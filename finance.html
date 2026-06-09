@@ -45,6 +45,8 @@
   --maxw:1080px;
   --topbar-h:58px;
   --step-h:54px;
+  /* simple-explanation helper layer */
+  --simple-bg:color-mix(in srgb,var(--accent) 5%,var(--surface));
 }
 
 *{box-sizing:border-box}
@@ -174,29 +176,6 @@ body.js-anim .reveal.is-in{opacity:1;transform:none;transition:opacity .7s cubic
 .section-head .kicker{margin-bottom:14px}
 .section-head h2{font-size:clamp(1.9rem,4.5vw,2.9rem);font-weight:800;letter-spacing:-.01em}
 .section-head .sub{margin-top:10px;color:var(--muted);font-size:1.05rem}
-.section-head--row{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
-.section-head--row .section-head__text{min-width:0}
-/* expand / collapse all */
-.expandall{
-  appearance:none;cursor:pointer;flex:none;
-  display:inline-flex;align-items:center;gap:9px;
-  background:var(--surface);border:1px solid var(--line-2);border-radius:999px;
-  color:var(--accent);font-family:var(--font-body);font-weight:600;font-size:14px;line-height:1;
-  padding:10px 17px;transition:background .25s,border-color .25s,color .25s,transform .12s;
-  -webkit-tap-highlight-color:transparent;
-}
-.expandall:hover{background:var(--accent-tint-2);border-color:var(--accent)}
-.expandall:active{transform:translateY(1px)}
-.expandall:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.expandall__icon{display:grid;place-items:center;width:16px;height:16px}
-.expandall__chev{display:block;width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .3s;margin-top:-3px}
-.expandall[aria-expanded="true"] .expandall__chev{transform:rotate(-135deg);margin-top:2px}
-/* stepper edge fades (scroll hint) */
-.stepper::before,.stepper::after{content:"";position:absolute;top:0;bottom:0;width:36px;pointer-events:none;z-index:3;opacity:0;transition:opacity .25s}
-.stepper::before{left:0;background:linear-gradient(to right,var(--paper),rgba(244,240,231,0))}
-.stepper::after{right:0;background:linear-gradient(to left,var(--paper),rgba(244,240,231,0))}
-.stepper.fade-left::before{opacity:1}
-.stepper.fade-right::after{opacity:1}
 
 /* ===== spine / layers ===== */
 .spine{position:relative;padding-bottom:24px}
@@ -331,6 +310,79 @@ body.mode-overview .layer{padding-block:8px}
 .foot__line{display:flex;align-items:center;gap:10px;color:var(--ink);font-family:var(--font-display);font-weight:700;font-size:1.05rem}
 .foot__sub{color:var(--muted);font-size:.92rem}
 
+/* ===== simple explanation — micro-learning helper layer ===== */
+.simple{margin-top:14px}
+.simple__btn{
+  appearance:none;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-body);font-size:13px;font-weight:600;line-height:1;
+  color:var(--accent);background:var(--accent-tint);
+  border:1px solid rgba(43,58,103,.22);border-radius:999px;
+  padding:8px 14px;
+  transition:background .25s,border-color .25s,color .25s,box-shadow .25s;
+}
+.simple__btn:hover{background:var(--accent-tint-2);border-color:var(--accent)}
+.simple__btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.simple__bulb{flex:none;transition:transform .35s}
+.simple__chev{flex:none;opacity:.7;transition:transform .35s}
+.simple.is-open .simple__btn{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 3px 11px -3px rgba(43,58,103,.55)}
+.simple.is-open .simple__bulb{transform:scale(1.05) rotate(-6deg)}
+.simple.is-open .simple__chev{transform:rotate(180deg);opacity:.9}
+
+.simple__wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .42s cubic-bezier(.4,0,.2,1)}
+.simple.is-open .simple__wrap{grid-template-rows:1fr}
+.simple__inner{overflow:hidden;min-height:0}
+.simple__card{
+  margin-top:12px;
+  background:var(--simple-bg);
+  border:1px solid var(--line);
+  border-inline-start:3px solid var(--accent);
+  border-radius:13px;
+  padding:15px 17px;
+}
+.simple__head{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font-display);font-weight:700;font-size:1rem;
+  color:var(--accent-700);margin-bottom:9px;
+}
+.simple__head .em{font-size:1.04em;line-height:1}
+.simple__card p{font-size:.93rem;line-height:1.74;color:var(--ink-soft);margin:0}
+.simple__card p + p{margin-top:9px}
+.simple__card .lbl{font-weight:700;color:var(--accent-700)}
+.simple__flow{margin-top:9px;font-size:.93rem;line-height:1.95;color:var(--ink-soft)}
+.simple__flow .ar{color:var(--accent);font-weight:700;padding-inline:4px}
+.simple__qs{margin-top:7px;font-size:.93rem;line-height:1.9;color:var(--ink-soft)}
+/* example mini-box */
+.simple__eg{
+  margin-top:11px;padding:11px 14px;
+  background:var(--surface);border:1px solid var(--line);border-radius:11px;
+}
+.simple__eg .eg-l{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--accent);margin-bottom:5px;
+}
+.simple__eg .eg-l::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.simple__eg p{font-size:.92rem;line-height:1.7;color:var(--ink-soft)}
+/* closing punch line */
+.simple__close{margin-top:11px;padding-top:11px;border-top:1px dashed var(--line-2);font-size:.93rem;line-height:1.72;color:var(--ink)}
+.simple__close .lbl{color:var(--accent-700);font-weight:700}
+
+/* dark variant — inside the study (lens) frame card */
+.simple--dark .simple__btn{color:var(--gold);background:rgba(203,163,95,.13);border-color:rgba(203,163,95,.32)}
+.simple--dark .simple__btn:hover{background:rgba(203,163,95,.22);border-color:var(--gold)}
+.simple--dark .simple__btn:focus-visible{outline-color:var(--gold)}
+.simple--dark.is-open .simple__btn{background:var(--gold);border-color:var(--gold);color:var(--lens-bg);box-shadow:0 3px 11px -3px rgba(0,0,0,.5)}
+.simple--dark .simple__card{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.1);border-inline-start-color:var(--gold)}
+.simple--dark .simple__head{color:var(--gold)}
+.simple--dark .simple__card p,.simple--dark .simple__qs,.simple--dark .simple__flow{color:var(--lens-muted)}
+.simple--dark .simple__card .lbl,.simple--dark .simple__flow .ar{color:var(--gold)}
+.simple--dark .simple__eg{background:rgba(0,0,0,.2);border-color:rgba(255,255,255,.08)}
+.simple--dark .simple__eg .eg-l{color:var(--gold)}
+.simple--dark .simple__eg .eg-l::before{background:var(--gold)}
+.simple--dark .simple__eg p{color:var(--lens-muted)}
+.simple--dark .simple__close{color:var(--lens-fg);border-top-color:rgba(255,255,255,.14)}
+.simple--dark .simple__close .lbl{color:var(--gold)}
+
 /* ===== responsive ===== */
 @media (max-width:760px){
   .frame__grid{grid-template-columns:1fr}
@@ -338,6 +390,8 @@ body.mode-overview .layer{padding-block:8px}
 }
 @media (max-width:600px){
   body{font-size:16px}
+  .simple__card{padding:14px 15px}
+  .simple__card p,.simple__eg p,.simple__flow,.simple__qs,.simple__close{font-size:.95rem}
   .notes{grid-template-columns:1fr}
   .duo{grid-template-columns:1fr}
   .qgrid{grid-template-columns:1fr}
@@ -417,12 +471,47 @@ body.mode-overview .layer{padding-block:8px}
           <div class="fcard__role">המערכת</div>
           <p class="fcard__def">מערכת מקושרת ודינמית של אנשים, עסקים, שווקים, מוסדות ומדינות, שמקצה משאבים מוגבלים — באמצעות החלטות, תמריצים, מחירים וכללים — לאורך זמן, תחת אי־ודאות, ניגודי אינטרסים ולולאות משוב.</p>
           <p class="fcard__mini">זהו האובייקט שאותו מתארות שש השכבות שלהלן.</p>
+          <div class="simple">
+            <button class="simple__btn" type="button" aria-expanded="false" aria-controls="s-system">
+              <svg class="simple__bulb" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M9.5 17.5h5M10.5 20.5h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 3.2a5.8 5.8 0 0 0-3.7 10.3c.5.4.85 1 .9 1.6l.05.4h5.5l.05-.4c.05-.6.4-1.2.9-1.6A5.8 5.8 0 0 0 12 3.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+              <span>הסבר פשוט</span>
+              <svg class="simple__chev" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="simple__wrap" id="s-system"><div class="simple__inner">
+              <div class="simple__card">
+                <div class="simple__head"><span class="em">💡</span><span>בפשטות</span></div>
+                <p>המשק הוא כמו מערכת עצבים ענקית של העולם — אנשים, עסקים ומדינות מקבלים החלטות, והפעולות שלהם משפיעות זו על זו דרך כסף, מחירים ותמריצים.</p>
+                <div class="simple__flow">כשמחיר עולה <span class="ar">→</span> אנשים משנים התנהגות.<br>כשיש מחסור <span class="ar">→</span> עסקים מגיבים.<br>כשחוק משתנה <span class="ar">→</span> השוק זז.</div>
+                <p class="simple__close">הכול מחובר, משתנה כל הזמן, ופועל תחת אי־ודאות.</p>
+              </div>
+            </div></div>
+          </div>
         </article>
         <article class="fcard fcard--study reveal">
           <span class="fcard__tag">כלכלה</span>
           <div class="fcard__role">חקר המערכת</div>
           <p class="fcard__def">חקר האופן שבו המערכת פועלת: כיצד מוקצים משאבים, כיצד נוצרים מחירים ותמריצים, מתי ההקצאה מצליחה או נכשלת — ומי נושא בתוצאות.</p>
           <p class="fcard__mini">העדשה אינה חלק מהמערכת. היא הדיסציפלינה שחוקרת אותה.</p>
+          <div class="simple simple--dark">
+            <button class="simple__btn" type="button" aria-expanded="false" aria-controls="s-study">
+              <svg class="simple__bulb" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M9.5 17.5h5M10.5 20.5h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 3.2a5.8 5.8 0 0 0-3.7 10.3c.5.4.85 1 .9 1.6l.05.4h5.5l.05-.4c.05-.6.4-1.2.9-1.6A5.8 5.8 0 0 0 12 3.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+              <span>הסבר פשוט</span>
+              <svg class="simple__chev" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="simple__wrap" id="s-study"><div class="simple__inner">
+              <div class="simple__card">
+                <div class="simple__head"><span class="em">💡</span><span>בפשטות</span></div>
+                <p>אם המשק הוא המערכת — כלכלה היא הדרך להבין איך היא עובדת.</p>
+                <p><span class="lbl">היא שואלת:</span></p>
+                <div class="simple__qs">איך אנשים בוחרים?<br>איך מחירים נוצרים?<br>מתי השוק עובד טוב?<br>ומתי צריך כללים, מוסדות או התערבות?</div>
+                <div class="simple__eg">
+                  <div class="eg-l">לדוגמה</div>
+                  <p>אם מחירי הדירות עולים, הכלכלה לא שואלת רק "כמה זה עולה?" — אלא גם למה זה קרה, מי מושפע מזה, ומה יכול לשנות את המצב.</p>
+                </div>
+                <p class="simple__close"><span class="lbl">במילים אחרות:</span> המשק הוא הדבר שקורה. הכלכלה היא העדשה שמנסה להסביר אותו.</p>
+              </div>
+            </div></div>
+          </div>
         </article>
       </div>
     </div>
@@ -431,16 +520,10 @@ body.mode-overview .layer{padding-block:8px}
   <!-- SYSTEM: the spine -->
   <section class="system">
     <div class="wrap">
-      <div class="section-head section-head--row reveal" id="sec-system">
-        <div class="section-head__text">
-          <span class="kicker">המשק</span>
-          <h2>מבנה המערכת</h2>
-          <p class="sub">שש שכבות, מן היסוד אל התוצאה.</p>
-        </div>
-        <button class="expandall" id="expandAll" type="button" aria-expanded="false" aria-controls="layer-1 layer-2 layer-3 layer-4 layer-5 layer-6">
-          <span class="expandall__icon" aria-hidden="true"><span class="expandall__chev"></span></span>
-          <span class="expandall__label">הרחב הכול</span>
-        </button>
+      <div class="section-head reveal" id="sec-system">
+        <span class="kicker">המשק</span>
+        <h2>מבנה המערכת</h2>
+        <p class="sub">שש שכבות, מן היסוד אל התוצאה.</p>
       </div>
 
       <div class="spine">
@@ -457,6 +540,25 @@ body.mode-overview .layer{padding-block:8px}
               <button class="layer__toggle" aria-expanded="false" aria-controls="d1" aria-label="הרחבת השכבה"><span class="chev"></span></button>
             </div>
             <p class="layer__essence">אין מספיק מהכול — ולכן צריך לבחור.</p>
+            <div class="simple">
+              <button class="simple__btn" type="button" aria-expanded="false" aria-controls="s1">
+                <svg class="simple__bulb" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M9.5 17.5h5M10.5 20.5h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 3.2a5.8 5.8 0 0 0-3.7 10.3c.5.4.85 1 .9 1.6l.05.4h5.5l.05-.4c.05-.6.4-1.2.9-1.6A5.8 5.8 0 0 0 12 3.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                <span>הסבר פשוט</span>
+                <svg class="simple__chev" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="simple__wrap" id="s1"><div class="simple__inner">
+                <div class="simple__card">
+                  <div class="simple__head"><span class="em">💡</span><span>בפשטות</span></div>
+                  <p>הכול מתחיל מזה שאין מספיק מהכול.</p>
+                  <p>אין מספיק זמן, כסף, עובדים, קרקע, אנרגיה או תשומת לב — ולכן כל בחירה מחייבת ויתור.</p>
+                  <div class="simple__eg">
+                    <div class="eg-l">לדוגמה</div>
+                    <p>אם למדינה יש תקציב מוגבל, יותר כסף לבריאות יכול לבוא על חשבון ביטחון, חינוך או תשתיות.</p>
+                  </div>
+                  <p class="simple__close">כשמשאב מוגבל, השאלה הכלכלית הראשונה היא: מי יקבל אותו, למה, ובאיזה מחיר?</p>
+                </div>
+              </div></div>
+            </div>
             <div class="layer__detailwrap" id="d1"><div class="layer__detail"><div class="layer__detail-inner">
               <p>כל המערכת מתחילה מעובדה אחת: המשאבים מוגבלים, ומולם עומדים צרכים ורצונות בלתי מוגבלים. מכאן נולד הצורך לבחור.</p>
               <div class="chips">
@@ -487,6 +589,26 @@ body.mode-overview .layer{padding-block:8px}
               <button class="layer__toggle" aria-expanded="false" aria-controls="d2" aria-label="הרחבת השכבה"><span class="chev"></span></button>
             </div>
             <p class="layer__essence">כל בחירה היא ויתור — וגם הימור על עתיד לא ידוע.</p>
+            <div class="simple">
+              <button class="simple__btn" type="button" aria-expanded="false" aria-controls="s2">
+                <svg class="simple__bulb" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M9.5 17.5h5M10.5 20.5h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 3.2a5.8 5.8 0 0 0-3.7 10.3c.5.4.85 1 .9 1.6l.05.4h5.5l.05-.4c.05-.6.4-1.2.9-1.6A5.8 5.8 0 0 0 12 3.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                <span>הסבר פשוט</span>
+                <svg class="simple__chev" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="simple__wrap" id="s2"><div class="simple__inner">
+                <div class="simple__card">
+                  <div class="simple__head"><span class="em">💡</span><span>בפשטות</span></div>
+                  <p>אחרי שמבינים שיש מחסור, צריך להחליט איך להשתמש במה שיש.</p>
+                  <p>אבל כל החלטה היא גם ויתור — וגם הימור על עתיד שלא יודעים בוודאות.</p>
+                  <div class="simple__flow">לקנות או לחסוך.<br>להשקיע או להמתין.<br>לייצר עכשיו או לקחת סיכון לעתיד.</div>
+                  <div class="simple__eg">
+                    <div class="eg-l">לדוגמה</div>
+                    <p>עסק שמעסיק עובד חדש היום מקווה שהביקוש בעתיד יצדיק את ההוצאה.</p>
+                  </div>
+                  <p class="simple__close">המשק הוא רצף של בחירות כאלה.</p>
+                </div>
+              </div></div>
+            </div>
             <div class="layer__detailwrap" id="d2"><div class="layer__detail"><div class="layer__detail-inner">
               <p>מאחר שאי אפשר לקבל הכול, כל שחקן חייב לבחור כיצד להשתמש במשאביו. שתי עובדות הופכות את הבחירה לקשה:</p>
               <div class="notes">
@@ -515,6 +637,26 @@ body.mode-overview .layer{padding-block:8px}
               <button class="layer__toggle" aria-expanded="false" aria-controls="d3" aria-label="הרחבת השכבה"><span class="chev"></span></button>
             </div>
             <p class="layer__essence">ההקצאה נעשית בשני מסלולים: מחירים — <b>וכללים</b>.</p>
+            <div class="simple">
+              <button class="simple__btn" type="button" aria-expanded="false" aria-controls="s3">
+                <svg class="simple__bulb" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M9.5 17.5h5M10.5 20.5h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 3.2a5.8 5.8 0 0 0-3.7 10.3c.5.4.85 1 .9 1.6l.05.4h5.5l.05-.4c.05-.6.4-1.2.9-1.6A5.8 5.8 0 0 0 12 3.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                <span>הסבר פשוט</span>
+                <svg class="simple__chev" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="simple__wrap" id="s3"><div class="simple__inner">
+                <div class="simple__card">
+                  <div class="simple__head"><span class="em">💡</span><span>בפשטות</span></div>
+                  <p>המשק צריך מנגנון שיחלק משאבים בין אנשים.</p>
+                  <p>לפעמים זה קורה דרך מחירים: מחיר גבוה מאותת שיש ביקוש, מחסור או סיכון.</p>
+                  <p>אבל לא הכול נקבע בשוק חופשי. חוקים, מיסים, רגולציה, בנקים, מונופולים ומדינות קובעים גם הם מי מקבל מה.</p>
+                  <div class="simple__eg">
+                    <div class="eg-l">לדוגמה</div>
+                    <p>מחיר של דירה לא נקבע רק לפי ביקוש. הוא מושפע גם מריבית, תכנון, קרקע, רגולציה, בנקים ומדיניות ממשלתית.</p>
+                  </div>
+                  <p class="simple__close">לכן לא מספיק לשאול "מה המחיר?" צריך לשאול גם: מי קובע את הכללים?</p>
+                </div>
+              </div></div>
+            </div>
             <div class="layer__detailwrap" id="d3"><div class="layer__detail"><div class="layer__detail-inner">
               <div class="sub">
                 <div class="sub__h">שווקים ומחירים</div>
@@ -560,6 +702,26 @@ body.mode-overview .layer{padding-block:8px}
               <button class="layer__toggle" aria-expanded="false" aria-controls="d4" aria-label="הרחבת השכבה"><span class="chev"></span></button>
             </div>
             <p class="layer__essence">התנאים הקבועים שתחתם המערכת פועלת — להבדיל מהתופעות שהם מולידים.</p>
+            <div class="simple">
+              <button class="simple__btn" type="button" aria-expanded="false" aria-controls="s4">
+                <svg class="simple__bulb" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M9.5 17.5h5M10.5 20.5h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 3.2a5.8 5.8 0 0 0-3.7 10.3c.5.4.85 1 .9 1.6l.05.4h5.5l.05-.4c.05-.6.4-1.2.9-1.6A5.8 5.8 0 0 0 12 3.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                <span>הסבר פשוט</span>
+                <svg class="simple__chev" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="simple__wrap" id="s4"><div class="simple__inner">
+                <div class="simple__card">
+                  <div class="simple__head"><span class="em">💡</span><span>בפשטות</span></div>
+                  <p>המשק לא פועל בתנאי מעבדה.</p>
+                  <p>כל החלטה מתקבלת בזמן, עם מידע חלקי, ובעתיד שאף אחד לא באמת יודע.</p>
+                  <div class="simple__flow">לכן כסף היום שווה אחרת מכסף מחר.<br>לכן סיכון דורש פיצוי.<br>ולכן מידע טוב יכול לשנות החלטות שלמות.</div>
+                  <div class="simple__eg">
+                    <div class="eg-l">לדוגמה</div>
+                    <p>משקיע שמקבל מידע מוקדם על שינוי בריבית עשוי לשנות החלטה לפני ששאר השוק מגיב.</p>
+                  </div>
+                  <p class="simple__close">אלה לא אירועים חד־פעמיים — אלה תנאי הרקע של כל המערכת.</p>
+                </div>
+              </div></div>
+            </div>
             <div class="layer__detailwrap" id="d4"><div class="layer__detail"><div class="layer__detail-inner">
               <p>אלה אינם אירועים אלא תנאי יסוד — המסגרת שבתוכה כל החלטה מתקבלת:</p>
               <div class="sub">
@@ -586,6 +748,26 @@ body.mode-overview .layer{padding-block:8px}
               <button class="layer__toggle" aria-expanded="false" aria-controls="d5" aria-label="הרחבת השכבה"><span class="chev"></span></button>
             </div>
             <p class="layer__essence">אותה מערכת גם מתאזנת — וגם מסתחררת.</p>
+            <div class="simple">
+              <button class="simple__btn" type="button" aria-expanded="false" aria-controls="s5">
+                <svg class="simple__bulb" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M9.5 17.5h5M10.5 20.5h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 3.2a5.8 5.8 0 0 0-3.7 10.3c.5.4.85 1 .9 1.6l.05.4h5.5l.05-.4c.05-.6.4-1.2.9-1.6A5.8 5.8 0 0 0 12 3.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                <span>הסבר פשוט</span>
+                <svg class="simple__chev" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="simple__wrap" id="s5"><div class="simple__inner">
+                <div class="simple__card">
+                  <div class="simple__head"><span class="em">💡</span><span>בפשטות</span></div>
+                  <p>המשק כל הזמן מנסה להתאזן — אבל לפעמים דווקא התגובות של האנשים מטלטלות אותו.</p>
+                  <p>אם מחיר עולה, אנשים קונים פחות. אם יש ביקוש, עסקים מייצרים יותר. זה הצד שמחזיר את המערכת לאיזון.</p>
+                  <p>אבל ציפיות יכולות גם להסתחרר: אם כולם חושבים שמחירים יעלו, הם מתנהגים בצורה שגורמת להם באמת לעלות.</p>
+                  <div class="simple__eg">
+                    <div class="eg-l">לדוגמה</div>
+                    <p>אם אנשים חושבים שמחירי הדירות ימשיכו לעלות, חלקם ממהרים לקנות — והביקוש הזה יכול לדחוף את המחירים עוד יותר למעלה.</p>
+                  </div>
+                  <p class="simple__close">לכן המשק יכול להיות גם יציב — וגם להיכנס למשברים.</p>
+                </div>
+              </div></div>
+            </div>
             <div class="layer__detailwrap" id="d5"><div class="layer__detail"><div class="layer__detail-inner">
               <p>המערכת אינה רק "א׳ גורם לב׳". בה־בעת פועלים בה שני כוחות מנוגדים, והשאלה היא מתי גובר כל אחד מהם:</p>
               <div class="duo">
@@ -615,6 +797,25 @@ body.mode-overview .layer{padding-block:8px}
               <button class="layer__toggle" aria-expanded="false" aria-controls="d6" aria-label="הרחבת השכבה"><span class="chev"></span></button>
             </div>
             <p class="layer__essence">המערכת לא רק יוצרת עושר — היא גם קובעת <b>למי</b>.</p>
+            <div class="simple">
+              <button class="simple__btn" type="button" aria-expanded="false" aria-controls="s6">
+                <svg class="simple__bulb" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M9.5 17.5h5M10.5 20.5h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 3.2a5.8 5.8 0 0 0-3.7 10.3c.5.4.85 1 .9 1.6l.05.4h5.5l.05-.4c.05-.6.4-1.2.9-1.6A5.8 5.8 0 0 0 12 3.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                <span>הסבר פשוט</span>
+                <svg class="simple__chev" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="simple__wrap" id="s6"><div class="simple__inner">
+                <div class="simple__card">
+                  <div class="simple__head"><span class="em">💡</span><span>בפשטות</span></div>
+                  <p>המשק לא רק מייצר עושר. הוא גם מחלק אותו.</p>
+                  <p>מערכת יכולה להיות יעילה — לייצר הרבה, לצמוח מהר, להשתמש טוב במשאבים — ועדיין להיות לא הוגנת או לא יציבה.</p>
+                  <div class="simple__eg">
+                    <div class="eg-l">לדוגמה</div>
+                    <p>חברה יכולה לצמוח מהר, אבל אם רוב הרווח הולך לקבוצה קטנה — המערכת אולי יעילה, אבל לא בהכרח יציבה או הוגנת.</p>
+                  </div>
+                  <p class="simple__close">לכן השאלה אינה רק: כמה המערכת מייצרת? אלא גם: מי נהנה מזה, מי נושא בסיכון, ומה קורה לחברה לאורך זמן?</p>
+                </div>
+              </div></div>
+            </div>
             <div class="layer__detailwrap" id="d6"><div class="layer__detail"><div class="layer__detail-inner">
               <div class="duo">
                 <div class="duo__panel duo__panel--a">
@@ -720,28 +921,30 @@ body.mode-overview .layer{padding-block:8px}
     if(tog) tog.addEventListener("click",function(e){ e.stopPropagation(); toggle(); });
   });
 
-  /* ---- active step on scroll (keeps the active step in view inside the sticky nav) ---- */
+  /* ---- simple-explanation toggles (tap/click; independent of reading mode) ---- */
+  var simples=Array.prototype.slice.call(document.querySelectorAll(".simple"));
+  simples.forEach(function(s){
+    var btn=s.querySelector(".simple__btn");
+    if(!btn) return;
+    btn.addEventListener("click",function(e){
+      e.stopPropagation();
+      var open=s.classList.toggle("is-open");
+      btn.setAttribute("aria-expanded",open?"true":"false");
+    });
+  });
+
+  /* ---- active step on scroll ---- */
   var steps=Array.prototype.slice.call(document.querySelectorAll(".step"));
   var stepMap={};
   steps.forEach(function(s){ stepMap[s.getAttribute("href").slice(1)]=s; });
   var targets=Array.prototype.slice.call(document.querySelectorAll(".layer, #sec-lens"));
-  var supportsScrollOpts="scrollBehavior" in document.documentElement.style;
-  function centerStepInNav(s){
-    /* inline:center is writing-direction aware -> correct in RTL too.
-       block:nearest + body overflow-x:hidden means only the nav scrolls, never the page. */
-    if(!s||!supportsScrollOpts) return;
-    s.scrollIntoView({inline:"center",block:"nearest",behavior:motionOK?"smooth":"auto"});
-  }
-  function setActiveStep(s){
-    if(!s) return;
-    steps.forEach(function(x){x.classList.remove("is-active");});
-    s.classList.add("is-active");
-    centerStepInNav(s);
-  }
   if("IntersectionObserver" in window){
     var so=new IntersectionObserver(function(es){
       es.forEach(function(e){
-        if(e.isIntersecting) setActiveStep(stepMap[e.target.id]);
+        if(e.isIntersecting){
+          var s=stepMap[e.target.id];
+          if(s){ steps.forEach(function(x){x.classList.remove("is-active");}); s.classList.add("is-active"); }
+        }
       });
     },{rootMargin:"-44% 0px -52% 0px",threshold:0});
     targets.forEach(function(t){so.observe(t);});
@@ -771,52 +974,9 @@ body.mode-overview .layer{padding-block:8px}
     if(!el) return;
     e.preventDefault();
     goTo(el);
-    setActiveStep(stepMap[id]);
+    var s=stepMap[id];
+    if(s){ steps.forEach(function(x){x.classList.remove("is-active");}); s.classList.add("is-active"); }
   },false);
-
-  /* ---- expand / collapse all + label sync ---- */
-  var expandAllBtn=document.getElementById("expandAll");
-  function allOpen(){ return layers.length>0 && layers.every(function(l){return l.classList.contains("is-open");}); }
-  function syncExpandAll(){
-    if(!expandAllBtn) return;
-    var open=allOpen();
-    expandAllBtn.setAttribute("aria-expanded",open?"true":"false");
-    var lbl=expandAllBtn.querySelector(".expandall__label");
-    if(lbl) lbl.textContent=open?"צמצם הכול":"הרחב הכול";
-  }
-  function setAll(open){
-    layers.forEach(function(l){
-      l.classList.toggle("is-open",open);
-      var t=l.querySelector(".layer__toggle");
-      if(t) t.setAttribute("aria-expanded",open?"true":"false");
-    });
-  }
-  if(expandAllBtn){
-    expandAllBtn.addEventListener("click",function(){ setAll(!allOpen()); });
-    if("MutationObserver" in window){          /* keep label in sync with mode-switch / nav / single toggles */
-      var moAll=new MutationObserver(syncExpandAll);
-      layers.forEach(function(l){ moAll.observe(l,{attributes:true,attributeFilter:["class"]}); });
-    }
-    syncExpandAll();
-  }
-
-  /* ---- stepper edge fades (hint horizontal scroll, RTL-safe) ---- */
-  var stepperEl=document.querySelector(".stepper");
-  var stepScroll=document.querySelector(".stepper .wrap");
-  var stepTrack=document.querySelector(".steptrack");
-  function syncStepFade(){
-    if(!stepperEl||!stepScroll||!stepTrack) return;
-    var wr=stepScroll.getBoundingClientRect(), tr=stepTrack.getBoundingClientRect();
-    stepperEl.classList.toggle("fade-left", tr.left < wr.left-1);   /* hidden content to the physical left */
-    stepperEl.classList.toggle("fade-right", tr.right > wr.right+1); /* ...and to the right */
-  }
-  if(stepScroll){
-    stepScroll.addEventListener("scroll",syncStepFade,{passive:true});
-    window.addEventListener("resize",syncStepFade,{passive:true});
-    window.addEventListener("load",syncStepFade);
-    syncStepFade();
-    window.setTimeout(syncStepFade,400); /* recheck after fonts settle */
-  }
 
   /* ---- scroll progress ---- */
   var bar=document.getElementById("progressBar");
