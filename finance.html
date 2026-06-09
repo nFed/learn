@@ -720,18 +720,28 @@ body.mode-overview .layer{padding-block:8px}
     if(tog) tog.addEventListener("click",function(e){ e.stopPropagation(); toggle(); });
   });
 
-  /* ---- active step on scroll ---- */
+  /* ---- active step on scroll (keeps the active step in view inside the sticky nav) ---- */
   var steps=Array.prototype.slice.call(document.querySelectorAll(".step"));
   var stepMap={};
   steps.forEach(function(s){ stepMap[s.getAttribute("href").slice(1)]=s; });
   var targets=Array.prototype.slice.call(document.querySelectorAll(".layer, #sec-lens"));
+  var supportsScrollOpts="scrollBehavior" in document.documentElement.style;
+  function centerStepInNav(s){
+    /* inline:center is writing-direction aware -> correct in RTL too.
+       block:nearest + body overflow-x:hidden means only the nav scrolls, never the page. */
+    if(!s||!supportsScrollOpts) return;
+    s.scrollIntoView({inline:"center",block:"nearest",behavior:motionOK?"smooth":"auto"});
+  }
+  function setActiveStep(s){
+    if(!s) return;
+    steps.forEach(function(x){x.classList.remove("is-active");});
+    s.classList.add("is-active");
+    centerStepInNav(s);
+  }
   if("IntersectionObserver" in window){
     var so=new IntersectionObserver(function(es){
       es.forEach(function(e){
-        if(e.isIntersecting){
-          var s=stepMap[e.target.id];
-          if(s){ steps.forEach(function(x){x.classList.remove("is-active");}); s.classList.add("is-active"); }
-        }
+        if(e.isIntersecting) setActiveStep(stepMap[e.target.id]);
       });
     },{rootMargin:"-44% 0px -52% 0px",threshold:0});
     targets.forEach(function(t){so.observe(t);});
@@ -761,8 +771,7 @@ body.mode-overview .layer{padding-block:8px}
     if(!el) return;
     e.preventDefault();
     goTo(el);
-    var s=stepMap[id];
-    if(s){ steps.forEach(function(x){x.classList.remove("is-active");}); s.classList.add("is-active"); }
+    setActiveStep(stepMap[id]);
   },false);
 
   /* ---- expand / collapse all + label sync ---- */
