@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#04050c">
+<title>גלקסיה חיה · Fable 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;500;700;900&family=Secular+One&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{
+  --bg:#04050c;
+  --ink:#e3e9ff;
+  --muted:#7e88b4;
+  --line:rgba(140,160,255,.14);
+  --glass:rgba(9,12,26,.5);
+  --acc1:#9db9ff; --acc2:#c98bff; --acc3:#ffb38a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);
+  font-family:'Heebo',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;color:var(--ink)}
+#scene{position:fixed;inset:0;display:block;touch-action:none;cursor:grab}
+#scene.grabbing{cursor:grabbing}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(ellipse at 50% 42%, transparent 50%, rgba(2,3,10,.72) 100%)}
+.ui{position:fixed;z-index:5;user-select:none;-webkit-user-select:none}
+
+/* כותרת */
+.title{top:20px;right:22px;text-align:right;animation:fadeDown 1.2s .2s cubic-bezier(.2,.7,.2,1) both}
+.eyebrow{font:600 10px/1 ui-monospace,'SF Mono',Consolas,monospace;letter-spacing:.45em;color:#7fa6ff;opacity:.85}
+h1{font-family:'Secular One','Heebo',sans-serif;font-weight:400;
+  font-size:clamp(26px,4vw,40px);line-height:1.05;margin-top:8px;letter-spacing:.01em;
+  background:linear-gradient(100deg,var(--acc1),var(--acc2) 48%,var(--acc3));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 18px rgba(150,130,255,.25))}
+.sub{margin-top:6px;font-size:11.5px;font-weight:300;color:var(--muted);letter-spacing:.04em}
+
+/* סטטיסטיקות */
+.stats{top:20px;left:22px;display:grid;grid-template-columns:auto auto;gap:10px 22px;
+  background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:14px 18px;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  animation:fadeDown 1.2s .45s cubic-bezier(.2,.7,.2,1) both}
+.stat b{display:block;direction:ltr;text-align:left;font-size:18px;font-weight:700;
+  font-variant-numeric:tabular-nums;color:#eef2ff;text-shadow:0 0 12px rgba(130,160,255,.35)}
+.stat span{font-size:10px;font-weight:300;color:var(--muted);letter-spacing:.06em}
+
+/* רמז */
+.hint{bottom:96px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:300;color:var(--muted);
+  background:rgba(9,12,26,.38);padding:7px 16px;border-radius:99px;border:1px solid rgba(140,160,255,.08);
+  backdrop-filter:blur(8px);white-space:nowrap;animation:fadeUp 1.2s .8s cubic-bezier(.2,.7,.2,1) both}
+
+/* פס שליטה */
+.bar{bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;
+  flex-wrap:wrap;justify-content:center;background:var(--glass);border:1px solid var(--line);
+  border-radius:20px;padding:11px 16px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  max-width:96vw;box-shadow:0 10px 40px rgba(0,0,0,.45);
+  animation:fadeUp 1.2s .6s cubic-bezier(.2,.7,.2,1) both}
+.btn{cursor:pointer;border:1px solid rgba(150,170,255,.18);background:rgba(120,150,255,.07);
+  color:#cfd9ff;border-radius:12px;padding:10px 14px;font:500 12.5px/1 'Heebo',sans-serif;transition:.18s}
+.btn:hover{background:rgba(120,150,255,.16);border-color:rgba(150,170,255,.45)}
+.btn:focus-visible{outline:2px solid var(--acc1);outline-offset:2px}
+.btn.on{border-color:#86a7ff;color:#eef3ff;background:rgba(110,150,255,.18);
+  box-shadow:0 0 16px rgba(110,150,255,.3)}
+.ctrl{display:flex;flex-direction:column;gap:6px}
+.ctrl label{font-size:10px;font-weight:300;color:var(--muted);display:flex;justify-content:space-between;gap:10px}
+.ctrl label b{color:#bcc9f7;font-weight:600;font-variant-numeric:tabular-nums;direction:ltr}
+input[type=range]{-webkit-appearance:none;appearance:none;width:112px;height:3px;border-radius:2px;
+  background:linear-gradient(90deg,#6e8cff,#c77dff);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+  background:#fff;border:none;box-shadow:0 0 10px rgba(150,170,255,.95);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#fff;border:none;
+  box-shadow:0 0 10px rgba(150,170,255,.95);cursor:pointer}
+select.btn{appearance:none;-webkit-appearance:none;padding-left:12px}
+.sep{width:1px;height:32px;background:var(--line)}
+
+#fallback{position:fixed;inset:0;display:none;place-items:center;z-index:9;
+  color:#9aa6d8;font-size:14px;padding:30px;text-align:center;background:var(--bg)}
+
+@keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion:reduce){.ui{animation:none !important}}
+@media (max-width:680px){
+  .hint{display:none}
+  .title{top:14px;right:16px}
+  .sub{font-size:10px}
+  .stats{top:auto;bottom:148px;left:50%;transform:translateX(-50%);grid-template-columns:repeat(4,auto);
+    gap:6px 16px;padding:9px 14px;animation-name:fadeUp}
+  .stat b{font-size:14px}
+  input[type=range]{width:86px}
+  .bar{gap:9px;padding:9px 12px;border-radius:16px}
+  .btn{padding:9px 11px;font-size:11.5px}
+}
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div class="vignette"></div>
+
+<div class="ui title">
+  <div class="eyebrow">CLAUDE FABLE 5 · WEBGL</div>
+  <h1>גלקסיה חיה</h1>
+  <div class="sub">סימולציית כבידה בזמן אמת — סובבו, התקרבו, וזרקו פנימה חורים שחורים</div>
+</div>
+
+<div class="ui stats">
+  <div class="stat"><b id="stStars">0</b><span>כוכבים</span></div>
+  <div class="stat"><b id="stFps">—</b><span>FPS</span></div>
+  <div class="stat"><b id="stEaten">0</b><span>נבלעו</span></div>
+  <div class="stat"><b id="stBH">0</b><span>חורים שחורים</span></div>
+</div>
+
+<div class="ui hint">גרירה — סיבוב · גלגלת / צביטה — זום · לחיצה כפולה — יצירת חור שחור · גררו חור שחור כדי להזיז אותו</div>
+
+<div class="ui bar">
+  <button class="btn" id="btnBH">＋ חור שחור</button>
+  <button class="btn on" id="btnRot">⟳ סיבוב אוטומטי</button>
+  <button class="btn" id="btnReset">↺ איפוס</button>
+  <div class="sep"></div>
+  <div class="ctrl">
+    <label>מהירות זמן <b id="vSpeed">×1.0</b></label>
+    <input type="range" id="rSpeed" min="0" max="3" step="0.1" value="1" aria-label="מהירות זמן">
+  </div>
+  <div class="ctrl">
+    <label>כבידת חורים שחורים <b id="vGrav">×1.0</b></label>
+    <input type="range" id="rGrav" min="0.2" max="4" step="0.1" value="1" aria-label="כבידת חורים שחורים">
+  </div>
+  <div class="sep"></div>
+  <select class="btn" id="selN" aria-label="מספר כוכבים">
+    <option value="20000">20K כוכבים</option>
+    <option value="50000" selected>50K כוכבים</option>
+    <option value="100000">100K כוכבים · כבד</option>
+  </select>
+</div>
+
+<div id="fallback">הדפדפן הזה לא תומך ב-WebGL, אז הגלקסיה נשארת בדמיון 🌌</div>
+
+<script>
+(function(){
+'use strict';
+/* ============================================================
+   גלקסיה חיה — סימולציית N-גופים ב-WebGL
+   50,000 כוכבים · כבידה אמיתית · חורים שחורים נגררים
+   ============================================================ */
+var TAU = Math.PI * 2;
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function lerp(a,b,t){ return a+(b-a)*t; }
+function gauss(){ return (Math.random()+Math.random()+Math.random()+Math.random()-2)*0.7071; }
+
+/* ---------- אתחול רנדרר ---------- */
+var canvas = document.getElementById('scene');
+var renderer;
+try{
+  renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, powerPreference:'high-performance'});
+}catch(e){
+  document.getElementById('fallback').style.display='grid';
+  return;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x04050c, 1);
+
+var scene  = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera(58, window.innerWidth/window.innerHeight, 0.1, 4000);
+
+/* ---------- טקסטורות מצוירות בקנבס ---------- */
+function radialTex(stops, size){
+  size = size || 256;
+  var c = document.createElement('canvas'); c.width = c.height = size;
+  var g = c.getContext('2d');
+  var grd = g.createRadialGradient(size/2,size/2,0, size/2,size/2,size/2);
+  for(var i=0;i<stops.length;i++) grd.addColorStop(stops[i][0], stops[i][1]);
+  g.fillStyle = grd; g.fillRect(0,0,size,size);
+  return new THREE.CanvasTexture(c);
+}
+function diskTex(){
+  var s=512, c=document.createElement('canvas'); c.width=c.height=s;
+  var g=c.getContext('2d'), h=s/2;
+  var grd=g.createRadialGradient(h,h,s*0.16, h,h,s*0.5);
+  grd.addColorStop(0.00,'rgba(255,250,235,0)');
+  grd.addColorStop(0.18,'rgba(255,244,214,0.95)');
+  grd.addColorStop(0.34,'rgba(255,196,120,0.75)');
+  grd.addColorStop(0.62,'rgba(255,120,70,0.30)');
+  grd.addColorStop(1.00,'rgba(255,90,50,0)');
+  g.fillStyle=grd; g.fillRect(0,0,s,s);
+  // פסי סחרור באקרציה
+  g.globalCompositeOperation='lighter';
+  for(var i=0;i<70;i++){
+    var r=s*(0.18+Math.random()*0.3), a0=Math.random()*TAU, a1=a0+0.25+Math.random()*1.1;
+    g.strokeStyle='rgba(255,235,200,'+(0.04+Math.random()*0.1)+')';
+    g.lineWidth=1+Math.random()*2.2;
+    g.beginPath(); g.arc(h,h,r,a0,a1); g.stroke();
+  }
+  g.globalCompositeOperation='destination-out';
+  for(var j=0;j<40;j++){
+    var r2=s*(0.18+Math.random()*0.3), b0=Math.random()*TAU, b1=b0+0.15+Math.random()*0.7;
+    g.strokeStyle='rgba(0,0,0,'+(0.08+Math.random()*0.18)+')';
+    g.lineWidth=1+Math.random()*2.5;
+    g.beginPath(); g.arc(h,h,r2,b0,b1); g.stroke();
+  }
+  return new THREE.CanvasTexture(c);
+}
+var softTex   = radialTex([[0,'rgba(255,255,255,1)'],[0.3,'rgba(255,255,255,.55)'],[1,'rgba(255,255,255,0)']],64);
+var coreTex   = radialTex([[0,'rgba(255,246,226,1)'],[0.25,'rgba(255,222,170,0.6)'],[0.6,'rgba(255,170,120,0.18)'],[1,'rgba(255,150,100,0)']]);
+var ringTexBH = radialTex([[0,'rgba(255,220,180,0)'],[0.6,'rgba(255,220,180,0)'],[0.72,'rgba(255,238,214,0.95)'],[0.8,'rgba(255,160,90,0.5)'],[1,'rgba(255,120,60,0)']]);
+var glowTexBH = radialTex([[0,'rgba(190,140,255,0.85)'],[0.35,'rgba(125,95,255,0.32)'],[1,'rgba(60,40,160,0)']]);
+var accTex    = diskTex();
+
+/* ---------- שדה כוכבי רקע רחוק ---------- */
+(function(){
+  var n=2400, pos=new Float32Array(n*3), col=new Float32Array(n*3);
+  for(var i=0;i<n;i++){
+    var r=650+Math.random()*350, th=Math.random()*TAU, ph=Math.acos(2*Math.random()-1);
+    pos[i*3]  = Math.sin(ph)*Math.cos(th)*r;
+    pos[i*3+1]= Math.cos(ph)*r;
+    pos[i*3+2]= Math.sin(ph)*Math.sin(th)*r;
+    var b=0.45+Math.random()*0.55, blue=Math.random()*0.18;
+    col[i*3]=b*(1-blue*0.6); col[i*3+1]=b*(1-blue*0.25); col[i*3+2]=b;
+  }
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  g.setAttribute('color',    new THREE.BufferAttribute(col,3));
+  var m=new THREE.PointsMaterial({size:1.7, map:softTex, transparent:true, opacity:0.85,
+    vertexColors:true, depthWrite:false, blending:THREE.AdditiveBlending, sizeAttenuation:false});
+  scene.add(new THREE.Points(g,m));
+})();
+
+/* ---------- ערפיליות ---------- */
+var nebulas=[];
+(function(){
+  var palettes=[
+    [[0,'rgba(120,80,255,0.55)'],[0.4,'rgba(120,80,255,0.18)'],[1,'rgba(120,80,255,0)']],
+    [[0,'rgba(60,160,255,0.5)'],[0.4,'rgba(60,160,255,0.16)'],[1,'rgba(60,160,255,0)']],
+    [[0,'rgba(255,90,180,0.45)'],[0.4,'rgba(255,90,180,0.14)'],[1,'rgba(255,90,180,0)']],
+    [[0,'rgba(80,220,210,0.4)'],[0.4,'rgba(80,220,210,0.12)'],[1,'rgba(80,220,210,0)']]
+  ];
+  for(var i=0;i<7;i++){
+    var t=radialTex(palettes[i%palettes.length],256);
+    var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t, transparent:true,
+      opacity:0.05+Math.random()*0.07, depthWrite:false, blending:THREE.AdditiveBlending}));
+    var rr=16+Math.random()*52, aa=Math.random()*TAU;
+    sp.position.set(Math.cos(aa)*rr,(Math.random()-0.5)*9,Math.sin(aa)*rr);
+    var sc=70+Math.random()*90; sp.scale.set(sc,sc,1);
+    sp.material.rotation=Math.random()*TAU;
+    scene.add(sp);
+    nebulas.push({sp:sp, spin:(Math.random()-0.5)*0.012});
+  }
+})();
+
+/* ---------- זוהר הליבה ---------- */
+var coreGlow = new THREE.Sprite(new THREE.SpriteMaterial({map:coreTex, transparent:true,
+  opacity:0.55, depthWrite:false, blending:THREE.AdditiveBlending}));
+coreGlow.scale.set(34,34,1); scene.add(coreGlow);
+var coreGlow2 = new THREE.Sprite(new THREE.SpriteMaterial({map:coreTex, transparent:true,
+  opacity:0.9, depthWrite:false, blending:THREE.AdditiveBlending}));
+coreGlow2.scale.set(11,11,1); scene.add(coreGlow2);
+
+/* ---------- שיידר הכוכבים ---------- */
+var starUniforms = { uTime:{value:0}, uPx:{value:renderer.getPixelRatio()} };
+var starMat = new THREE.ShaderMaterial({
+  uniforms: starUniforms,
+  transparent:true, depthWrite:false, depthTest:true, blending:THREE.AdditiveBlending,
+  vertexShader: [
+    'attribute float aSize;','attribute float aPhase;','attribute vec3 aColor;',
+    'uniform float uTime;','uniform float uPx;',
+    'varying vec3 vColor;',
+    'void main(){',
+    '  vColor = aColor;',
+    '  float tw = 0.8 + 0.32 * sin(uTime*1.9 + aPhase);',
+    '  vec4 mv = modelViewMatrix * vec4(position,1.0);',
+    '  float ps = aSize * tw * uPx * (150.0 / -mv.z);',
+    '  gl_PointSize = clamp(ps, 0.7, 60.0);',
+    '  gl_Position = projectionMatrix * mv;',
+    '}'
+  ].join('\n'),
+  fragmentShader: [
+    'varying vec3 vColor;',
+    'void main(){',
+    '  vec2 uv = gl_PointCoord - 0.5;',
+    '  float d = length(uv) * 2.0;',
+    '  float a = exp(-d*d*4.5);',
+    '  float core = exp(-d*d*20.0);',
+    '  if(a < 0.02) discard;',
+    '  vec3 col = vColor * a + vec3(1.0) * core * 0.85;',
+    '  gl_FragColor = vec4(col, a);',
+    '}'
+  ].join('\n')
+});
+
+/* ---------- בניית הגלקסיה ---------- */
+var ARMS=5, GAL_R=60, SPIN=0.21, GM_C=300;
+var N=0, posArr, velArr, colArr, sizeArr, phaseArr, starGeo, starPoints;
+
+function placeStar(i, fresh){
+  var ix=i*3, x,y,z,r,ang;
+  if(Math.random()<0.16){            // בליטה מרכזית
+    r=Math.abs(gauss())*7+0.6;
+    var th=Math.random()*TAU, ph=Math.acos(2*Math.random()-1);
+    x=Math.sin(ph)*Math.cos(th)*r; z=Math.sin(ph)*Math.sin(th)*r; y=Math.cos(ph)*r*0.6;
+  }else{                              // זרועות ספירליות
+    var arm=(Math.random()*ARMS)|0;
+    r=Math.pow(Math.random(),0.6)*GAL_R+1.5;
+    ang=arm*TAU/ARMS + r*SPIN + gauss()*(0.26+3.0/(r+2));
+    r+=gauss()*1.7; if(r<1.5) r=1.5+Math.random();
+    x=Math.cos(ang)*r; z=Math.sin(ang)*r;
+    var thick=(1-Math.min(r/GAL_R,1)*0.72)*2.1;
+    y=gauss()*thick;
+  }
+  var rad=Math.sqrt(x*x+z*z)+0.001;
+  var sp=Math.sqrt(GM_C/(rad+3.5));
+  posArr[ix]=x; posArr[ix+1]=y; posArr[ix+2]=z;
+  velArr[ix]  = -z/rad*sp + gauss()*0.22;
+  velArr[ix+1]=  gauss()*0.16;
+  velArr[ix+2]=  x/rad*sp + gauss()*0.22;
+  if(fresh){
+    var t=Math.min(rad/GAL_R,1), u=Math.random(), cr,cg,cb;
+    if(u<0.05){ cr=0.72; cg=0.82; cb=1.0; }                 // כחול-לבן לוהט
+    else if(u<0.10){ cr=1.0; cg=0.55; cb=0.4; }             // ענק אדום
+    else if(u<0.17){ cr=0.78; cg=0.6; cb=1.0; }             // סגול
+    else{
+      cr=lerp(1.0,0.55,t); cg=lerp(0.88,0.68,t); cb=lerp(0.66,1.0,t);
+      cr+= (Math.random()-0.5)*0.1; cg+=(Math.random()-0.5)*0.1; cb+=(Math.random()-0.5)*0.1;
+    }
+    colArr[ix]=cr; colArr[ix+1]=cg; colArr[ix+2]=cb;
+    if(Math.random()<0.04){ sizeArr[i]=2.8+Math.random()*2.6; }
+    else{ sizeArr[i]=0.8+Math.random()*1.35; }
+    phaseArr[i]=Math.random()*TAU;
+  }
+}
+
+function buildGalaxy(n){
+  if(starPoints){ scene.remove(starPoints); starGeo.dispose(); }
+  N=n;
+  posArr=new Float32Array(n*3); velArr=new Float32Array(n*3); colArr=new Float32Array(n*3);
+  sizeArr=new Float32Array(n);  phaseArr=new Float32Array(n);
+  for(var i=0;i<n;i++) placeStar(i,true);
+  starGeo=new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(posArr,3));
+  starGeo.setAttribute('aColor',   new THREE.BufferAttribute(colArr,3));
+  starGeo.setAttribute('aSize',    new THREE.BufferAttribute(sizeArr,1));
+  starGeo.setAttribute('aPhase',   new THREE.BufferAttribute(phaseArr,1));
+  starPoints=new THREE.Points(starGeo, starMat);
+  starPoints.frustumCulled=false;
+  scene.add(starPoints);
+  document.getElementById('stStars').textContent=n.toLocaleString('en-US');
+}
+buildGalaxy(50000);
+
+/* ---------- חורים שחורים ---------- */
+var bhs=[], pickMeshes=[], consumed=0, MAX_BH=6;
+var sphereGeo=new THREE.SphereGeometry(0.55,32,24);
+var pickGeo  =new THREE.SphereGeometry(2.6,8,8);
+var ring1Geo =new THREE.RingGeometry(0.8,1.5,80);
+var ring2Geo =new THREE.RingGeometry(1.45,2.7,80);
+var blackMat =new THREE.MeshBasicMaterial({color:0x000000});
+var invisMat =new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,depthTest:false});
+
+function easeOutBack(t){ var c1=1.70158,c3=c1+1; t=clamp(t,0,1); return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2); }
+
+function addBH(x,z){
+  if(bhs.length>=MAX_BH) return;
+  var d=Math.sqrt(x*x+z*z); if(d>110){ x*=110/d; z*=110/d; }
+  var b={x:x,z:z,mass:1,horizon:1.5,vis:0.0001,t0:performance.now(),ph:Math.random()*TAU};
+  var g=new THREE.Group(); g.position.set(x,0,z);
+
+  var tilt=new THREE.Group();
+  tilt.rotation.set((Math.random()-0.5)*0.36,0,(Math.random()-0.5)*0.36);
+  g.add(tilt);
+
+  tilt.add(new THREE.Mesh(sphereGeo, blackMat));
+
+  var spin1=new THREE.Group(), spin2=new THREE.Group();
+  var d1=new THREE.Mesh(ring1Geo, new THREE.MeshBasicMaterial({map:accTex, color:0xffd9a0,
+    transparent:true, opacity:0.95, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending}));
+  var d2=new THREE.Mesh(ring2Geo, new THREE.MeshBasicMaterial({map:accTex, color:0xff8a55,
+    transparent:true, opacity:0.45, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending}));
+  d1.rotation.x=Math.PI/2; d2.rotation.x=Math.PI/2;
+  spin1.add(d1); spin2.add(d2); tilt.add(spin1); tilt.add(spin2);
+
+  var photon=new THREE.Sprite(new THREE.SpriteMaterial({map:ringTexBH, transparent:true,
+    opacity:0.95, depthWrite:false, blending:THREE.AdditiveBlending}));
+  photon.scale.set(1.65,1.65,1); g.add(photon);
+
+  var glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexBH, transparent:true,
+    opacity:0.6, depthWrite:false, blending:THREE.AdditiveBlending}));
+  glow.scale.set(5.5,5.5,1); g.add(glow);
+
+  var pick=new THREE.Mesh(pickGeo, invisMat);
+  pick.userData.bh=b; g.add(pick); pickMeshes.push(pick);
+
+  b.group=g; b.spin1=spin1; b.spin2=spin2; b.glow=glow;
+  scene.add(g); bhs.push(b);
+  updBHStat();
+}
+function removeAllBH(){
+  for(var i=0;i<bhs.length;i++) scene.remove(bhs[i].group);
+  bhs.length=0; pickMeshes.length=0; updBHStat();
+}
+function updBHStat(){ document.getElementById('stBH').textContent=bhs.length; }
+
+/* ---------- פיזיקה ---------- */
+var FAR2=180*180;
+function physics(dt){
+  if(dt<=0) return;
+  var m=bhs.length, b, i, ix;
+  for(b=0;b<m;b++){
+    var o=bhs[b];
+    o.gm = 170*o.mass*S.grav;
+    o.h2 = o.horizon*o.horizon;
+  }
+  outer:
+  for(i=0;i<N;i++){
+    ix=i*3;
+    var x=posArr[ix], y=posArr[ix+1], z=posArr[ix+2];
+    var r2=x*x+y*y+z*z+6.0;
+    var f=GM_C/(r2*Math.sqrt(r2));
+    var ax=-x*f, ay=-y*f - y*0.22, az=-z*f;
+    for(b=0;b<m;b++){
+      var o2=bhs[b];
+      var dx=o2.x-x, dy=-y, dz=o2.z-z;
+      var d2=dx*dx+dy*dy+dz*dz;
+      if(d2<o2.h2){
+        if(o2.mass<14){ o2.mass+=0.015; o2.horizon=1.5*Math.cbrt(o2.mass); }
+        consumed++;
+        placeStar(i,false);
+        continue outer;
+      }
+      d2+=0.8;
+      var fb=o2.gm/(d2*Math.sqrt(d2));
+      ax+=dx*fb; ay+=dy*fb; az+=dz*fb;
+    }
+    velArr[ix]+=ax*dt; velArr[ix+1]+=ay*dt; velArr[ix+2]+=az*dt;
+    x+=velArr[ix]*dt; y+=velArr[ix+1]*dt; z+=velArr[ix+2]*dt;
+    if(x*x+z*z>FAR2){ placeStar(i,false); continue; }
+    posArr[ix]=x; posArr[ix+1]=y; posArr[ix+2]=z;
+  }
+  starGeo.attributes.position.needsUpdate=true;
+}
+
+/* ---------- מצלמה ---------- */
+var cam={az:2.3, pol:1.06, dist:200, distT:94, azV:0, polV:0};
+function applyCam(){
+  var sp=Math.sin(cam.pol);
+  camera.position.set(Math.cos(cam.az)*sp*cam.dist, Math.cos(cam.pol)*cam.dist, Math.sin(cam.az)*sp*cam.dist);
+  camera.lookAt(0,0,0);
+}
+
+/* ---------- אינטראקציה ---------- */
+var S={ timeScale:1, grav:1, autoRot:true };
+var raycaster=new THREE.Raycaster(), ndc=new THREE.Vector2();
+var planeY0=new THREE.Plane(new THREE.Vector3(0,1,0),0), hitV=new THREE.Vector3();
+var pointers=new Map(), mode=null, dragBH=null, lastX=0, lastY=0;
+var pinchStart=0, pinchDist0=0, lastTapT=0, lastTapX=0, lastTapY=0, hoverT=0;
+
+function setNDC(cx,cy){ ndc.x=(cx/window.innerWidth)*2-1; ndc.y=-(cy/window.innerHeight)*2+1; }
+function pickBH(cx,cy){
+  if(!pickMeshes.length) return null;
+  setNDC(cx,cy); raycaster.setFromCamera(ndc,camera);
+  var hits=raycaster.intersectObjects(pickMeshes,false);
+  return hits.length? hits[0].object.userData.bh : null;
+}
+function planePoint(cx,cy){
+  setNDC(cx,cy); raycaster.setFromCamera(ndc,camera);
+  return raycaster.ray.intersectPlane(planeY0,hitV)? hitV : null;
+}
+
+canvas.addEventListener('pointerdown',function(e){
+  canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===2){
+    mode='pinch';
+    var pts=Array.from(pointers.values());
+    pinchDist0=Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+    pinchStart=cam.distT;
+    return;
+  }
+  var bh=pickBH(e.clientX,e.clientY);
+  if(bh){ mode='bh'; dragBH=bh; }
+  else{ mode='orbit'; cam.azV=0; cam.polV=0; }
+  lastX=e.clientX; lastY=e.clientY;
+  canvas.classList.add('grabbing');
+});
+
+window.addEventListener('pointermove',function(e){
+  if(pointers.has(e.pointerId)) pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(mode==='pinch' && pointers.size===2){
+    var pts=Array.from(pointers.values());
+    var d=Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+    if(d>0 && pinchDist0>0) cam.distT=clamp(pinchStart*pinchDist0/d, 26, 460);
+    return;
+  }
+  if(mode==='orbit'){
+    var dx=e.clientX-lastX, dy=e.clientY-lastY;
+    cam.az  += dx*0.0052;
+    cam.pol  = clamp(cam.pol+dy*0.0052, 0.18, 1.5);
+    cam.azV  = dx*0.0009; cam.polV = dy*0.0009;
+    lastX=e.clientX; lastY=e.clientY;
+  }else if(mode==='bh' && dragBH){
+    var p=planePoint(e.clientX,e.clientY);
+    if(p){
+      var d2=Math.sqrt(p.x*p.x+p.z*p.z);
+      var px=p.x, pz=p.z;
+      if(d2>120){ px*=120/d2; pz*=120/d2; }
+      dragBH.x=px; dragBH.z=pz;
+      dragBH.group.position.set(px,0,pz);
+    }
+  }else if(!mode){
+    var now=performance.now();
+    if(now-hoverT>90){
+      hoverT=now;
+      canvas.style.cursor = pickBH(e.clientX,e.clientY) ? 'pointer' : 'grab';
+    }
+  }
+});
+
+window.addEventListener('pointerup',function(e){
+  pointers.delete(e.pointerId);
+  // זיהוי הקשה כפולה במגע
+  if(e.pointerType==='touch' && mode!=='pinch' && mode!=='bh'){
+    var now=performance.now();
+    if(now-lastTapT<330 && Math.hypot(e.clientX-lastTapX,e.clientY-lastTapY)<28){
+      var p=planePoint(e.clientX,e.clientY);
+      if(p) addBH(p.x,p.z);
+      lastTapT=0;
+    }else{ lastTapT=now; lastTapX=e.clientX; lastTapY=e.clientY; }
+  }
+  if(pointers.size===0){ mode=null; dragBH=null; canvas.classList.remove('grabbing'); }
+  else if(pointers.size===1 && mode==='pinch'){ mode='orbit';
+    var pt=pointers.values().next().value; lastX=pt.x; lastY=pt.y; }
+});
+
+canvas.addEventListener('dblclick',function(e){
+  if(pickBH(e.clientX,e.clientY)) return;
+  var p=planePoint(e.clientX,e.clientY);
+  if(p) addBH(p.x,p.z);
+});
+
+canvas.addEventListener('wheel',function(e){
+  e.preventDefault();
+  cam.distT=clamp(cam.distT*Math.exp(e.deltaY*0.0012), 26, 460);
+},{passive:false});
+
+/* ---------- חיווט ממשק ---------- */
+function $(id){ return document.getElementById(id); }
+$('rSpeed').addEventListener('input',function(){
+  S.timeScale=parseFloat(this.value);
+  $('vSpeed').textContent='×'+S.timeScale.toFixed(1);
+});
+$('rGrav').addEventListener('input',function(){
+  S.grav=parseFloat(this.value);
+  $('vGrav').textContent='×'+S.grav.toFixed(1);
+});
+$('btnBH').addEventListener('click',function(){
+  var a=Math.random()*TAU, r=16+Math.random()*28;
+  addBH(Math.cos(a)*r, Math.sin(a)*r);
+});
+$('btnRot').addEventListener('click',function(){
+  S.autoRot=!S.autoRot; this.classList.toggle('on',S.autoRot);
+});
+$('btnReset').addEventListener('click',function(){
+  buildGalaxy(N); removeAllBH(); consumed=0;
+});
+$('selN').addEventListener('change',function(){
+  buildGalaxy(parseInt(this.value,10)); removeAllBH(); consumed=0;
+});
+
+/* ---------- סטטיסטיקות ---------- */
+var fpsFrames=0, fpsLast=performance.now(), fpsVal=0;
+setInterval(function(){
+  $('stFps').textContent = fpsVal>0 ? fpsVal : '—';
+  $('stEaten').textContent = consumed.toLocaleString('en-US');
+},300);
+
+/* ---------- שינוי גודל ---------- */
+window.addEventListener('resize',function(){
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+/* ---------- לולאה ראשית ---------- */
+var last=performance.now();
+function tick(now){
+  requestAnimationFrame(tick);
+  var dt=(now-last)/1000; last=now;
+  if(dt>0.05) dt=0.05;
+  var sdt=dt*S.timeScale;
+
+  if(S.autoRot && mode!=='orbit' && mode!=='pinch') cam.az+=dt*0.045;
+  cam.az+=cam.azV; cam.pol=clamp(cam.pol+cam.polV,0.18,1.5);
+  cam.azV*=0.92; cam.polV*=0.92;
+  cam.dist=lerp(cam.dist,cam.distT,0.06);
+  applyCam();
+
+  starUniforms.uTime.value=now/1000;
+  physics(sdt);
+
+  for(var i=0;i<bhs.length;i++){
+    var b=bhs[i];
+    b.vis=lerp(b.vis,b.horizon,0.07);
+    var sc=b.vis*easeOutBack((now-b.t0)/600);
+    b.group.scale.setScalar(Math.max(sc,0.001));
+    b.spin1.rotation.y+=sdt*0.9;
+    b.spin2.rotation.y-=sdt*0.55;
+    b.glow.material.opacity=0.5+0.18*Math.sin(now/280+b.ph);
+  }
+  var pulse=1+0.03*Math.sin(now/900);
+  coreGlow.scale.set(34*pulse,34*pulse,1);
+  for(var k=0;k<nebulas.length;k++) nebulas[k].sp.material.rotation+=nebulas[k].spin*dt;
+
+  renderer.render(scene,camera);
+
+  fpsFrames++;
+  if(now-fpsLast>=500){ fpsVal=Math.round(fpsFrames*1000/(now-fpsLast)); fpsFrames=0; fpsLast=now; }
+}
+applyCam();
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
