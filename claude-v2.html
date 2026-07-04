@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="מדריך מקיף ועדכני לעבודה עם Claude Code ב-2026 — מהיסודות ועד סוכנים מרובים אוטונומיים, Agent Teams, Dynamic Workflows ודור המודלים החדש: Sonnet 5 ו-Fable 5.">
+<title>Claude Code · המדריך האגנטי המלא 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+============================================================ */
+:root{
+  --bg:#1a1613; --bg-2:#211c17; --bg-3:#2a241d; --bg-code:#15110d;
+  --surface-hover:#322a22; --border:#3a3128; --border-soft:#2c2620;
+  --text:#f1e9dd; --text-soft:#cabaa7; --text-mute:#988977;
+  --accent:#e08a63; --accent-strong:#d97757; --accent-2:#e3b341;
+  --accent-soft:rgba(224,138,99,.13); --accent-line:rgba(224,138,99,.32);
+  --teal:#6db3a6; --green:#a3c293; --blue:#7fb3d9; --purple:#bb9bd9;
+  --danger:#e07a6f; --gold:#e3b341;
+  --tok-comment:#7d7163; --tok-string:#a3c293; --tok-keyword:#e08a63;
+  --tok-number:#e3b341; --tok-bool:#bb9bd9; --tok-prop:#7fb3d9;
+  --tok-flag:#dba3c6; --tok-cmd:#f4ede2; --tok-var:#6db3a6;
+  --tok-func:#e6cd92; --tok-heading:#e08a63; --tok-punc:#988977; --tok-link:#7fb3d9;
+  --font-display:'Frank Ruhl Libre',"Times New Roman",serif;
+  --font-body:'Assistant',system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,"SFMono-Regular",monospace;
+  --sb-w:312px; --header-h:62px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+  --shadow:0 8px 30px rgba(0,0,0,.35);
+  --shadow-lg:0 24px 60px -12px rgba(0,0,0,.55);
+  --radius:14px; --radius-sm:9px;
+  --maxw:820px;
+}
+html[data-theme="light"]{
+  --bg:#f6f1e8; --bg-2:#fffdf8; --bg-3:#f0e8da;
+  --surface-hover:#efe6d6; --border:#e2d7c5; --border-soft:#ece2d2;
+  --text:#2b2419; --text-soft:#5c5345; --text-mute:#8a7e6d;
+  --accent:#c2643f; --accent-strong:#ad522d; --accent-soft:rgba(194,100,63,.11);
+  --accent-line:rgba(194,100,63,.28);
+  --shadow:0 8px 30px rgba(120,90,60,.12);
+  --shadow-lg:0 24px 60px -14px rgba(120,90,60,.22);
+  --shadow-sm:0 1px 2px rgba(120,90,60,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font-body);background:var(--bg);color:var(--text);
+  line-height:1.75;font-size:17px;font-weight:400;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow-x:hidden;letter-spacing:.1px;
+  transition:background .4s ease,color .4s ease;
+}
+/* atmosphere */
+.bg-layer{position:fixed;inset:0;z-index:-2;pointer-events:none}
+.bg-grid{position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background-image:radial-gradient(var(--accent-soft) 1px,transparent 1.4px);
+  background-size:26px 26px;opacity:.55;
+  -webkit-mask-image:radial-gradient(ellipse 90% 60% at 70% 0%,#000 0%,transparent 75%);
+  mask-image:radial-gradient(ellipse 90% 60% at 70% 0%,#000 0%,transparent 75%);}
+.bg-glow{position:fixed;z-index:-2;top:-260px;left:50%;transform:translateX(-50%);
+  width:1100px;height:620px;pointer-events:none;
+  background:radial-gradient(circle at 50% 0%,rgba(217,119,87,.20),transparent 62%);
+  filter:blur(8px);}
+html[data-theme="light"] .bg-glow{background:radial-gradient(circle at 50% 0%,rgba(194,100,63,.16),transparent 62%);}
+
+::selection{background:var(--accent);color:#1a1613}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:20px;border:3px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:var(--text-mute)}
+
+/* ============================================================
+   TOP READING PROGRESS
+============================================================ */
+#read-progress{position:fixed;top:0;right:0;height:3px;width:0%;z-index:120;
+  background:linear-gradient(90deg,var(--accent-strong),var(--accent-2));
+  box-shadow:0 0 12px rgba(224,138,99,.55);transition:width .12s linear}
+
+/* ============================================================
+   HEADER
+============================================================ */
+header.top{position:fixed;top:0;right:0;left:0;height:var(--header-h);z-index:100;
+  display:flex;align-items:center;gap:14px;padding:0 22px;
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:blur(16px) saturate(140%);
+  -webkit-backdrop-filter:blur(16px) saturate(140%);
+  border-bottom:1px solid var(--border-soft)}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--text);min-width:0}
+.brand .mark{width:34px;height:34px;border-radius:9px;flex:none;
+  display:grid;place-items:center;font-family:var(--font-mono);font-weight:700;font-size:18px;
+  color:#1a1613;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  box-shadow:0 4px 14px rgba(224,138,99,.4)}
+.brand .b-txt{display:flex;flex-direction:column;line-height:1.05;min-width:0}
+.brand .b-txt b{font-weight:700;font-size:16px;letter-spacing:.2px}
+.brand .b-txt span{font-size:11.5px;color:var(--text-mute);font-weight:500}
+.top .spacer{flex:1}
+.top-btn{height:38px;min-width:38px;padding:0 11px;border-radius:9px;border:1px solid var(--border);
+  background:var(--bg-2);color:var(--text-soft);cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;gap:7px;font-family:var(--font-body);
+  font-size:13.5px;font-weight:600;transition:.18s}
+.top-btn:hover{background:var(--surface-hover);color:var(--text);border-color:var(--accent-line)}
+.top-btn svg{width:18px;height:18px}
+.top-btn .kbd{font-family:var(--font-mono);font-size:11px;border:1px solid var(--border);
+  border-radius:4px;padding:1px 5px;color:var(--text-mute);background:var(--bg)}
+#menu-btn{display:none}
+
+/* ============================================================
+   LAYOUT
+============================================================ */
+.layout{display:flex;align-items:flex-start;padding-top:var(--header-h)}
+aside.sidebar{position:sticky;top:var(--header-h);width:var(--sb-w);flex:none;
+  height:calc(100vh - var(--header-h));overflow-y:auto;overflow-x:hidden;
+  border-left:1px solid var(--border-soft);padding:20px 14px 60px;
+  scrollbar-width:thin}
+main.content{flex:1;min-width:0;display:flex;justify-content:center;padding:0 clamp(18px,4vw,60px)}
+.content-inner{width:100%;max-width:var(--maxw);padding-bottom:120px}
+
+/* progress card */
+.prog-card{background:linear-gradient(160deg,var(--bg-3),var(--bg-2));border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:15px;margin-bottom:18px}
+.ring{position:relative;width:62px;height:62px;flex:none}
+.ring svg{transform:rotate(-90deg);width:62px;height:62px}
+.ring .bg-c{stroke:var(--border);stroke-width:6;fill:none}
+.ring .fg-c{stroke:url(#ringgrad);stroke-width:6;fill:none;stroke-linecap:round;
+  transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1)}
+.ring .pct{position:absolute;inset:0;display:grid;place-items:center;
+  font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--text)}
+.prog-meta{min-width:0}
+.prog-meta b{display:block;font-size:14px;font-weight:700}
+.prog-meta span{font-size:12.5px;color:var(--text-mute)}
+.prog-reset{margin-top:5px;background:none;border:none;color:var(--accent);font-size:12px;
+  cursor:pointer;font-family:var(--font-body);font-weight:600;padding:0;text-decoration:underline;text-underline-offset:2px}
+.prog-reset:hover{color:var(--accent-strong)}
+
+/* search */
+.search-wrap{position:relative;margin-bottom:16px}
+.search-wrap svg{position:absolute;top:50%;right:12px;transform:translateY(-50%);
+  width:17px;height:17px;color:var(--text-mute);pointer-events:none}
+#nav-search{width:100%;height:42px;padding:0 38px 0 14px;border-radius:10px;
+  border:1px solid var(--border);background:var(--bg-2);color:var(--text);
+  font-family:var(--font-body);font-size:14.5px;outline:none;transition:.18s}
+#nav-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#nav-search::placeholder{color:var(--text-mute)}
+
+/* nav */
+.nav-phase{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
+  color:var(--text-mute);padding:16px 12px 7px;display:flex;align-items:center;gap:8px}
+.nav-phase::after{content:"";flex:1;height:1px;background:var(--border-soft)}
+.nav-phase:first-child{padding-top:4px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;
+  text-decoration:none;color:var(--text-soft);font-size:14.5px;font-weight:500;
+  cursor:pointer;transition:.16s;position:relative;border:1px solid transparent}
+.nav-item:hover{background:var(--surface-hover);color:var(--text)}
+.nav-item.active{background:var(--accent-soft);color:var(--accent);font-weight:700;
+  border-color:var(--accent-line)}
+.nav-item.active .num{background:var(--accent);color:#1a1613;border-color:transparent}
+.nav-item .num{width:25px;height:25px;flex:none;border-radius:7px;border:1px solid var(--border);
+  display:grid;place-items:center;font-family:var(--font-mono);font-size:11.5px;font-weight:600;
+  color:var(--text-mute);transition:.16s}
+.nav-item .lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-item .done{width:16px;height:16px;flex:none;opacity:0;transform:scale(.5);transition:.2s;color:var(--green)}
+.nav-item.completed .done{opacity:1;transform:scale(1)}
+.nav-item.completed .num{color:var(--green);border-color:color-mix(in srgb,var(--green) 40%,transparent)}
+.nav-empty{padding:20px 12px;color:var(--text-mute);font-size:13.5px;text-align:center;display:none}
+
+/* ============================================================
+   HERO
+============================================================ */
+.hero{padding:46px 0 30px;border-bottom:1px solid var(--border-soft);margin-bottom:14px;position:relative}
+.hero .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);
+  font-size:12.5px;font-weight:500;color:var(--accent);background:var(--accent-soft);
+  border:1px solid var(--accent-line);padding:5px 13px;border-radius:30px;margin-bottom:22px;
+  animation:fadeUp .6s both}
+.hero .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 0 0 rgba(163,194,147,.6);animation:pulse 2.4s infinite}
+.hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(38px,6.4vw,68px);
+  line-height:1.05;letter-spacing:-.5px;margin-bottom:20px;animation:fadeUp .6s .07s both}
+.hero h1 .grad{background:linear-gradient(115deg,var(--accent),var(--accent-2) 80%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.hero .lede{font-size:clamp(18px,2.3vw,21px);color:var(--text-soft);max-width:640px;
+  line-height:1.7;margin-bottom:26px;animation:fadeUp .6s .14s both;font-weight:400}
+.hero .lede b{color:var(--text);font-weight:700}
+.hero-stats{display:flex;flex-wrap:wrap;gap:11px;margin-bottom:30px;animation:fadeUp .6s .2s both}
+.hstat{background:var(--bg-2);border:1px solid var(--border);border-radius:12px;
+  padding:12px 16px;min-width:118px}
+.hstat b{display:block;font-family:var(--font-mono);font-weight:700;font-size:21px;color:var(--accent)}
+.hstat span{font-size:12.5px;color:var(--text-mute);font-weight:500}
+
+/* terminal */
+.terminal{background:var(--bg-code);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;box-shadow:var(--shadow-lg);animation:fadeUp .6s .26s both;direction:ltr}
+.term-bar{display:flex;align-items:center;gap:8px;padding:11px 15px;
+  background:linear-gradient(var(--bg-3),var(--bg-2));border-bottom:1px solid var(--border)}
+.term-bar .dots{display:flex;gap:7px}
+.term-bar .dots i{width:12px;height:12px;border-radius:50%;display:block}
+.term-bar .dots i:nth-child(1){background:#e0726b}
+.term-bar .dots i:nth-child(2){background:#e3b341}
+.term-bar .dots i:nth-child(3){background:#a3c293}
+.term-bar .tt{font-family:var(--font-mono);font-size:12px;color:var(--text-mute);margin-inline-start:8px}
+.term-body{padding:18px 20px;font-family:var(--font-mono);font-size:14px;line-height:1.85;
+  min-height:208px;text-align:left}
+.term-body .ln{display:block;white-space:pre-wrap;opacity:0}
+.term-body .prompt{color:var(--accent-2)}
+.term-body .user{color:var(--text)}
+.term-body .ag{color:var(--accent)}
+.term-body .muted{color:var(--text-mute)}
+.term-body .ok{color:var(--green)}
+.term-body .cursor{display:inline-block;width:9px;height:17px;background:var(--accent);
+  vertical-align:middle;margin-inline-start:3px;animation:blink 1.05s step-end infinite}
+.reveal-ln{animation:lnIn .4s forwards}
+
+/* ============================================================
+   CONTENT TYPOGRAPHY
+============================================================ */
+.doc-section{padding:54px 0 10px;scroll-margin-top:80px;border-bottom:1px solid var(--border-soft)}
+.doc-section:last-of-type{border-bottom:none}
+.sec-head{margin-bottom:26px}
+.sec-kicker{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-mono);
+  font-size:12.5px;font-weight:500;color:var(--text-mute);margin-bottom:13px;text-transform:uppercase;letter-spacing:1px}
+.sec-kicker .knum{color:var(--accent);font-weight:700;border:1px solid var(--accent-line);
+  background:var(--accent-soft);border-radius:6px;padding:2px 8px}
+h2.sec-title{font-family:var(--font-display);font-weight:800;font-size:clamp(28px,4vw,42px);
+  line-height:1.12;letter-spacing:-.4px}
+.doc-section h3{font-family:var(--font-display);font-weight:700;font-size:clamp(21px,2.6vw,27px);
+  margin:38px 0 14px;line-height:1.25;letter-spacing:-.2px;
+  padding-bottom:0;display:flex;align-items:baseline;gap:11px}
+.doc-section h3::before{content:"";width:5px;height:.95em;border-radius:3px;flex:none;
+  background:linear-gradient(var(--accent),var(--accent-2));transform:translateY(.08em)}
+.doc-section h4{font-weight:700;font-size:18px;margin:26px 0 9px;color:var(--text)}
+.doc-section p{margin:0 0 16px;color:var(--text-soft)}
+.doc-section p strong,.doc-section li strong{color:var(--text);font-weight:700}
+.doc-section a.link{color:var(--accent);text-decoration:underline;text-underline-offset:3px;
+  text-decoration-color:var(--accent-line);transition:.15s;font-weight:600}
+.doc-section a.link:hover{text-decoration-color:var(--accent)}
+.doc-section ul,.doc-section ol{margin:0 0 18px;padding-inline-start:0;list-style:none}
+.doc-section li{position:relative;padding-inline-start:26px;margin-bottom:10px;color:var(--text-soft)}
+.doc-section ul>li::before{content:"";position:absolute;right:6px;top:.62em;width:7px;height:7px;
+  border-radius:2px;background:var(--accent);transform:rotate(45deg)}
+.doc-section ol{counter-reset:li}
+.doc-section ol>li{counter-increment:li}
+.doc-section ol>li::before{content:counter(li);position:absolute;right:0;top:.05em;
+  width:21px;height:21px;border-radius:6px;background:var(--accent-soft);border:1px solid var(--accent-line);
+  color:var(--accent);font-family:var(--font-mono);font-size:11.5px;font-weight:700;
+  display:grid;place-items:center}
+.lead-p{font-size:19.5px;line-height:1.7;color:var(--text-soft)}
+.lead-p strong{color:var(--text)}
+
+/* inline code */
+code.ic{font-family:var(--font-mono);font-size:.86em;background:var(--bg-3);
+  border:1px solid var(--border-soft);border-radius:6px;padding:1.5px 6px;color:var(--accent);
+  direction:ltr;unicode-bidi:isolate;white-space:nowrap;font-weight:500}
+html[data-theme="light"] code.ic{color:var(--accent-strong)}
+
+/* keyboard */
+kbd{font-family:var(--font-mono);font-size:.8em;background:var(--bg-3);border:1px solid var(--border);
+  border-bottom-width:2px;border-radius:5px;padding:1.5px 7px;color:var(--text);white-space:nowrap}
+
+/* ============================================================
+   CODE BLOCKS
+============================================================ */
+.code-block{margin:20px 0;border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  background:var(--bg-code);box-shadow:var(--shadow-sm)}
+.code-head{display:flex;align-items:center;gap:9px;padding:9px 14px;
+  background:linear-gradient(var(--bg-3),var(--bg-2));border-bottom:1px solid var(--border)}
+.code-head .cdots{display:flex;gap:6px}
+.code-head .cdots i{width:10px;height:10px;border-radius:50%;display:block}
+.code-head .cdots i:nth-child(1){background:#e0726b}
+.code-head .cdots i:nth-child(2){background:#e3b341}
+.code-head .cdots i:nth-child(3){background:#a3c293}
+.code-head .clang{font-family:var(--font-mono);font-size:11.5px;color:var(--text-mute);
+  margin-inline-start:6px;font-weight:500;letter-spacing:.5px}
+.code-head .cspace{flex:1}
+.copy-btn{background:var(--bg);border:1px solid var(--border);color:var(--text-soft);
+  font-family:var(--font-body);font-size:12px;font-weight:600;border-radius:7px;
+  padding:5px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.16s}
+.copy-btn:hover{background:var(--surface-hover);color:var(--text);border-color:var(--accent-line)}
+.copy-btn svg{width:14px;height:14px}
+.copy-btn.copied{color:var(--green);border-color:color-mix(in srgb,var(--green) 45%,transparent)}
+.code-block pre{margin:0;padding:16px 18px;overflow-x:auto;direction:ltr;text-align:left}
+.code-block code{font-family:var(--font-mono);font-size:13.5px;line-height:1.72;color:var(--text);
+  white-space:pre;tab-size:2}
+/* tokens */
+.tok-comment{color:var(--tok-comment);font-style:italic}
+.tok-string{color:var(--tok-string)}
+.tok-keyword{color:var(--tok-keyword)}
+.tok-number{color:var(--tok-number)}
+.tok-bool{color:var(--tok-bool)}
+.tok-prop{color:var(--tok-prop)}
+.tok-flag{color:var(--tok-flag)}
+.tok-cmd{color:var(--tok-cmd);font-weight:600}
+.tok-var{color:var(--tok-var)}
+.tok-func{color:var(--tok-func)}
+.tok-heading{color:var(--tok-heading);font-weight:700}
+.tok-punc{color:var(--tok-punc)}
+.tok-link{color:var(--tok-link)}
+
+/* ============================================================
+   CALLOUTS
+============================================================ */
+.callout{position:relative;margin:22px 0;padding:16px 18px 16px 18px;border-radius:12px;
+  border:1px solid var(--border);background:var(--bg-2);border-right:3px solid var(--accent)}
+.callout .co-head{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14.5px;
+  margin-bottom:7px;color:var(--text)}
+.callout .co-head .ico{width:22px;height:22px;flex:none;display:grid;place-items:center;
+  border-radius:6px;font-size:13px}
+.callout p:last-child,.callout ul:last-child,.callout li:last-child{margin-bottom:0}
+.callout p{color:var(--text-soft);font-size:15.5px;margin-bottom:8px}
+.callout.tip{border-right-color:var(--teal)}
+.callout.tip .ico{background:color-mix(in srgb,var(--teal) 18%,transparent);color:var(--teal)}
+.callout.warn{border-right-color:var(--gold);background:color-mix(in srgb,var(--gold) 7%,var(--bg-2))}
+.callout.warn .ico{background:color-mix(in srgb,var(--gold) 20%,transparent);color:var(--gold)}
+.callout.danger{border-right-color:var(--danger);background:color-mix(in srgb,var(--danger) 8%,var(--bg-2))}
+.callout.danger .ico{background:color-mix(in srgb,var(--danger) 20%,transparent);color:var(--danger)}
+.callout.note{border-right-color:var(--blue)}
+.callout.note .ico{background:color-mix(in srgb,var(--blue) 18%,transparent);color:var(--blue)}
+.callout.bench{border-right-color:var(--purple);background:color-mix(in srgb,var(--purple) 7%,var(--bg-2))}
+.callout.bench .ico{background:color-mix(in srgb,var(--purple) 20%,transparent);color:var(--purple)}
+
+.usecase{margin:22px 0;border:1px solid var(--accent-line);border-radius:12px;overflow:hidden;
+  background:linear-gradient(160deg,var(--accent-soft),transparent)}
+.usecase .uc-head{display:flex;align-items:center;gap:9px;padding:11px 16px;font-weight:700;
+  font-size:14px;color:var(--accent);background:var(--accent-soft);border-bottom:1px solid var(--accent-line)}
+.usecase .uc-body{padding:15px 17px}
+.usecase .uc-body p{margin-bottom:9px;font-size:15.5px}
+.usecase .uc-body p:last-child{margin-bottom:0}
+
+.exercise{margin:22px 0;border:1px dashed var(--teal);border-radius:12px;
+  background:color-mix(in srgb,var(--teal) 6%,var(--bg-2));padding:16px 18px}
+.exercise .ex-head{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14.5px;
+  margin-bottom:9px;color:var(--teal)}
+.exercise ol,.exercise ul{margin-bottom:0}
+.exercise p:last-child{margin-bottom:0}
+
+/* ============================================================
+   TABLES
+============================================================ */
+.tbl-wrap{margin:22px 0;border:1px solid var(--border);border-radius:12px;overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:480px}
+thead th{background:var(--bg-3);color:var(--text);font-weight:700;text-align:right;
+  padding:11px 15px;border-bottom:1px solid var(--border);white-space:nowrap;font-size:13.5px}
+tbody td{padding:11px 15px;border-bottom:1px solid var(--border-soft);color:var(--text-soft);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--bg-2)}
+table code{font-family:var(--font-mono);font-size:12.5px;color:var(--accent);direction:ltr;
+  unicode-bidi:isolate;background:var(--bg-code);padding:1px 5px;border-radius:4px}
+html[data-theme="light"] table code{color:var(--accent-strong)}
+
+/* ============================================================
+   CARDS GRID
+============================================================ */
+.cards{display:grid;gap:14px;margin:22px 0}
+.cards.c2{grid-template-columns:repeat(2,1fr)}
+.cards.c3{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:16px 17px;
+  transition:.2s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--accent-line);transform:translateY(-2px);box-shadow:var(--shadow)}
+.card .c-ico{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;
+  background:var(--accent-soft);color:var(--accent);margin-bottom:12px;font-family:var(--font-mono);
+  font-weight:700;font-size:16px;border:1px solid var(--accent-line)}
+.card h4{margin:0 0 6px;font-size:16px;font-weight:700;color:var(--text)}
+.card p{margin:0;font-size:14px;color:var(--text-soft);line-height:1.6}
+.card code.ic{font-size:.82em}
+
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:11px;
+  font-weight:600;padding:2px 9px;border-radius:20px;vertical-align:middle;letter-spacing:.3px}
+.badge.exp{background:color-mix(in srgb,var(--gold) 15%,transparent);color:var(--gold);
+  border:1px solid color-mix(in srgb,var(--gold) 35%,transparent)}
+.badge.new{background:color-mix(in srgb,var(--green) 15%,transparent);color:var(--green);
+  border:1px solid color-mix(in srgb,var(--green) 35%,transparent)}
+.badge.ver{background:var(--bg-3);color:var(--text-mute);border:1px solid var(--border)}
+.badge.dep{background:color-mix(in srgb,var(--danger) 13%,transparent);color:var(--danger);
+  border:1px solid color-mix(in srgb,var(--danger) 33%,transparent)}
+
+/* mark-complete */
+.complete-row{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  margin-top:36px;padding:16px 18px;border:1px solid var(--border);border-radius:12px;
+  background:var(--bg-2);flex-wrap:wrap}
+.complete-row .cr-txt{font-size:14px;color:var(--text-mute)}
+.mark-btn{display:inline-flex;align-items:center;gap:8px;background:var(--bg-3);border:1px solid var(--border);
+  color:var(--text);font-family:var(--font-body);font-weight:700;font-size:14px;padding:9px 18px;
+  border-radius:9px;cursor:pointer;transition:.18s}
+.mark-btn:hover{border-color:var(--accent);background:var(--surface-hover)}
+.mark-btn svg{width:17px;height:17px;transition:.2s}
+.mark-btn.is-done{background:color-mix(in srgb,var(--green) 16%,transparent);
+  border-color:color-mix(in srgb,var(--green) 45%,transparent);color:var(--green)}
+
+/* ============================================================
+   DIVIDER / MISC
+============================================================ */
+.flag-line{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--text-mute);
+  margin:14px 0;padding:11px 14px;background:var(--bg-2);border-radius:9px;border:1px solid var(--border-soft)}
+.flag-line b{color:var(--text-soft)}
+hr.soft{border:none;border-top:1px solid var(--border-soft);margin:30px 0}
+.pill-row{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.pill{font-family:var(--font-mono);font-size:12.5px;background:var(--bg-3);border:1px solid var(--border);
+  border-radius:8px;padding:5px 11px;color:var(--text-soft);direction:ltr}
+.pill b{color:var(--accent);font-weight:600}
+</style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<svg width="0" height="0" style="position:absolute"><defs>
+<linearGradient id="ringgrad" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#d97757"/><stop offset="100%" stop-color="#e3b341"/>
+</linearGradient></defs></svg>
+
+<div id="read-progress"></div>
+<!-- ===================== HEADER ===================== -->
+<header class="top">
+  <button class="top-btn" id="menu-btn" aria-label="תפריט">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <a href="#top" class="brand">
+    <span class="mark">CC</span>
+    <span class="b-txt"><b>Claude Code</b><span>המדריך האגנטי המלא · 2026</span></span>
+  </a>
+  <span class="spacer"></span>
+  <button class="top-btn" id="search-trigger" aria-label="חיפוש">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span class="kbd">/</span>
+  </button>
+  <button class="top-btn" id="theme-btn" aria-label="החלף ערכת נושא">
+    <svg id="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.6" y1="4.6" x2="6.7" y2="6.7"/><line x1="17.3" y1="17.3" x2="19.4" y2="19.4"/><line x1="4.6" y1="19.4" x2="6.7" y2="17.3"/><line x1="17.3" y1="6.7" x2="19.4" y2="4.6"/></svg>
+    <svg id="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+  </button>
+</header>
+
+<!-- ===================== SIDEBAR ===================== -->
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="prog-card">
+    <div class="ring">
+      <svg viewBox="0 0 62 62"><circle class="bg-c" cx="31" cy="31" r="27"/><circle class="fg-c" id="ring-fg" cx="31" cy="31" r="27"/></svg>
+      <div class="pct" id="ring-pct">0%</div>
+    </div>
+    <div class="prog-meta">
+      <b>ההתקדמות שלך</b>
+      <span id="prog-count">0 מתוך 0 פרקים</span>
+      <button class="prog-reset" id="prog-reset">איפוס התקדמות</button>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="nav-search" placeholder="חיפוש בכל המדריך…" autocomplete="off" spellcheck="false">
+  </div>
+  <nav id="nav"></nav>
+  <div class="nav-empty" id="nav-empty">לא נמצאו תוצאות 🤷</div>
+</aside>
+
+<!-- ===================== CONTENT ===================== -->
+<main class="content">
+<div class="content-inner" id="top">
+
+<!-- HERO -->
+<section class="hero">
+  <span class="eyebrow"><span class="dot"></span>עודכן ל־2 ביולי 2026 · Sonnet 5 · Fable 5 · Opus 4.8</span>
+  <h1>לעבוד עם <span class="grad">Claude Code</span><br>בעידן הסוכנים האוטונומיים</h1>
+  <p class="lede">לא עוד "השלמת קוד". <b>Claude Code</b> הוא סוכן הנדסי שקורא קודבייס שלם, מתכנן, עורך קבצים, מריץ פקודות — ויודע לפצל עבודה למאות סוכני־משנה שעובדים במקביל. המדריך הזה לוקח אותך מהיסודות ועד <b>Agent Teams</b>, <b>Dynamic Workflows</b> ודור המודלים החדש — <b>Sonnet 5</b> ו־<b>Fable 5</b> — עם הדגש על איך עובדים <i>באמת</i> ביולי 2026.</p>
+  <div class="hero-stats">
+    <div class="hstat"><b>15</b><span>פרקים מעמיקים</span></div>
+    <div class="hstat"><b>3</b><span>רמות תזמור סוכנים</span></div>
+    <div class="hstat"><b>1,000</b><span>סוכנים ב־Workflow אחד</span></div>
+    <div class="hstat"><b>1M</b><span>הקשר נטיבי · Sonnet 5</span></div>
+  </div>
+  <div class="terminal">
+    <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div><span class="tt">claude — zsh — 96×24</span></div>
+    <div class="term-body" id="term"></div>
+  </div>
+</section>
+
+<!-- ===== 01 INTRO ===== -->
+<section class="doc-section" id="intro" data-num="01" data-title="מבוא: למה אגנטי" data-kicker="נקודת מוצא" data-phase="יסודות">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">01</span> נקודת מוצא</div>
+<h2 class="sec-title">מבוא: מ"השלמת קוד" להנדסה אגנטית</h2></div>
+
+<p class="lead-p">רוב המפתחים פגשו לראשונה כלי AI כ<strong>אוטוקומפליט חכם</strong> — אתה כותב, הוא משלים שורה. <strong>Claude Code</strong> שייך לדור אחר לגמרי: הוא <strong>סוכן (agent)</strong> שמקבל מטרה, אוסף לבד את ההקשר מהקודבייס, בונה תוכנית, עורך עשרות קבצים, מריץ טסטים ופקודות מעטפת, קורא את הפלט, ומתקן את עצמו — בלולאה — עד שהמשימה הושלמה.</p>
+
+<p>ההבדל הזה משנה את האופן שבו אתה עובד. אתה מפסיק להיות "הקלדן" והופך ל<strong>מנהל/ת של סוכן</strong> (ובהמשך — של צוות סוכנים). התפקיד שלך עובר מ"לכתוב כל שורה" ל"להגדיר מטרות ברורות, לספק הקשר טוב, לאשר תוכניות, ולבקר תוצאות". זו בדיוק נקודת המבט שהמדריך הזה בנוי סביבה.</p>
+
+<div class="usecase"><div class="uc-head"><span>🆕</span>עדכון 2 ביולי 2026 — מה השתנה מאז המהדורה הקודמת</div>
+<div class="uc-body">
+<p><strong>Sonnet 5 הוא ברירת המחדל החדשה של Claude Code</strong> (v2.1.197+): כמעט־Opus בביצועים אגנטיים, חלון הקשר של <strong>1M טוקנים נטיבי</strong>, ותמחור היכרות של $2/$10 עד 31 באוגוסט. פרטים בפרק 03.</p>
+<p><strong>Fable 5</strong> — מודל ה־Mythos הראשון שפתוח לציבור — הושק ב־9 ביוני, הושעה ב־12 ביוני תחת צו פיקוח־ייצוא של ממשלת ארה"ב, וחזר לזמינות מלאה ב־1 ביולי. נבחר עם <code class="ic">/model fable</code>; כללי העלות שלו שונים מהותית — פרק 03.</p>
+<p>ובשטח: סוכן <strong>Explore</strong> יורש כעת את מודל הסשן (ולא Haiku), נוסף מצב הרשאות <strong>Auto</strong> מבוסס־מסווג, <code class="ic">/rewind</code> משחזר גם שיחה מלפני <code class="ic">/clear</code>, ו־<code class="ic">claude mcp login</code> מאמת שרתים משורת הפקודה. הכל משולב בפרקים הרלוונטיים ומסומן 🆕.</p>
+</div></div>
+
+<h3>איפה Claude Code רץ</h3>
+<p>למרות השם, Claude Code הוא הרבה מעבר ל־CLI. אותו מנוע אגנטי זמין בכמה משטחים:</p>
+<div class="cards c3">
+  <div class="card"><div class="c-ico">⌘</div><h4>טרמינל</h4><p>הבית המקורי. אינטראקטיבי או <code class="ic">headless</code> לסקריפטים ו־CI.</p></div>
+  <div class="card"><div class="c-ico">&lt;/&gt;</div><h4>IDE</h4><p>תוסף ל־VS Code / Cursor ופלאגין רשמי ל־JetBrains, עם diff מובנה.</p></div>
+  <div class="card"><div class="c-ico">▦</div><h4>Desktop / Web</h4><p>אפליקציית שולחן עבודה ו־<code class="ic">claude.ai/code</code> בדפדפן.</p></div>
+  <div class="card"><div class="c-ico">▤</div><h4>Mobile</h4><p>אפליקציית iOS — אפשר אפילו לנתב משימות אל אפליקציית הדסקטופ.</p></div>
+  <div class="card"><div class="c-ico">#</div><h4>Slack</h4><p>הפעלת הסוכן ישירות מתוך ערוצי הצוות.</p></div>
+  <div class="card"><div class="c-ico">⚙</div><h4>Agent SDK</h4><p>אותה תשתית בדיוק, כספרייה ל־Python/TypeScript לבניית סוכנים משלך.</p></div>
+</div>
+
+<h3>מדרג הסוכנים — מה נלמד</h3>
+<p>הלב של המדריך הוא <strong>מדרג בן שלוש רמות של תזמור סוכנים</strong>. ככל שעולים במדרג, גדל מקבילות העבודה — אבל גם העלות והמורכבות. השאלה המנחה תמיד תהיה אחת: <strong>כמה כל "עובד" צריך לדעת על השאר?</strong> למה המדרג הזה בכלל קיים, ומה העיקרון שמאחוריו — זה הנושא של הפרק הבא.</p>
+<div class="cards c3">
+  <div class="card"><div class="c-ico">1</div><h4>Subagents</h4><p>סוכני־משנה עם חלון הקשר נפרד, בתוך סשן אחד. אידאלי לבידוד משימות ולחיפוש מקבילי. <span class="badge ver">פרק 07</span></p></div>
+  <div class="card"><div class="c-ico">2</div><h4>Agent Teams</h4><p>כמה סשנים מלאים שמשתפים פעולה — ראש צוות, חברי צוות ותיבת דואר ביניהם. <span class="badge exp">ניסיוני</span> <span class="badge ver">פרק 11</span></p></div>
+  <div class="card"><div class="c-ico">3</div><h4>Dynamic Workflows</h4><p>סקריפט תזמור שמריץ עד 1,000 סוכנים במקביל, עם אימות אדוורסרי. <span class="badge new">2026</span> <span class="badge ver">פרק 12</span></p></div>
+</div>
+
+<div class="callout note"><div class="co-head"><span class="ico">📌</span>איך לנווט במדריך</div>
+<p>הסרגל מימין מחולק לשלושה שלבים: <strong>יסודות</strong> (1–6), <strong>סוכני AI</strong> (7–12) ו־<strong>אוטומציה ומעשה</strong> (13–15). אפשר לחפש בכל התוכן בתיבת החיפוש (קיצור <kbd>/</kbd>), לסמן פרקים כהושלמו, וההתקדמות נשמרת אוטומטית בדפדפן. מומלץ לעבור לפי הסדר — כל פרק מניח את הקודם.</p></div>
+
+<div class="callout warn"><div class="co-head"><span class="ico">⚠️</span>על "מידע עדכני" בעולם שזז מהר</div>
+<p>Claude Code מתעדכן כמעט שבועית. כל מספרי הגרסאות, שמות המודלים ורמות ה־<code class="ic">effort</code> כאן הם תצלום־מצב מ־2 ביולי 2026. כשמשהו תלוי־גרסה — נסמן זאת. תמיד אפשר לאמת מול התיעוד הרשמי ב־<code class="ic">code.claude.com/docs</code>.</p></div>
+</section>
+
+<!-- ===== 02 WHY ===== -->
+<section class="doc-section" id="why" data-num="02" data-title="למה מרובה־סוכנים?" data-kicker="העיקרון המארגן" data-phase="יסודות">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">02</span> העיקרון המארגן</div>
+<h2 class="sec-title">למה בכלל נוצרו מערכות מרובות סוכנים?</h2></div>
+
+<p class="lead-p">רבים ניגשים ל־Claude Code מתוך מחשבה שמדובר בכלי לכתיבת קוד, ולכן קל לראות רכיבים כמו Subagents, Skills ו־Workflows כאוסף פיצ'רים. בפועל, <strong>הם אינם פיצ'רים — הם פתרון לבעיה יסודית הרבה יותר</strong>. הפרק הזה לא עוסק ב"איך" אלא ב"למה": מי שמבין את העיקרון הזה יקרא את שאר המדריך אחרת.</p>
+
+<h3>הבעיה: מורכבות</h3>
+<p>ככל שהמשימה גדלה, כך קשה יותר ל־Agent יחיד:</p>
+<ul>
+<li>להחזיק את כל ההקשר בזיכרון.</li>
+<li>להבין מספר תחומים במקביל.</li>
+<li>לשמור על עקביות לאורך זמן.</li>
+<li>לבצע כמה תהליכים בו־זמנית.</li>
+<li>לבקר את עצמו תוך כדי ביצוע.</li>
+</ul>
+<p>וזו הנקודה המהותית: גם אם חלון ההקשר גדול מאוד, עצם ריכוז כל האחריות במקום אחד הופך את החשיבה לפחות יעילה. זה אינו רק אילוץ טכני של מספר טוקנים, אלא <strong>מגבלה כללית של ניהול מורכבות</strong> — ובפרק 05 נפגוש אותה גם במספרים: "ריקבון הקשר", שבו האיכות דועכת הרבה לפני שהחלון מתמלא.</p>
+
+<h3>הפתרון: חלוקת אחריות</h3>
+<p>במקום לבנות Agent אחד שעושה הכול, Claude Code מאמץ עיקרון שקיים כמעט בכל מערכת מורכבת:</p>
+<div class="callout note"><div class="co-head"><span class="ico">◆</span>העיקרון</div>
+<p><strong>חלוקת העבודה לרכיבים מתמחים, עם מנגנוני תיאום ביניהם.</strong> כל רכיב אחראי על תחום מוגדר; המערכת דואגת שכל אחד יתמקד במשימה שלו, ומנגנוני ה־Workflow והתיאום מחברים את כל התוצאות לפתרון אחד.</p></div>
+<div class="cards c3">
+<div class="card"><div class="c-ico">🔍</div><h4>חוקר</h4><p>ממפה את הקוד ואוסף הקשר — בלי לזהם את החלון הראשי.</p></div>
+<div class="card"><div class="c-ico">📐</div><h4>מתכנן</h4><p>מנסח אסטרטגיה לפני שמישהו נוגע בקוד.</p></div>
+<div class="card"><div class="c-ico">⌨</div><h4>מפתח</h4><p>מבצע את השינוי בפועל, בתחום מוגדר.</p></div>
+<div class="card"><div class="c-ico">🧪</div><h4>בודק</h4><p>מריץ טסטים ומאמת שהעבודה באמת עובדת.</p></div>
+<div class="card"><div class="c-ico">👁</div><h4>מבקר</h4><p>סוקר בהקשר נקי — בלי ההטיה של מי שכתב.</p></div>
+</div>
+
+<h3>תזמור דינמי: התהליך נבנה לפי הבעיה</h3>
+<p>כאשר המשימה פשוטה — Agent יחיד מספיק, וזו גם הבחירה הנכונה. כשהיא מורכבת, המערכת מחליטה באופן דינמי: אילו מומחים דרושים, באיזה סדר יעבדו, אילו תוצאות יעברו לביקורת, וכיצד לאחד את התוצרים. במקום להגדיר מראש תהליך קשיח, <strong>התהליך עצמו נבנה בהתאם לבעיה</strong>. את העיקרון הזה נפגוש בשלוש רמות הולכות ומתרחבות — subagent בודד, צוות סוכנים, ולבסוף הפיצ'ר שנושא את השם הזה ממש: Dynamic Workflows (פרק 12), שבו Claude כותב בעצמו את קוד התזמור.</p>
+
+<h3>אותו עיקרון, בכל מערכת מורכבת</h3>
+<p>הרעיון אינו ייחודי ל־Claude Code. בכל מערכת מורכבת — גוף האדם, חברה, ארגון או מערכת הפעלה — מגיע שלב שבו רכיב יחיד כבר אינו מסוגל להתמודד עם כל המורכבות. בשלב הזה נוצרת מערכת: חלוקת אחריות, התמחות, תיאום, משוב ובקרה. זהו עיקרון ותיק בתורת המערכות — הרברט סיימון תיאר אותו כבר ב־1962 במאמר "The Architecture of Complexity": מערכות מורכבות ששורדות בנויות כמעט תמיד כהיררכיה של תת־מערכות כמעט־עצמאיות. Claude Code מיישם את אותו עיקרון על פתרון בעיות באמצעות AI.</p>
+<div class="callout note"><div class="co-head"><span class="ico">🎯</span>המשפט שכדאי לקחת מהפרק</div>
+<p><strong>המטרה של Subagents אינה להוסיף מורכבות, אלא להפחית אותה — באמצעות ארגון נכון של העבודה.</strong> כשהמורכבות גדלה, היתרון כבר לא נובע מיכולת גבוהה יותר של רכיב בודד, אלא מהאופן שבו מארגנים את שיתוף הפעולה בין הרכיבים.</p></div>
+
+<h3>המפה: מהעיקרון אל הפיצ'רים</h3>
+<p>אם העיקרון ברור, שאר המדריך מפסיק להיראות כמו רשימת יכולות — והופך למערכת אחת. כך מתמפים הרכיבים שנלמד:</p>
+<div class="tbl-wrap"><table>
+<thead><tr><th>העיקרון המערכתי</th><th>המימוש ב-Claude Code</th><th>פרק</th></tr></thead>
+<tbody>
+<tr><td>חלוקת אחריות ובידוד הקשר</td><td>Subagents</td><td>07</td></tr>
+<tr><td>התמחות — "איך" מבצעים</td><td>Skills</td><td>08</td></tr>
+<tr><td>חיבור לעולם החיצון</td><td>MCP</td><td>09</td></tr>
+<tr><td>משוב ובקרה נאכפת</td><td>Hooks</td><td>10</td></tr>
+<tr><td>תיאום בין עמיתים</td><td>Agent Teams</td><td>11</td></tr>
+<tr><td>תזמור בקנה מידה + אימות</td><td>Dynamic Workflows</td><td>12</td></tr>
+</tbody></table></div>
+
+<div class="callout warn"><div class="co-head"><span class="ico">⚖️</span>ולצד זה — לחלוקה יש מחיר</div>
+<p>כל פיצול מוסיף עלות תיאום: טוקנים, זמן, ונקודות חדשות שבהן מידע יכול ללכת לאיבוד בדרך. לכן העיקרון עובד לשני הכיוונים — <strong>כשהמשימה לא באמת מתפצלת, סוכן יחיד מנצח מערכת שלמה</strong>. זו הסיבה שהמדריך יחזור שוב ושוב על הכלל "רדו במדרג, לא עלו" (ובפרק 07 נראה גם את המספרים: מרובה־סוכנים צורך פי ~15 טוקנים).</p></div>
+
+<div class="usecase"><div class="uc-head"><span>🧭</span>הערת מסגרת: לא רק כלי — דרך חשיבה</div>
+<div class="uc-body"><p>Claude Code אינו מלמד אותנו רק כיצד לבנות סוכנים. הוא מלמד דרך חדשה לחשוב על פתרון בעיות: לא לנסות ליצור רכיב אחד שיודע לעשות הכול, אלא לתכנן מערכת שבה כל רכיב עושה מעט — אך יחד הם מסוגלים לפתור בעיות מורכבות בהרבה.</p></div></div>
+
+<div class="exercise"><div class="ex-head"><span>🛠️</span>תרגול מחשבתי</div>
+<ol><li>קח משימה מורכבת אמיתית מהעבודה שלך ("להוסיף מערכת הרשאות", "לשדרג framework"). פרק אותה לתפקידים: מה החוקר צריך להחזיר? מה המתכנן מקבל ממנו? מי מבקר את מי?</li>
+<li>שאל על כל חלק: כמה הוא צריך לדעת על השאר? החלקים העצמאיים הם המועמדים לבידוד — ובהם ניפגש שוב בפרק 07.</li></ol></div>
+</section>
+
+<!-- ===== 03 SETUP ===== -->
+<section class="doc-section" id="setup" data-num="03" data-title="התקנה ובחירת מודל" data-kicker="התקנה והגדרה" data-phase="יסודות">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">03</span> התקנה והגדרה</div>
+<h2 class="sec-title">התקנה, הרשאות ובחירת מודל</h2></div>
+
+<p class="lead-p">ב־2026 דרך ההתקנה המומלצת היא <strong>ה־Native Installer</strong> — בינארי עצמאי שמתעדכן לבד ו<strong>אינו דורש Node.js כלל</strong>. שיטת ה־npm עדיין נתמכת אבל נחשבת כיום למורשת.</p>
+
+<h3>התקנה (השיטה המומלצת)</h3>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">bash · macOS / Linux</span><span class="cspace"></span></div>
+<pre><code class="lang-bash">curl -fsSL https://claude.ai/install.sh | bash</code></pre></div>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">PowerShell · Windows</span><span class="cspace"></span></div>
+<pre><code class="lang-bash">irm https://claude.ai/install.ps1 | iex</code></pre></div>
+<p>חלופות לגיטימיות: <code class="ic">brew install --cask claude-code</code> (macOS) או WinGet (Windows) — אך הן דורשות עדכון ידני, בעוד שה־installer מתעדכן אוטומטית ברקע.</p>
+
+<div class="callout warn"><div class="co-head"><span class="ico">⚠️</span>שיטת ה־npm <span class="badge dep">מורשת</span></div>
+<p><code class="ic">npm install -g @anthropic-ai/claude-code</code> עדיין עובד ודורש Node.js 18+. אם אתה כבר עליה — אפשר לעבור: <code class="ic">npm uninstall -g @anthropic-ai/claude-code</code> ואז להריץ את ה־installer (ההגדרות ב־<code class="ic">~/.claude</code> נשמרות). <strong>לעולם אל תתקין עם <code class="ic">sudo</code></strong> — זו טעות נפוצה שגורמת לבעיות הרשאות. השתמש ב־nvm במקום.</p></div>
+
+<h3>אימות והתחברות</h3>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">bash</span><span class="cspace"></span></div>
+<pre><code class="lang-bash"># בדיקת גרסה ואבחון בעיות התקנה
+claude --version
+claude doctor
+
+# הפעלה ראשונה — תיפתח התחברות בדפדפן (Pro / Max / Team / Enterprise)
+claude</code></pre></div>
+<p>לעבודה ב־CI או הרצה תכנותית מגדירים מפתח: <code class="ic">export ANTHROPIC_API_KEY="sk-ant-…"</code>. נרחיב על כך בפרק האוטומציה — שם זה גם קריטי לחיובים.</p>
+
+<h3>המודלים הזמינים (יולי 2026)</h3>
+<p>משפחת המודלים מתפרסת כעת על <strong>ארבע מחלקות</strong> — Haiku, Sonnet, Opus, ומעליהן <strong>Mythos</strong>. כלל האצבע של Anthropic: <strong>Fable</strong> לעבודה אסינכרונית ארוכה שהמודל מנהל לבד; <strong>Opus</strong> לשיתוף פעולה סינכרוני על בעיות קשות; <strong>Sonnet 5</strong> לכל השאר:</p>
+<div class="tbl-wrap"><table>
+<thead><tr><th>מודל</th><th>מזהה API</th><th>מתי להשתמש</th><th>תמחור API (קלט/פלט ל-1M)</th></tr></thead>
+<tbody>
+<tr><td><strong>Fable 5</strong> <span class="badge mythos">Mythos</span></td><td><code>claude-fable-5</code></td><td>ריצות אוטונומיות של שעות–ימים, מיגרציות ענק, בעיות עמומות מרובות־סשנים. הקשר 1M, פלט עד 128K.</td><td>$10 / $50</td></tr>
+<tr><td><strong>Opus 4.8</strong></td><td><code>claude-opus-4-8</code></td><td>הדגל לעבודה סינכרונית מורכבת: תכנון, תזמור סוכנים, באגים קשים.</td><td>$5 / $25</td></tr>
+<tr><td><strong>Sonnet 5</strong> <span class="badge new">ברירת המחדל</span></td><td><code>claude-sonnet-5</code></td><td>סוס העבודה החדש: כמעט־Opus במשימות אגנטיות, הקשר 1M נטיבי, בשבריר מהמחיר.</td><td>$2 / $10 עד 31.8, אח"כ $3 / $15</td></tr>
+<tr><td><strong>Sonnet 4.6</strong></td><td><code>claude-sonnet-4-6</code></td><td>הדור הקודם. רלוונטי בעיקר אם אתם תלויים ב־Priority Tier, שאינו זמין ב־Sonnet 5.</td><td>$3 / $15</td></tr>
+<tr><td><strong>Haiku 4.5</strong></td><td><code>claude-haiku-4-5-20251001</code></td><td>מהיר וזול. חיפוש בקודבייס, משימות subagent פשוטות.</td><td>$1 / $5</td></tr>
+</tbody></table></div>
+<div class="flag-line"><span>ℹ️</span><div><b>שימו לב:</b> ב־Bedrock / Vertex / Foundry, כינויים כמו <code class="ic">opus</code> עלולים להתרגם לגרסאות ישנות יותר אלא אם מצמידים מזהה מדויק. תוכנית <strong>Pro</strong> אינה כוללת גישה ל־Opus.</div></div>
+
+<div class="callout warn"><div class="co-head"><span class="ico">⚗️</span>Fable 5 — כללי משחק שונים <span class="badge ver">v2.1.170+</span></div>
+<p><strong>בחירה:</strong> <code class="ic">/model fable</code>. Fable אינו ברירת מחדל באף תוכנית, ואין כינוי <code class="ic">fableplan</code> — <code class="ic">opusplan</code> נשאר הכינוי ההיברידי היחיד.</p>
+<p><strong>חיוב:</strong> עד 7 ביולי Fable כלול בתוכניות Pro / Max / Team (ו־Enterprise נבחרות) עד 50% ממכסת השימוש השבועית; לאחר מכן — דרך <strong>usage credits</strong> בתעריפי API בלבד. גם בחלון הכלול הוא צורך מכסה בערך <strong>פי 2</strong> מ־Opus.</p>
+<p><strong>מסווגי בטיחות:</strong> בקשות בתחומי סייבר/ביולוגיה מנותבות אוטומטית ל־Opus 4.8 (עם הודעה בטרנסקריפט), והסשן נשאר על Opus עד שתריץ <code class="ic">/model fable</code> שוב — גם תוכן ב־CLAUDE.md או הגדרות MCP יכולים להפעיל זאת כבר בהודעה הראשונה. בנוסף, Fable מחייב שמירת נתונים של 30 יום.</p></div>
+
+<h3>בחירה והחלפה של מודל</h3>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">bash · 4 דרכים</span><span class="cspace"></span></div>
+<pre><code class="lang-bash"># בתוך הסשן
+/model sonnet
+/model opus
+/model fable
+
+# בהפעלה
+claude --model claude-sonnet-5
+
+# משתנה סביבה
+export ANTHROPIC_MODEL=claude-opus-4-8
+
+# קבוע, בהגדרות המשתמש
+# ~/.claude/settings.json  ->  { "model": "sonnet" }</code></pre></div>
+<p>כינוי שימושי: <code class="ic">opusplan</code> — משתמש ב־Opus עבור שלב התכנון, ויורד אוטומטית ל־Sonnet עבור הביצוע. כך מקבלים תכנון חכם בעלות סבירה. אפשר גם לקבע מודל לכל ה־subagents עם <code class="ic">CLAUDE_CODE_SUBAGENT_MODEL</code>.</p>
+
+<h3>רמות מאמץ (Effort) <span class="badge ver">Opus 4.7+ · Sonnet 5</span></h3>
+<p>פקודת <code class="ic">/effort</code> שולטת בכמה "מחשבה" Claude משקיע. ככל שגבוה יותר — חכם יותר אך איטי ויקר יותר:</p>
+<div class="pill-row">
+<span class="pill"><b>low</b></span><span class="pill"><b>medium</b></span>
+<span class="pill"><b>high</b> ← ברירת מחדל ב-Opus 4.8</span>
+<span class="pill"><b>xhigh</b></span><span class="pill"><b>max</b></span>
+<span class="pill"><b>ultracode</b> ← xhigh + תזמור Dynamic Workflows</span>
+</div>
+<p><span class="badge new">🆕</span> רמות המאמץ חלות כעת גם על <strong>Sonnet 5</strong>: ברמת xhigh הוא מתקרב לביצועי Opus 4.8 ברמות medium–high במבחני computer-use וחיפוש אגנטי — אבל בעלות דומה ואף גבוהה יותר, כך ש־Opus נשאר הבחירה הנכונה לחלק מהמשימות. עם השקת Sonnet 5 גם הועלו מגבלות הקצב ב־Claude Code כדי להכיל רמות effort גבוהות.</p>
+
+<div class="callout tip"><div class="co-head"><span class="ico">💡</span>טיפ פרקטי</div>
+<p>לעבודה יומיומית הישאר על <strong>Sonnet 5 (ברירת המחדל) עם effort בינוני</strong>. עלה ל־Opus 4.8 כשהמשימה באמת מורכבת (ארכיטקטורה, תזמור, באג עיקש), ושמור את <strong>Fable 5</strong> לריצות הארוכות והעמומות שבאמת מצדיקות תעריף כפול. זה יחסוך לך הרבה בעלות ובזמן, בלי לפגוע באיכות ברוב המקרים.</p></div>
+
+<div class="flag-line"><span>🧪</span><div><b>עוברים ל־Sonnet 5 ב־API / Agent SDK?</b> שלושה שינויים שוברים: adaptive thinking פעיל כברירת מחדל; <code class="ic">thinking</code> ידני עם budget_tokens הוסר (מחזיר 400); ופרמטרי דגימה (temperature וכו') שאינם ברירת־מחדל מחזירים 400. בנוסף, ה־tokenizer החדש מפיק כ־30% יותר טוקנים לאותו טקסט — קחו זאת בחשבון בתקציבי הקשר ועלות.</div></div>
+
+<div class="exercise"><div class="ex-head"><span>🛠️</span>תרגול</div>
+<ol><li>התקן את Claude Code עם ה־installer והרץ <code class="ic">claude doctor</code>. ודא שאין אזהרות.</li>
+<li>פתח פרויקט קיים, הרץ <code class="ic">claude</code>, וב־<code class="ic">/model</code> החלף בין Sonnet ל־Opus. שים לב להבדל במהירות התגובה הראשונה.</li>
+<li>צור <code class="ic">~/.claude/settings.json</code> והגדר בו <code class="ic">"model": "sonnet"</code> כברירת מחדל.</li></ol></div>
+</section>
+
+<!-- ===== 04 LOOP ===== -->
+<section class="doc-section" id="loop" data-num="04" data-title="הלולאה האגנטית" data-kicker="המודל המנטלי" data-phase="יסודות">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">04</span> המודל המנטלי</div>
+<h2 class="sec-title">הלולאה האגנטית ושליטה בה</h2></div>
+
+<p class="lead-p">לפני שצוללים לפיצ'רים, חשוב להפנים את <strong>הלולאה</strong> שמניעה כל פעולה של Claude Code. ברגע שמבינים אותה, כל שאר הכלים (subagents, hooks, plan mode) הופכים לדרכים לעצב או לשלוט בלולאה הזו.</p>
+
+<h3>ארבעת השלבים</h3>
+<div class="cards c2">
+  <div class="card"><div class="c-ico">1</div><h4>איסוף הקשר</h4><p>Claude קורא קבצים, מחפש בקוד (grep/glob), בודק git, ומריץ פקודות כדי להבין את המצב — לרוב בעזרת הסוכן המובנה Explore.</p></div>
+  <div class="card"><div class="c-ico">2</div><h4>תכנון</h4><p>הסוכן מנסח אסטרטגיה. ב־Plan Mode הוא מציג לך תוכנית מלאה <em>לפני</em> שנוגע בקוד.</p></div>
+  <div class="card"><div class="c-ico">3</div><h4>פעולה</h4><p>עריכת קבצים, הרצת פקודות, התקנת חבילות — כל פעולה כפופה למצב ההרשאות שהגדרת.</p></div>
+  <div class="card"><div class="c-ico">4</div><h4>אימות</h4><p>הרצת טסטים/לינטר, קריאת הפלט, ותיקון עצמי. הלולאה חוזרת עד שהיעד מושג.</p></div>
+</div>
+<p>תפקידך כמנהל הוא בעיקר בשלבים 2 ו־4: לאשר תוכנית טובה, ולוודא שהאימות אמיתי (ולא "אמרתי שעובד").</p>
+
+<h3>מצבי הרשאה — כמה חבל לתת</h3>
+<p>מצב ההרשאה קובע כמה אוטונומיה יש לסוכן. זו ההחלטה הבטיחותית החשובה ביותר שלך:</p>
+<div class="tbl-wrap"><table>
+<thead><tr><th>מצב</th><th>התנהגות</th><th>מתי</th></tr></thead>
+<tbody>
+<tr><td><code>default</code></td><td>מבקש אישור לכל פעולה שעלולה לשנות/להריץ.</td><td>ברירת מחדל, עבודה רגילה.</td></tr>
+<tr><td><code>acceptEdits</code></td><td>מאשר עריכות קבצים אוטומטית, עוצר על פקודות.</td><td>כשאתה סומך על כיוון העבודה.</td></tr>
+<tr><td><code>plan</code></td><td>קריאה בלבד — חוקר ומציע תוכנית, לא משנה כלום.</td><td>תכנון, חקירה, code review.</td></tr>
+<tr><td><code>auto</code> <span class="badge exp">תצוגה מקדימה</span></td><td>מסווג AI מטפל בבקשות ההרשאה: מאשר פעולות שגרתיות ועוצר על מסוכנות. נתמכים חוקי deny קשיחים שגוברים תמיד.</td><td>שביל ביניים בין אישור־הכל ל־YOLO.</td></tr>
+<tr><td><code>bypassPermissions</code></td><td>"YOLO" — לא מבקש כלום.</td><td><strong>רק בסביבה מבודדת/sandbox.</strong></td></tr>
+</tbody></table></div>
+
+<div class="callout danger"><div class="co-head"><span class="ico">🛑</span>על מצב YOLO</div>
+<p>הדגל <code class="ic">--dangerously-skip-permissions</code> נותן לסוכן לרוץ ללא בלמים. הוא שימושי בקונטיינר חד־פעמי, אבל <strong>מסוכן על מכונת העבודה שלך</strong>. תמיד עשה commit או גיבוי לפני שאתה נותן לסוכן גישה — תועד מקרה שבו סוכן מחק קבצי אודיו ייחודיים והחליף אותם ביצירות AI.</p></div>
+
+<h3>Plan Mode — הכלי הכי חשוב למתחילים מתקדמים</h3>
+<p>לחיצה על <kbd>Shift</kbd>+<kbd>Tab</kbd> (או <code class="ic">/plan</code>) מכניסה למצב תכנון: Claude חוקר את הקוד <strong>בקריאה בלבד</strong> ומציג תוכנית מפורטת. אתה יכול לערוך אותה בעורך לפני אישור. רק אחרי שאתה מאשר — הוא מתחיל לעבוד.</p>
+<div class="callout tip"><div class="co-head"><span class="ico">💡</span>"תכנן לפני שתבצע" — הרגל מספר 1</div>
+<p>זה אולי הטיפ היחיד שמשנה הכי הרבה. תכנון מראש הופך את הסוכן לצפוי ובטוח להרצה ארוכה ללא פיקוח צמוד. צוותים מדווחים שזה ההבדל בין "כלי שעוזר" ל"כלי שאפשר להשאיר לרוץ".</p></div>
+
+<h3>גלגל אחורה: <code class="ic" style="font-size:.85em">/rewind</code></h3>
+<p>טעה? לחיצה כפולה על <kbd>Esc</kbd> (או <code class="ic">/rewind</code>) מגלגלת את השיחה ואת הקבצים לנקודת checkpoint קודמת. <span class="badge new">🆕</span> מאז יוני, <code class="ic">/rewind</code> יודע לשחזר גם שיחה מלפני <code class="ic">/clear</code>, ותפריט ה־Rewind מציע "סכם עד כאן" לדחיסת הקשר מוקדמת. זו רשת ביטחון שמאפשרת לנסות גישות בלי לפחד.</p>
+
+<div class="exercise"><div class="ex-head"><span>🛠️</span>תרגול</div>
+<ol><li>בקש מ־Claude משימה בינונית (למשל "הוסף ולידציה לטופס ההרשמה"), אבל קודם הכנס ל־Plan Mode וקרא את התוכנית.</li>
+<li>ערוך את התוכנית — הוסף דרישה שהוא פספס — ואז אשר.</li>
+<li>אחרי שסיים, נסה <code class="ic">/rewind</code> וחזור למצב לפני העריכה.</li></ol></div>
+</section>
+
+<!-- ===== 05 CONTEXT ===== -->
+<section class="doc-section" id="context" data-num="05" data-title="הנדסת הקשר וזיכרון" data-kicker="הנדסת הקשר" data-phase="יסודות">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">05</span> הנדסת הקשר</div>
+<h2 class="sec-title">הנדסת הקשר וזיכרון</h2></div>
+
+<p class="lead-p"><strong>זה הפרק החשוב ביותר במדריך.</strong> איכות העבודה של Claude Code נקבעת יותר מכל דבר אחר על ידי <strong>מה נמצא בחלון ההקשר</strong>. כל פיצ'ר אגנטי שנלמד בהמשך — subagents, workflows — קיים בעיקר כדי לנהל את ההקשר נכון.</p>
+
+<h3>הבעיה: "ריקבון הקשר" (Context Rot)</h3>
+<p>לחלון ההקשר יש גבול — וביולי 2026 הוא זז: <strong>Sonnet 5</strong>, ברירת המחדל החדשה, מגיע עם <strong>1M טוקנים נטיבית</strong> בכל התוכניות (במודלים אחרים: 200K בסטנדרט, 1M לפי תוכנית ומודל). אבל הנה ההפתעה: ככל שההקשר מתמלא, <strong>האיכות יורדת</strong> עוד הרבה לפני שמגיעים לגבול. הסוכן מתבלבל, שוכח החלטות, ומתחיל לסתור את עצמו. משתמשים מנוסים שומרים על ניצול נמוך:</p>
+<div class="callout note"><div class="co-head"><span class="ico">📌</span>כלל ה־40% / 60%</div>
+<p>שאף לשמור את ההקשר <strong>מתחת ל־40%</strong> ניצול במהלך עבודה אקטיבית, וסגור משימה עד <strong>60%</strong>. מעבר לזה — האיכות מתחילה לדעוך. פקודת <code class="ic">/context</code> מציגה פילוח טוקנים מדויק.</p></div>
+<div class="flag-line"><span>🆕</span><div><b>הערת השוואה:</b> ה־tokenizer של Sonnet 5 מפיק כ־30% יותר טוקנים לאותו טקסט לעומת קודמיו — אל תשוו מספרי <code class="ic">/context</code> בין מודלים אחד־לאחד. כלל ה־40% נמדד באחוזים, ולכן נשאר תקף כמו שהוא.</div></div>
+
+<h3>שלוש פקודות שאתה חייב להכיר</h3>
+<div class="tbl-wrap"><table>
+<thead><tr><th>פקודה</th><th>מה היא עושה</th><th>מתי</th></tr></thead>
+<tbody>
+<tr><td><code>/context</code></td><td>מציגה כמה טוקנים תופסים מה (CLAUDE.md, כלים, שיחה).</td><td>כשמרגישים שהסוכן מאבד פוקוס.</td></tr>
+<tr><td><code>/compact</code></td><td>מסכמת את ההיסטוריה לתקציר, ומפנה מקום תוך שמירת הרצף.</td><td>כל 20–30 דק' עבודה, או ב־60%.</td></tr>
+<tr><td><code>/clear</code></td><td>מאפסת לחלוטין את חלון ההקשר.</td><td>כשמתחילים <strong>משימה חדשה ולא קשורה</strong>.</td></tr>
+</tbody></table></div>
+
+<div class="callout warn"><div class="co-head"><span class="ico">⚠️</span>הטעות מספר 1: "סשן מטבח" (Kitchen Sink)</div>
+<p>לערבב משימות לא קשורות באותו סשן מזהם את ההקשר ומוריד איכות. <strong>תיקנת באג? עברת לפיצ'ר חדש? עשה <code class="ic">/clear</code>.</strong> זול, מהיר, ומחזיר את הסוכן לחדות מלאה. בנוסף — אם ניסית לתקן כיוון שגוי פעמיים ונכשלת, אל תערום תיקונים: <code class="ic">/clear</code> או <code class="ic">/rewind</code>, ונסח מחדש את הבקשה הראשונית.</p></div>
+
+<h3>CLAUDE.md — הזיכרון הקבוע של הפרויקט</h3>
+<p>קובץ <code class="ic">CLAUDE.md</code> נטען אוטומטית בתחילת כל סשן ושורד <code class="ic">/compact</code>. כאן מתעדים את מה שהסוכן חייב לדעת על הפרויקט: מוסכמות קוד, פקודות הרצה, ארכיטקטורה, ו"אל תעשה". יש כמה רמות:</p>
+<ul>
+<li><strong>שורש הפרויקט</strong> — <code class="ic">./CLAUDE.md</code>, מוכנס מחדש גם אחרי compaction.</li>
+<li><strong>רמת המשתמש</strong> — <code class="ic">~/.claude/CLAUDE.md</code>, מוסכמות אישיות לכל הפרויקטים.</li>
+<li><strong>תיקיות מקוננות</strong> — CLAUDE.md בתת־תיקייה נטען כשעובדים בה.</li>
+</ul>
+<p>צור שלד התחלתי בפקודה <code class="ic">/init</code>. הנה דוגמה תמציתית וטובה:</p>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">markdown · CLAUDE.md</span><span class="cspace"></span></div>
+<pre><code class="lang-markdown"># הפרויקט: API לניהול הזמנות
+
+## פקודות
+- התקנה: `pnpm install`
+- בדיקות: `pnpm test` (חובה להריץ לפני סיום משימה)
+- לינט: `pnpm lint --fix`
+
+## מוסכמות
+- TypeScript בלבד, strict mode. אין `any`.
+- בדיקות עם Vitest, ליד הקובץ שהן בודקות.
+- שמות קבצים ב-kebab-case.
+
+## ארכיטקטורה
+- `src/routes` — הגדרות endpoint
+- `src/services` — לוגיקה עסקית (כאן לוגיקה, לא ב-routes)
+- `src/db` — שכבת Prisma
+
+## אל תעשה
+- אל תוסיף תלויות חדשות בלי לשאול.
+- השתמש בגישה הפשוטה ביותר; אל תוסיף אבסטרקציות לא מבוקשות.</code></pre></div>
+
+<div class="callout warn"><div class="co-head"><span class="ico">⚠️</span>אל תנפח את ה־CLAUDE.md</div>
+<p>הקובץ הזה עולה טוקנים <strong>בכל סשן מחדש</strong>. שמור אותו עובדתי וקצר (כ־200 שורות לכל היותר). הסעיף "אל תעשה" עם "השתמש בגישה הפשוטה ביותר" פותר טעות נפוצה נוספת — Claude נוטה להוסיף אבסטרקציות ומורכבות שלא ביקשת.</p></div>
+
+<h3>זיכרון אוטומטי</h3>
+<p>מעבר ל־CLAUDE.md, Claude כותב לעצמו <strong>הערות זיכרון</strong> מתוך התיקונים שלך — ולומד לאורך זמן. אפשר לעיין ולערוך אותן עם <code class="ic">/memory</code>. subagent יכול לקבל זיכרון משלו דרך השדה <code class="ic">memory</code> (נראה בפרק 07).</p>
+
+<div class="exercise"><div class="ex-head"><span>🛠️</span>תרגול</div>
+<ol><li>בפרויקט קיים הרץ <code class="ic">/init</code> וערוך את ה־CLAUDE.md שנוצר — הוסף את פקודות הטסט והלינט האמיתיות.</li>
+<li>במהלך עבודה, הרץ <code class="ic">/context</code> ובדוק מה תופס הכי הרבה טוקנים.</li>
+<li>תרגל את ההרגל: בסיום משימה — <code class="ic">/clear</code> לפני המשימה הבאה.</li></ol></div>
+</section>
+
+<!-- ===== 06 SINGLE ===== -->
+<section class="doc-section" id="single" data-num="06" data-title="סוכן יחיד: Plan + TDD" data-kicker="זרימות עבודה" data-phase="יסודות">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">06</span> זרימות עבודה</div>
+<h2 class="sec-title">עבודה עם סוכן יחיד: דפוסים שעובדים</h2></div>
+
+<p class="lead-p">לפני שמגיעים לסוכנים מרובים — חשוב לשלוט בעבודה עם סוכן <strong>יחיד</strong>. רוב המשימות היומיומיות לא צריכות תזמור מורכב; הן צריכות פרומפט טוב, תכנון, ואימות אמיתי.</p>
+
+<h3>אנטומיה של פרומפט טוב</h3>
+<p>הבדל מרכזי בין משתמשים מתחילים למנוסים הוא <strong>ספציפיות</strong>. במקום "תקן את הבאג", תן הקשר ומטרה:</p>
+<div class="cards c2">
+<div class="card"><div class="c-ico">✗</div><h4>חלש</h4><p>"שפר את ביצועי העמוד."</p></div>
+<div class="card"><div class="c-ico">✓</div><h4>חזק</h4><p>"עמוד <code class="ic">/dashboard</code> נטען לאט. בדוק את הקריאות ל־API ב־<code class="ic">useDashboard.ts</code>, אתר N+1, ותקן. הרץ את הטסטים לפני סיום."</p></div>
+</div>
+
+<h3>דפוס Test-Driven Development</h3>
+<p>אחד הדפוסים החזקים ביותר הוא <strong>Writer/Reviewer</strong>: סוכן אחד כותב טסטים שנכשלים, ואז כותב קוד שמעביר אותם. עוד יותר חזק — לתת ל<strong>הקשר נקי</strong> לבקר את הקוד, כי הוא לא מוטה לטובת קוד שהרגע כתב בעצמו (נחזור לזה בפרק ה־subagents).</p>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">prompt · TDD</span><span class="cspace"></span></div>
+<pre><code class="lang-text">תכתוב קודם טסטים עבור הפונקציה calculateShipping לפי הדרישות
+שבקובץ spec.md. הרץ אותם וודא שהם נכשלים (אין עדיין מימוש).
+אל תכתוב את המימוש עדיין — רק את הטסטים. אחרי שאאשר, נמשיך.</code></pre></div>
+<div class="callout tip"><div class="co-head"><span class="ico">💡</span>למה לעצור באמצע?</div>
+<p>בקשה לעצור אחרי הטסטים ("אחרי שאאשר") נותנת לך לבדוק שהטסטים נכונים <em>לפני</em> שהסוכן כותב קוד שמתאים את עצמו אליהם. זה מונע את המלכודת של "הטסט עבר כי הסוכן כתב אותו רופף".</p></div>
+
+<h3>פקודות נטויות (Slash Commands) שכדאי להכיר</h3>
+<div class="tbl-wrap"><table>
+<thead><tr><th>פקודה</th><th>תפקיד</th></tr></thead>
+<tbody>
+<tr><td><code>/init</code></td><td>יצירת CLAUDE.md התחלתי לפרויקט.</td></tr>
+<tr><td><code>/plan</code></td><td>כניסה ל־Plan Mode (קריאה בלבד + תוכנית).</td></tr>
+<tr><td><code>/agents</code></td><td>יצירה וניהול של subagents.</td></tr>
+<tr><td><code>/review</code> · <code>/code-review</code></td><td>סקירת קוד של השינויים האחרונים.</td></tr>
+<tr><td><code>/mcp</code></td><td>סטטוס ואימות (OAuth) של שרתי MCP.</td></tr>
+<tr><td><code>/usage</code></td><td>מעקב צריכה ועלות (<code>/cost</code> ו־<code>/stats</code> אוחדו לתוכה; שניהם עדיין עובדים כקיצורים).</td></tr>
+<tr><td><code>/goal</code> <span class="badge new">🆕</span></td><td>מגדיר תנאי סיום — הסוכן ממשיך לעבוד עד שהתנאי מתקיים.</td></tr>
+<tr><td><code>/ultrareview</code> <span class="badge exp">ענן</span></td><td>צי סוכני ציד־באגים שרץ בענן ומחזיר ממצאים ל־CLI.</td></tr>
+<tr><td><code>/recap</code></td><td>סיכום "מה קרה" כשחוזרים לסשן פתוח.</td></tr>
+<tr><td><code>/context</code> · <code>/compact</code> · <code>/clear</code></td><td>ניהול חלון ההקשר.</td></tr>
+<tr><td><code>/rewind</code></td><td>גלגול אחורה לנקודת checkpoint.</td></tr>
+<tr><td><code>/doctor</code></td><td>אבחון בעיות התקנה והגדרה.</td></tr>
+</tbody></table></div>
+
+<h3>פקודות מותאמות אישית</h3>
+<p>אפשר ליצור פקודות משלך — למשל <code class="ic">/deploy-check</code> שמריץ רצף בדיקות קבוע. ב־2026 <strong>הפקודות המותאמות התמזגו לתוך Skills</strong>: הפורמט המומלץ הוא <code class="ic">.claude/skills/&lt;name&gt;/SKILL.md</code> (נלמד בפרק 08). הפורמט הישן <code class="ic">.claude/commands/*.md</code> <span class="badge dep">מורשת</span> עדיין עובד, אך אם יש התנגשות בשם — ה־skill מנצח.</p>
+
+<div class="usecase"><div class="uc-head"><span>🎯</span>תרחיש אמיתי: פיתוח פיצ'ר מקצה לקצה</div>
+<div class="uc-body">
+<p><strong>1.</strong> <code class="ic">/clear</code> להתחלה נקייה. <strong>2.</strong> <kbd>Shift</kbd>+<kbd>Tab</kbd> ל־Plan Mode, ותיאור הפיצ'ר. <strong>3.</strong> קריאת התוכנית, עריכה, אישור. <strong>4.</strong> מעבר ל־<code class="ic">acceptEdits</code> ולתת לסוכן לעבוד. <strong>5.</strong> בסיום — <code class="ic">/review</code> בהקשר נקי לסקירה אובייקטיבית. <strong>6.</strong> commit.</p>
+</div></div>
+
+<div class="exercise"><div class="ex-head"><span>🛠️</span>תרגול</div>
+<ol><li>קח באג אמיתי וכתוב פרומפט "חזק" לפי האנטומיה למעלה — עם נתיב קובץ, תיאור הבעיה, ודרישה להריץ טסטים.</li>
+<li>תרגל את דפוס ה־TDD: בקש טסטים נכשלים תחילה, אשר, ואז מימוש.</li></ol></div>
+</section>
+
+<!-- ===== 07 SUBAGENTS ===== -->
+<section class="doc-section" id="subagents" data-num="07" data-title="Subagents — סוכני משנה" data-kicker="ליבת המערכת" data-phase="סוכני AI">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">07</span> ליבת המערכת · סוכני AI</div>
+<h2 class="sec-title">Subagents — סוכני המשנה</h2></div>
+
+<p class="lead-p"><strong>Subagent</strong> הוא עוזר מתמחה עם <strong>חלון הקשר משלו</strong>, פרומפט מערכת משלו, סט כלים והרשאות משלו. זו אבן הבניין הראשונה של עבודה אגנטית מרובת־סוכנים — וברוב המקרים גם המועילה ביותר. הרעיון המרכזי: <strong>בידוד הקשר</strong>. במקום למלא את חלון השיחה הראשי במאות שורות פלט, אתה שולח subagent "להביא רק את התשובה".</p>
+
+<h3>למה זה עוצמתי כל כך</h3>
+<ul>
+<li><strong>שמירה על ההקשר הראשי נקי</strong> — ה־subagent עושה את העבודה ה"מלוכלכת" (קריאת 30 קבצים), ומחזיר רק תקציר. ההקשר שלך נשאר חד.</li>
+<li><strong>התמחות</strong> — סוכן עם פרומפט מערכת ממוקד ("אתה מבקר אבטחה") מתפקד טוב יותר מסוכן כללי.</li>
+<li><strong>מקביליות</strong> — אפשר להריץ כמה subagents בו־זמנית.</li>
+<li><strong>הגבלת הרשאות</strong> — סוכן סקירה יכול לקבל גישת קריאה בלבד.</li>
+</ul>
+
+<h3>הסוכנים המובנים</h3>
+<div class="cards c3">
+<div class="card"><div class="c-ico">🔍</div><h4>Explore</h4><p>קריאה בלבד — חיפוש מהיר בקודבייס. <span class="badge new">🆕</span> מיוני 2026 יורש את מודל הסשן (עד Opus); קודם רץ על Haiku. מדלג על CLAUDE.md וגיט כדי להישאר זריז.</p></div>
+<div class="card"><div class="c-ico">📋</div><h4>Plan</h4><p>מחקר קריאה־בלבד שמזין את Plan Mode.</p></div>
+<div class="card"><div class="c-ico">⚙</div><h4>general-purpose</h4><p>כל הכלים זמינים — לסוכן רב־תכליתי.</p></div>
+</div>
+
+<h3>איפה מגדירים — ומי גובר</h3>
+<p>subagent הוא קובץ Markdown עם "כותרת" YAML. המיקומים, לפי סדר קדימות (גבוה גובר):</p>
+<ol>
+<li>הגדרות מנוהלות (managed) — קדימות עליונה.</li>
+<li>דגל <code class="ic">--agents</code> בשורת הפקודה (JSON).</li>
+<li><code class="ic">.claude/agents/</code> — ברמת הפרויקט (משותף לצוות דרך git).</li>
+<li><code class="ic">~/.claude/agents/</code> — ברמת המשתמש.</li>
+<li>סוכני פלאגין — קדימות נמוכה ביותר.</li>
+</ol>
+
+<h3>שדות ה־Frontmatter</h3>
+<div class="tbl-wrap"><table>
+<thead><tr><th>שדה</th><th>תפקיד</th></tr></thead>
+<tbody>
+<tr><td><code>name</code> <span class="badge ver">חובה</span></td><td>שם ייחודי לקריאה.</td></tr>
+<tr><td><code>description</code> <span class="badge ver">חובה</span></td><td>מתי להשתמש בסוכן. <strong>קריטי</strong> להפעלה אוטומטית.</td></tr>
+<tr><td><code>tools</code> / <code>disallowedTools</code></td><td>אילו כלים מותרים/אסורים.</td></tr>
+<tr><td><code>model</code></td><td><code>sonnet</code>/<code>opus</code>/<code>haiku</code>/<code>fable</code>/<code>inherit</code>.</td></tr>
+<tr><td><code>permissionMode</code></td><td>מצב הרשאות לסוכן (למשל קריאה בלבד).</td></tr>
+<tr><td><code>maxTurns</code></td><td>תקרת מספר הסבבים — בלם בטיחות לעלות.</td></tr>
+<tr><td><code>skills</code></td><td>טעינה מראש של תוכן Skills מלא.</td></tr>
+<tr><td><code>mcpServers</code></td><td>שרתי MCP ייעודיים לסוכן זה בלבד.</td></tr>
+<tr><td><code>memory</code></td><td><code>user</code>/<code>project</code>/<code>local</code> — זיכרון נפרד.</td></tr>
+<tr><td><code>isolation: worktree</code></td><td>הרצה ב־git worktree מבודד (פרק 14).</td></tr>
+<tr><td><code>effort</code> · <code>background</code> · <code>color</code></td><td>רמת מאמץ, הרצת רקע, וצבע בממשק.</td></tr>
+</tbody></table></div>
+
+<h3>דוגמה מלאה: סוכן סקירת קוד</h3>
+<p>צור עם <code class="ic">/agents</code> (מומלץ — יש גם "Generate with Claude" שמנסח טיוטה), או כתוב ידנית. שים את הקובץ ב־<code class="ic">.claude/agents/code-reviewer.md</code>:</p>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">.claude/agents/code-reviewer.md</span><span class="cspace"></span></div>
+<pre><code class="lang-yaml">---
+name: code-reviewer
+description: מומחה סקירת קוד. השתמש מיד אחרי כתיבה או שינוי של קוד. use proactively.
+tools: Read, Grep, Glob, Bash
+model: inherit
+---
+אתה מבקר/ת קוד בכיר/ה. כשאתה מופעל:
+1. הרץ git diff כדי לראות את השינויים האחרונים
+2. התמקד בקבצים ששונו בלבד
+3. החזר משוב לפי עדיפות: קריטי / אזהרות / הצעות
+
+דווח רק על בעיות נכונות, אבטחה, או אי-עמידה בדרישות.
+אל תמציא בעיות סגנון שוליות.</code></pre></div>
+
+<div class="callout warn"><div class="co-head"><span class="ico">⚠️</span>טעות נפוצה: מבקר ש"ממציא" בעיות</div>
+<p>סוכן שמונחה "מצא פערים" — <strong>ימצא פערים</strong>, גם אם אין. שים לב שבדוגמה הוספנו במפורש "דווח רק על בעיות נכונות... אל תמציא". בלי זה, סוכני סקירה נוטים להציף אותך בהערות חסרות ערך.</p></div>
+
+<h3>איך מפעילים subagent</h3>
+<ul>
+<li><strong>אוטומטית</strong> — לפי ה־<code class="ic">description</code>. הוסף "use proactively" כדי לעודד.</li>
+<li><strong>בשפה טבעית</strong> — "השתמש בסוכן test-runner כדי…".</li>
+<li><strong>אזכור</strong> — <code class="ic">@code-reviewer בדוק את השינוי</code>.</li>
+<li><strong>לכל הסשן</strong> — <code class="ic">claude --agent code-reviewer</code>.</li>
+</ul>
+
+<h3>שלוש מגבלות שחייבים להבין</h3>
+<div class="callout note"><div class="co-head"><span class="ico">📌</span>ההקשר מתחיל נקי</div>
+<p>subagent מתחיל עם הקשר <strong>מבודד ונקי</strong> — הוא לא רואה את השיחה שלך. ערוץ הקלט היחיד שלו הוא <strong>מחרוזת הפרומפט</strong> שנשלחת אליו. לכן חובה לכלול בו את כל מה שצריך: נתיבי קבצים, הודעות שגיאה, דרישות.</p></div>
+<div class="callout note"><div class="co-head"><span class="ico">📌</span>subagent לא יכול ליצור subagent</div>
+<p>סוכני משנה <strong>לא יכולים להפעיל סוכני משנה אחרים</strong>. אם צריך רצף — משרשרים אותם מהשיחה הראשית (פלט אחד → קלט הבא), או משתמשים ב־Skills. תזמור מסיבי באמת — זה כבר התחום של Dynamic Workflows (פרק 12).</p></div>
+<div class="flag-line"><span>ℹ️</span><div><b>הערת גרסה:</b> בגרסה 2.1.63 הכלי <code class="ic">Task</code> שונה ל־<code class="ic">Agent</code> (אזכורים ישנים עדיין עובדים כ־alias).</div></div>
+<div class="flag-line"><span>🆕</span><div><b>עדכוני יוני–יולי:</b> subagents שרצים ברקע מציפים כעת בקשות הרשאה בסשן הראשי (במקום דחייה אוטומטית), ו־subagents ודחיסת הקשר יורשים את הגדרות ה־extended thinking של הסשן.</div></div>
+
+<h3>מקביליות, עלות ו־Fork</h3>
+<p>אפשר להריץ כמה subagents במקביל (חוסם בקדמת המסך, או ברקע). כל אחד מחזיר רק את התקציר שלו. אבל זהירות: הרצת הרבה סוכנים שכל אחד מחזיר פלט מפורט — <strong>מציפה את ההקשר הראשי</strong>. אפשר להגביל אילו סוגי סוכנים ניתן להפעיל בעזרת תחביר כמו <code class="ic">Agent(worker, researcher)</code> בשדה <code class="ic">tools</code>.</p>
+<p><strong>Subagent מפוצל (Fork)</strong> <span class="badge ver">v2.1.161+</span> — בעזרת <code class="ic">/fork</code>, הסוכן <em>יורש את השיחה המלאה</em> במקום להתחיל נקי, ומשתמש מחדש ב־prompt cache של ההורה. זה זול יותר מ־subagent טרי כשצריך הרבה רקע.</p>
+
+<h3>המחקר שמאחורי הכל: דפוס Orchestrator-Worker</h3>
+<p>Anthropic פרסמה מחקר על מערכת המחקר מרובת־הסוכנים שלהם. הוא הבסיס התיאורטי לכל הפרק הזה — וגם לפרקים 11–12:</p>
+<div class="callout bench"><div class="co-head"><span class="ico">📊</span>נתונים רשמיים מ-Anthropic (הערכה פנימית)</div>
+<p>מערכת מרובת־סוכנים (Opus כראש, Sonnet כעובדים) <strong>עקפה סוכן יחיד ב־90.2%</strong> במבחן המחקר הפנימי שלהם.</p>
+<p>סוכנים צורכים פי ~4 טוקנים משיחה רגילה, ו<strong>מערכות מרובות־סוכנים — פי ~15</strong>. כדאי רק כשערך המשימה מצדיק את העלות.</p>
+<p>במבחן BrowseComp, <strong>צריכת הטוקנים לבדה הסבירה 80%</strong> מהשונות בביצועים — לפני בחירת המודל ומספר קריאות הכלים.</p></div>
+
+<h4>כללי תזמור מעשיים (שווה לשבץ בפרומפט של מתזמר)</h4>
+<ul>
+<li><strong>איסוף עובדה פשוט</strong> → סוכן 1, 3–10 קריאות כלים.</li>
+<li><strong>השוואה ישירה</strong> → 2–4 סוכנים, 10–15 קריאות כל אחד.</li>
+<li><strong>מחקר מורכב</strong> → 10+ סוכנים עם חלוקת אחריות ברורה.</li>
+<li>המתזמר מפעיל <strong>3–5 סוכנים במקביל</strong> (לא בטור), וכל סוכן משתמש ב־3+ כלים במקביל — מה שקיצר זמן מחקר עד 90%.</li>
+</ul>
+<div class="callout tip"><div class="co-head"><span class="ico">🆕</span>דפוס יולי 2026: Fable כמתזמר, עובדים זולים</div>
+<p>עם הגעת Fable 5, הדפוס שצובר תאוצה: <strong>Fable מתכנן, מפרק ומאמת</strong> — והביצוע נדחף ל־subagents שמוצמד להם <code class="ic">model: sonnet</code> או <code class="ic">haiku</code> ב־frontmatter. מאמצים מוקדמים מדווחים על ירידת איכות זניחה וחיסכון ניכר בעלות לעומת "הכל על Fable".</p></div>
+
+<h3>חמשת דפוסי הסוכנים</h3>
+<p>ממאמר היסוד "Building Effective Agents", שמבדיל בין <strong>workflows</strong> (מסלולים מוגדרים מראש בקוד) ל־<strong>agents</strong> (שמכוונים את עצמם):</p>
+<div class="cards c2">
+<div class="card"><div class="c-ico">→</div><h4>Prompt Chaining</h4><p>שרשור: פלט שלב אחד הוא קלט הבא.</p></div>
+<div class="card"><div class="c-ico">⇄</div><h4>Routing</h4><p>סיווג קלט וניתוב לטיפול המתאים.</p></div>
+<div class="card"><div class="c-ico">⫶</div><h4>Parallelization</h4><p>חלוקה למקטעים, או הצבעה בין כמה ריצות.</p></div>
+<div class="card"><div class="c-ico">◆</div><h4>Orchestrator-Workers</h4><p>מתזמר מחלק משימות לעובדים דינמית.</p></div>
+<div class="card"><div class="c-ico">↺</div><h4>Evaluator-Optimizer</h4><p>סוכן מייצר, אחר מבקר ומשפר בלולאה.</p></div>
+</div>
+
+<div class="callout danger"><div class="co-head"><span class="ico">🛑</span>מתי <em>לא</em> להשתמש במרובה־סוכנים</div>
+<p>לפי Anthropic: תחומים שדורשים <strong>הקשר משותף לכל הסוכנים</strong> או שיש בהם הרבה תלויות הדדיות — אינם מתאימים כיום למרובה־סוכנים. דווקא <strong>רוב משימות הקוד</strong> פחות מקביליות ממחקר, וסוכני LLM עדיין לא מצטיינים בתיאום ובהאצלה בזמן אמת. כלל אצבע מהקהילה: "לולאת בקרה פשוטה עוקפת מערכת מרובת־סוכנים" כשהמשימה לא באמת מתפצלת.</p></div>
+
+<div class="usecase"><div class="uc-head"><span>🎯</span>תרחיש אמיתי: סקירה אובייקטיבית</div>
+<div class="uc-body"><p>כתבת פיצ'ר בסשן הראשי. במקום לבקש מאותו הקשר (המוטה) לבקר את עצמו, הפעל את <code class="ic">@code-reviewer</code> — שמתחיל בהקשר נקי, מריץ <code class="ic">git diff</code>, ומחזיר רק רשימת בעיות לפי עדיפות. ההקשר הראשי שלך נשאר זמין להמשך העבודה.</p></div></div>
+
+<div class="exercise"><div class="ex-head"><span>🛠️</span>תרגול</div>
+<ol><li>הרץ <code class="ic">/agents</code> וצור סוכן <code class="ic">test-runner</code> עם גישה ל־Bash בלבד, שמריץ את הטסטים ומחזיר רק כשלים.</li>
+<li>צור סוכן <code class="ic">explorer</code> מבוסס Haiku עם קריאה בלבד, ובקש ממנו "מפה לי איפה מטופלת אותנטיקציה בקוד".</li>
+<li>שרשר: בקש מ־explorer מיפוי, ואז העבר את הפלט שלו לסוכן שמבצע שינוי ממוקד.</li></ol></div>
+</section>
+
+<!-- ===== 08 SKILLS ===== -->
+<section class="doc-section" id="skills" data-num="08" data-title="Skills — כישורים" data-kicker="הרחבת יכולות" data-phase="סוכני AI">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">08</span> הרחבת יכולות · סוכני AI</div>
+<h2 class="sec-title">Skills — כישורים לסוכן</h2></div>
+
+<p class="lead-p"><strong>Skill</strong> הוא תיקייה עם קובץ <code class="ic">SKILL.md</code> שמלמד את הסוכן לבצע משימה ספציפית טוב יותר — מוסכמות, נהלים, או אפילו סקריפטים מוכנים. בניגוד ל־subagent (שהוא "מי" מבצע), Skill הוא "<strong>איך</strong>" מבצעים. זהו תקן פתוח (Agent Skills) שעובד באופן זהה ב־Claude.ai, ב־Claude Code, ב־Agent SDK ובפלטפורמת המפתחים.</p>
+
+<h3>המבנה</h3>
+<p>תיקיית skill מכילה <code class="ic">SKILL.md</code> (חובה: <code class="ic">name</code> ו־<code class="ic">description</code> ב־frontmatter, ואז הוראות ב־Markdown), ואופציונלית תיקיות <code class="ic">scripts/</code>, <code class="ic">references/</code> ו־<code class="ic">assets/</code>. המיקומים: <code class="ic">.claude/skills/</code> (פרויקט), <code class="ic">~/.claude/skills/</code> (משתמש), וכן skills מובנים כמו <code class="ic">/code-review</code> ו־<code class="ic">/debug</code>.</p>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">.claude/skills/pdf-report/SKILL.md</span><span class="cspace"></span></div>
+<pre><code class="lang-yaml">---
+name: pdf-report
+description: יוצר דוח PDF ממותג מנתוני JSON. השתמש כשמבקשים "דוח", "PDF" או "סיכום מודפס".
+allowed-tools: Read, Bash
+---
+# יצירת דוח PDF
+
+1. קרא את הנתונים מהקובץ שסופק.
+2. הרץ את `scripts/build.py` עם הנתיב כארגומנט.
+3. הפלט נשמר ב-`output/report.pdf`.
+
+## Gotchas (טעויות שכדאי להימנע מהן)
+- אל תייצר את ה-PDF ב-pure HTML — השתמש בסקריפט המצורף.
+- ודא שהפונט העברי נטען, אחרת הטקסט יופיע הפוך.</code></pre></div>
+
+<h3>גילוי הדרגתי (Progressive Disclosure) — הקסם האמיתי</h3>
+<div class="callout note"><div class="co-head"><span class="ico">📌</span>למה אפשר להתקין הרבה skills בזול</div>
+<p>בתחילת הסשן נטענים <strong>רק ה־name וה־description</strong> של כל skill (זול מאוד). תוכן ה־SKILL.md המלא וקבצי העזר נטענים <strong>רק כשצריך אותם</strong>. סקריפטים רצים דרך bash <strong>בלי לצרוך הקשר כלל</strong>. כך אפשר להחזיק עשרות skills בלי לבזבז טוקנים.</p></div>
+
+<h3>הפעלה ותכונות אגנטיות</h3>
+<ul>
+<li><strong>אוטומטית</strong> — כש־<code class="ic">description</code> מתאים לבקשה. כתוב תיאורים "דחפניים" — Claude נוטה <em>לא</em> להפעיל מספיק.</li>
+<li><strong>ישירה</strong> — <code class="ic">/skill-name</code>.</li>
+<li><code class="ic">context: fork</code> — מריץ את ה־skill בתוך subagent (אפשר לבחור <code class="ic">agent: Explore</code>).</li>
+<li><code class="ic">allowed-tools</code> — הגבלת כלים (ב־CLI; ה־SDK מתעלם).</li>
+<li><code class="ic">disable-model-invocation: true</code> — הופך אותו לידני בלבד.</li>
+<li><code class="ic">$ARGUMENTS</code> — הזרקת קלט מהמשתמש לתוך ה־skill.</li>
+<li>בשדה <code class="ic">skills:</code> של subagent — <strong>טעינה מראש</strong> של תוכן skill מלא.</li>
+</ul>
+
+<div class="callout tip"><div class="co-head"><span class="ico">💡</span>skill-creator והמאגר הרשמי</div>
+<p>Anthropic מספקת meta-skill בשם <code class="ic">skill-creator</code> שעוזר לכתוב skills. המאגר הרשמי: <code class="ic">github.com/anthropics/skills</code>. החלק היקר ביותר בכל skill הוא סעיף ה־<strong>Gotchas</strong> — טעויות אמיתיות שהסוכן עושה. שפר את ה־skill על ידי צפייה איך Claude שני באמת משתמש בו.</p></div>
+
+<div class="exercise"><div class="ex-head"><span>🛠️</span>תרגול</div>
+<ol><li>צור skill בשם <code class="ic">commit-msg</code> שמלמד את הסוכן את פורמט ה־commit של הצוות שלך (Conventional Commits, למשל).</li>
+<li>הוסף לו סעיף Gotchas עם 2–3 טעויות שראית את הסוכן עושה.</li></ol></div>
+</section>
+
+<!-- ===== 09 MCP ===== -->
+<section class="doc-section" id="mcp" data-num="09" data-title="MCP — חיבור לעולם" data-kicker="חיבור לעולם החיצון" data-phase="סוכני AI">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">09</span> חיבור לעולם · סוכני AI</div>
+<h2 class="sec-title">MCP — חיבור הסוכן לעולם החיצון</h2></div>
+
+<p class="lead-p">סוכן שמוגבל לקבצים מקומיים — מוגבל בכוחו. <strong>Model Context Protocol (MCP)</strong> הוא תקן פתוח שמאפשר ל־Claude Code לדבר עם שירותים חיצוניים: GitHub, Linear, Sentry, מסדי נתונים, Playwright ועוד. Claude Code הוא ה<strong>לקוח</strong> (client), ושרתי MCP חושפים כלים שהסוכן יכול לקרוא להם.</p>
+
+<h3>שלוש דרכי תקשורת (Transports)</h3>
+<div class="cards c3">
+<div class="card"><div class="c-ico">▸</div><h4>stdio</h4><p>תהליך מקומי. הכי פשוט לשרתים שרצים על המכונה שלך.</p></div>
+<div class="card"><div class="c-ico">⇅</div><h4>HTTP <span class="badge new">מומלץ</span></h4><p>לשרתים מרוחקים, עם תמיכת OAuth 2.1.</p></div>
+<div class="card"><div class="c-ico">⊘</div><h4>SSE <span class="badge dep">מיושן</span></h4><p>הוחלף לטובת HTTP. אל תשתמש בחדש.</p></div>
+</div>
+
+<h3>הוספה וניהול</h3>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">bash</span><span class="cspace"></span></div>
+<pre><code class="lang-bash"># שרת מקומי (stdio)
+claude mcp add --transport stdio github -- npx @modelcontextprotocol/server-github
+
+# שרת מרוחק (HTTP)
+claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+
+# ניהול
+claude mcp list
+claude mcp get github
+claude mcp remove github
+
+# אימות OAuth ישירות מהמעטפת (v2.1.185+)
+claude mcp login sentry
+claude mcp logout sentry</code></pre></div>
+<p>בתוך הסשן, <code class="ic">/mcp</code> מציג סטטוס ומאפשר אימות OAuth. שים לב: כל הדגלים (<code class="ic">--transport</code>, <code class="ic">--scope</code>, <code class="ic">--env</code>) באים <strong>לפני</strong> שם השרת, ו־<code class="ic">--</code> מפריד את פקודת ה־stdio.</p>
+
+<h3>סקופים — ומי גובר</h3>
+<p>לפי קדימות (גבוה גובר): <strong>local</strong> ← <strong>project</strong> (קובץ <code class="ic">.mcp.json</code>, מומלץ ל־commit כדי לשתף עם הצוות) ← <strong>user</strong> ← פלאגין ← קונקטורים של claude.ai.</p>
+
+<h3>Tool Search — חיסכון טוקנים מהותי <span class="badge new">ברירת מחדל ב-2026</span></h3>
+<div class="callout note"><div class="co-head"><span class="ico">📌</span>למה זה משנה</div>
+<p>בעבר, כל הגדרות הכלים של כל שרתי ה־MCP נטענו לראש ההקשר — בזבוז עצום. כיום, במקום זאת, Claude <strong>שולף כלים לפי דרישה</strong>. במקרה אחד שתועד, עומס ה־MCP ירד מ־51K ל־8.5K טוקנים. אפשר לכבות עם <code class="ic">ENABLE_TOOL_SEARCH=false</code>, ולכוונן עם <code class="ic">MCP_TIMEOUT</code> ו־<code class="ic">MAX_MCP_OUTPUT_TOKENS</code>.</p></div>
+
+<h3>שרתים פופולריים</h3>
+<div class="pill-row">
+<span class="pill">GitHub</span><span class="pill">Linear</span><span class="pill">Slack</span><span class="pill">Sentry</span>
+<span class="pill">Postgres / Supabase</span><span class="pill">Playwright</span><span class="pill">Figma</span>
+<span class="pill">Context7 <b>(תיעוד חי)</b></span>
+</div>
+<p>קטלוג ה־MCP של Docker מספק <strong>300+ שרתים מאומתים ומכולתיים</strong> עם התקנה בלחיצה.</p>
+
+<div class="callout tip"><div class="co-head"><span class="ico">💡</span>זווית אגנטית: צמצם MCP ל־subagent בודד</div>
+<p>כדי לא להעמיס הגדרות כלים על ההקשר הראשי, אפשר לחבר שרת MCP <strong>רק ל־subagent מסוים</strong> דרך השדה <code class="ic">mcpServers</code> ב־frontmatter שלו. כך, למשל, סוכן ה"חקירה" שלך הוא היחיד שמחזיק את כלי Sentry — וההקשר הראשי נשאר רזה.</p></div>
+
+<div class="exercise"><div class="ex-head"><span>🛠️</span>תרגול</div>
+<ol><li>הוסף שרת MCP של GitHub והרץ <code class="ic">/mcp</code> כדי לאמת חיבור.</li>
+<li>בקש מ־Claude "פתח לי issue ב־repo עם סיכום הבאג שתיקנו".</li>
+<li>צור subagent שמחזיק את שרת ה־MCP בלבד דרך <code class="ic">mcpServers</code>, ובדוק שההקשר הראשי לא נטען בכליו.</li></ol></div>
+</section>
+
+<!-- ===== 10 HOOKS ===== -->
+<section class="doc-section" id="hooks" data-num="10" data-title="Hooks — אוטומציה ואכיפה" data-kicker="אוטומציה ואכיפה" data-phase="סוכני AI">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">10</span> אכיפה · סוכני AI</div>
+<h2 class="sec-title">Hooks — אוטומציה ואכיפה דטרמיניסטית</h2></div>
+
+<p class="lead-p"><strong>Hooks</strong> הם מטפלים (shell, HTTP, prompt או agent) שרצים אוטומטית באירועי מחזור־חיים של הסוכן. ההבדל מ־CLAUDE.md מהותי: CLAUDE.md הוא <em>בקשה</em> שהסוכן עשוי לקיים; hook הוא <strong>חוק</strong> שנאכף בקוד.</p>
+<div class="callout bench"><div class="co-head"><span class="ico">📊</span>נתון</div>
+<p>Hooks אוכפים כללים בכ־<strong>100%</strong> מהמקרים, לעומת כ־70% היענות בלבד כשמסתמכים על הוראות ב־CLAUDE.md. הם פועלים גם על פעולות של subagents.</p></div>
+
+<h3>אירועי המפתח</h3>
+<div class="tbl-wrap"><table>
+<thead><tr><th>אירוע</th><th>מתי רץ</th><th>טריק</th></tr></thead>
+<tbody>
+<tr><td><code>PreToolUse</code></td><td>לפני שכלי מורץ.</td><td>קוד יציאה 2 = <strong>חסום</strong> את הפעולה.</td></tr>
+<tr><td><code>PostToolUse</code></td><td>אחרי שכלי רץ.</td><td>פורמט/לינט אוטומטי על קבצים שנכתבו.</td></tr>
+<tr><td><code>Stop</code></td><td>כשהסוכן רוצה לסיים.</td><td>קוד יציאה 2 = <strong>המשך לעבוד</strong> (למשל אם טסטים נכשלים).</td></tr>
+<tr><td><code>UserPromptSubmit</code></td><td>כששולחים פרומפט.</td><td>הזרקת הקשר נוסף.</td></tr>
+<tr><td><code>SessionStart/End</code></td><td>תחילת/סוף סשן.</td><td>setup/teardown.</td></tr>
+<tr><td><code>SubagentStart/Stop</code></td><td>סביב הרצת subagent.</td><td>לוגיקה ספציפית לסוכני משנה.</td></tr>
+</tbody></table></div>
+<div class="flag-line"><span>🆕</span><div><b>חדש:</b> hooks רואים את רמת ה־effort הפעילה דרך <code class="ic">$CLAUDE_EFFORT</code>, ואירוע <code class="ic">Notification</code> מדווח <code class="ic">agent_needs_input</code> / <code class="ic">agent_completed</code> מסוכני רקע — נוח לחיבור התראות דסקטופ.</div></div>
+
+<h3>דוגמה: פורמט אוטומטי אחרי כל עריכה</h3>
+<p>מגדירים ב־<code class="ic">.claude/settings.json</code> (פרויקט) או <code class="ic">~/.claude/settings.json</code> (משתמש):</p>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">.claude/settings.json</span><span class="cspace"></span></div>
+<pre><code class="lang-json">{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"$CLAUDE_TOOL_INPUT_FILE_PATH\""
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre></div>
+
+<h3>שליטה עדינה ב־PreToolUse</h3>
+<p>פלט JSON מ־hook של <code class="ic">PreToolUse</code> תומך ב־<code class="ic">permissionDecision</code> בערכים <code class="ic">"allow"</code> / <code class="ic">"deny"</code> / <code class="ic">"ask"</code>, וגם ב־<code class="ic">updatedInput</code> לשינוי הקלט לפני ההרצה. כך אפשר, למשל, לחסום אוטומטית <code class="ic">push</code> ל־main או פקודות <code class="ic">rm -rf</code> מסוכנות.</p>
+
+<div class="callout danger"><div class="co-head"><span class="ico">🛑</span>זהירות מלולאה אינסופית</div>
+<p>hook על <code class="ic">Stop</code> שמחזיר "המשך לעבוד" יכול להיכנס ללולאה אינסופית. הגן עליו על ידי בדיקת הדגל <code class="ic">stop_hook_active</code> ועצירה אם הוא כבר פעיל.</p></div>
+
+<div class="callout warn"><div class="co-head"><span class="ico">⚠️</span>טעות נפוצה: hook-spam שאוכל טוקנים</div>
+<p>אחד משלושת בזבזני הטוקנים הגדולים הוא <strong>הצפת פלט מ־hooks</strong> (למשל פורמטר ש"מדבר" הרבה). ודא שה־hooks שלך שקטים — מפנים פלט שגיאה רק כשבאמת יש בעיה.</p></div>
+
+<div class="usecase"><div class="uc-head"><span>🎯</span>תרחיש אמיתי: "שער איכות" אוטומטי</div>
+<div class="uc-body"><p>שילוב חזק: <code class="ic">PostToolUse</code> מפעיל prettier+eslint על כל קובץ שנכתב, ו־<code class="ic">Stop</code> מריץ את חבילת הטסטים — ואם משהו נכשל, מחזיר את הסוכן לעבודה אוטומטית. התוצאה: קוד שעובר תמיד דרך אותו שער איכות, בלי שתצטרך לבקש.</p></div></div>
+</section>
+
+<!-- ===== 11 AGENT TEAMS ===== -->
+<section class="doc-section" id="teams" data-num="11" data-title="Agent Teams — צוותי סוכנים" data-kicker="מולטי-סוכן · רמה 2" data-phase="סוכני AI">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">11</span> מולטי-סוכן · רמה 2</div>
+<h2 class="sec-title">Agent Teams — צוותי סוכנים <span class="badge exp">ניסיוני</span></h2></div>
+
+<p class="lead-p">אם subagent הוא "שליח" שמביא תשובה, <strong>Agent Team</strong> הוא <strong>צוות של עמיתים</strong>. כאן מדובר בכמה סשנים מלאים של Claude Code שעובדים יחד: <strong>ראש צוות</strong> (team lead) שמתאם, ו<strong>חברי צוות</strong> (teammates) שכל אחד מהם הוא סוכן עצמאי עם חלון הקשר משלו — ויכולת לשלוח הודעות זה לזה.</p>
+
+<div class="callout warn"><div class="co-head"><span class="ico">⚠️</span>פיצ'ר ניסיוני</div>
+<p>Agent Teams נמצא בשלב ניסיוני. דורש הפעלה מפורשת: <code class="ic">CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code>, גרסה 2.1.32+ ומודל Opus 4.6 ומעלה. הממשק, הזמינות והעלויות עשויים להשתנות.</p></div>
+
+<h3>מה מבדיל צוות מ־subagents</h3>
+<div class="tbl-wrap"><table>
+<thead><tr><th></th><th>Subagents</th><th>Agent Team</th></tr></thead>
+<tbody>
+<tr><td><strong>תקשורת</strong></td><td>רק עם השיחה הראשית. מחזיר תקציר.</td><td>חברי הצוות <strong>מדברים זה עם זה</strong> (mailbox).</td></tr>
+<tr><td><strong>אינטראקציה שלך</strong></td><td>שולח ושוכח.</td><td>אפשר לדבר עם <strong>כל חבר צוות בנפרד</strong>.</td></tr>
+<tr><td><strong>תיאום</strong></td><td>אין; הם לא מודעים זה לזה.</td><td><strong>רשימת משימות משותפת</strong> עם תלויות.</td></tr>
+<tr><td><strong>עלות</strong></td><td>בינונית.</td><td>גבוהה — כ־פי 5 טוקנים לכל חבר צוות.</td></tr>
+</tbody></table></div>
+
+<h3>שלושת מנגנוני התיאום</h3>
+<div class="cards c3">
+<div class="card"><div class="c-ico">★</div><h4>ראש הצוות</h4><p>מתאם, מפצל משימות ומאשר. <kbd>Shift</kbd>+<kbd>Tab</kbd> מגביל אותו ל"תיאום בלבד".</p></div>
+<div class="card"><div class="c-ico">☑</div><h4>רשימת משימות משותפת</h4><p>תלויות נפתחות אוטומטית בסיום משימה קודמת.</p></div>
+<div class="card"><div class="c-ico">✉</div><h4>תיבת דואר</h4><p>חברי הצוות שולחים הודעות ישירות זה לזה לתיאום עדין.</p></div>
+</div>
+<p>כל חבר צוות יכול לקבל פאנל <code class="ic">tmux</code> משלו, ותוכניות של חברי צוות יכולות לדרוש אישור (קריאה בלבד עד שראש הצוות מאשר). אפשר לעשות שימוש חוזר בהגדרות subagent כ"סוגי" חברי צוות. אירועי מחזור־חיים ייעודיים: <code class="ic">TeammateIdle</code>, <code class="ic">TaskCreated</code>, <code class="ic">TaskCompleted</code>.</p>
+
+<h3>מתי צוות הוא הבחירה הנכונה</h3>
+<ul>
+<li><strong>עבודה חוצת־שכבות</strong> — חבר אחד על ה־frontend, שני על ה־backend, שלישי על הטסטים, עם תלויות ביניהם.</li>
+<li><strong>מודולים נפרדים</strong> — כל חבר צוות "בעלים" של מודול חדש.</li>
+<li><strong>דיבוג עם השערות מתחרות</strong> — כל חבר רודף השערה אחרת ומדווח.</li>
+<li><strong>מחקר/סקירה מזוויות מתחרות</strong>.</li>
+</ul>
+
+<div class="callout tip"><div class="co-head"><span class="ico">💡</span>זכור את העלות</div>
+<p>צוות צורך טוקנים בקצב גבוה משמעותית מסשן יחיד. השתמש בו כשהמשימה <strong>באמת</strong> מתפצלת לעבודה מקבילה עם בעלות נפרדת — לא כברירת מחדל. למשימת קוד "רגילה", סוכן יחיד או subagent כמעט תמיד יעיל יותר.</p></div>
+
+<div class="usecase"><div class="uc-head"><span>🎯</span>תרחיש אמיתי: פיצ'ר full-stack</div>
+<div class="uc-body"><p>בניית פיצ'ר "התראות" שדורש: סכמת DB, endpoint, רכיב UI וטסטים. ראש הצוות מפרק לרשימת משימות, מקצה חבר ל־DB+API וחבר ל־UI. כשמשימת ה־API מסתיימת, התלות של ה־UI נפתחת אוטומטית, וחבר ה־UI מקבל הודעה בתיבת הדואר עם חתימת ה־API לעבוד מולה.</p></div></div>
+</section>
+
+<!-- ===== 12 DYNAMIC WORKFLOWS ===== -->
+<section class="doc-section" id="workflows" data-num="12" data-title="Dynamic Workflows" data-kicker="מולטי-סוכן · רמה 3" data-phase="סוכני AI">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">12</span> מולטי-סוכן · רמה 3</div>
+<h2 class="sec-title">Dynamic Workflows — תזמור בקנה מידה <span class="badge new">2026</span></h2></div>
+
+<p class="lead-p">הרמה הגבוהה ביותר במדרג. ב־<strong>Dynamic Workflow</strong>, Claude <strong>כותב סקריפט תזמור ב־JavaScript</strong> שרץ ברקע ומפזר <strong>עד 16 סוכנים במקביל ועד 1,000 בסך הכול</strong>. זהו ההבדל המהותי: לא אתה מתזמר — <em>הקוד</em> מתזמר, ו־Claude כותב את הקוד הזה.</p>
+
+<div class="callout warn"><div class="co-head"><span class="ico">⚠️</span>תצוגה מקדימה למחקר</div>
+<p>שוחרר עם Opus 4.8 (28 במאי 2026), דורש גרסה 2.1.154+. פעיל כברירת מחדל בתוכניות Max/Team (וגם Enterprise). API, מכסות ותמחור עשויים להשתנות.</p></div>
+
+<h3>הרעיון: תוצאות־ביניים מחוץ להקשר</h3>
+<div class="callout note"><div class="co-head"><span class="ico">📌</span>למה זה פורץ את מחסום ההקשר</div>
+<p>תוצאות הביניים של מאות הסוכנים נשמרות ב<strong>משתני הסקריפט</strong> — לא בחלון ההקשר של Claude. רק <strong>התשובה הסופית</strong> חוזרת אליו. כך אפשר לעבד היקף עצום בלי "ריקבון הקשר". הסקריפט עצמו לא יכול לגעת במערכת הקבצים או ב־shell — <strong>רק הסוכנים</strong> עושים זאת.</p></div>
+
+<h3>אימות אדוורסרי — איכות דרך הפרכה</h3>
+<p>זה אולי החלק החכם ביותר: הסוכנים ניגשים לבעיה <strong>מזוויות עצמאיות</strong>, <strong>סוכנים אחרים מנסים להפריך</strong> את הממצאים, והריצה <strong>חוזרת על עצמה עד להתכנסות</strong> — עם אימות לפני שתוצאה מאוחדת פנימה. התוצאה אמינה הרבה יותר מ"סוכן בודד שאמר שמצא".</p>
+
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">javascript · סקיצה רעיונית של סקריפט תזמור</span><span class="cspace"></span></div>
+<pre><code class="lang-javascript">// Claude כותב סקריפט כזה ומריץ אותו ברקע
+const files = await glob("src/**/*.ts");
+
+// מפזר סוכנים במקביל — אחד לכל קובץ
+const findings = await Promise.all(
+  files.map(file =>
+    agent({
+      prompt: `אתר שימושי API מיושנים בקובץ ${file} והצע תיקון`,
+      model: "haiku",
+      maxTokens: 4000
+    })
+  )
+);
+
+// סוכן מאמת מנסה להפריך כל ממצא לפני האיחוד
+const verified = await agent({
+  prompt: "בדוק והפרך את הממצאים; השאר רק ודאיים",
+  input: findings
+});
+
+return summarize(verified);</code></pre></div>
+
+<h3>איך מפעילים</h3>
+<ul>
+<li>הכללת המילה <strong>"workflow"</strong> בפרומפט.</li>
+<li>הגדרת <code class="ic">ultracode</code> (רמת xhigh + הרשאה קבועה לפזר workflows).</li>
+<li>ה־workflow המובנה <code class="ic">/deep-research</code>.</li>
+<li><code class="ic">/workflows</code> מציג ריצות פעילות. הריצות ניתנות לחידוש (resumable).</li>
+</ul>
+
+<h3>למה זה מתאים</h3>
+<div class="pill-row">
+<span class="pill">מיגרציות בקנה מידה של קודבייס</span>
+<span class="pill">ציד באגים על פני כל ה־repo</span>
+<span class="pill">ביקורת אבטחה רב־קבצית</span>
+<span class="pill">מחקר מוצלב ומאומת</span>
+</div>
+
+<div class="callout danger"><div class="co-head"><span class="ico">🛑</span>העלות מטפסת מהר</div>
+<p>ריצה עם 200 עובדים ב־xhigh יכולה לעלות <strong>$30–60+ עבור סבב יחיד</strong> של המתזמר. נהל זאת: דרג את העובדים למודל זול (Haiku), הגבל את <code class="ic">maxTokens</code> שלהם, והשתמש ב־workflows רק למשימות שבאמת דורשות מקביליות עצומה ואימות.</p></div>
+
+<div class="exercise"><div class="ex-head"><span>🛠️</span>תרגול (בזהירות תקציבית)</div>
+<ol><li>הרץ <code class="ic">/deep-research</code> על שאלה טכנית מורכבת והשווה את העומק לתשובת סוכן יחיד.</li>
+<li>נסח משימת מיגרציה קטנה עם המילה "workflow" (למשל "החלף את כל קריאות ה־fetch ל־axios ב־workflow") ועקוב ב־<code class="ic">/workflows</code>.</li></ol></div>
+</section>
+
+<!-- ===== 13 PICKER (INTERACTIVE) ===== -->
+<section class="doc-section" id="picker" data-num="13" data-title="בורר אסטרטגיית סוכנים" data-kicker="כלי החלטה אינטראקטיבי" data-phase="אוטומציה ומעשה">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">13</span> כלי אינטראקטיבי · מעשה</div>
+<h2 class="sec-title">סולם ההחלטה: איזה סוכן, מתי?</h2></div>
+
+<p class="lead-p">למדנו ארבע רמות תזמור. עכשיו השאלה המעשית: <strong>מה לבחור למשימה שלפניך?</strong> כלל הזהב הוא תמיד אותו אחד — <strong>גבול ההקשר</strong>: כמה כל "עובד" צריך לדעת על השאר. ככל שהעבודה עצמאית יותר, אפשר לטפס גבוה יותר במדרג.</p>
+
+<h3>טבלת ההשוואה</h3>
+<div class="tbl-wrap"><table>
+<thead><tr><th>רמה</th><th>מקביליות</th><th>הקשר</th><th>עלות יחסית</th><th>מתאים ל…</th></tr></thead>
+<tbody>
+<tr><td><strong>סוכן יחיד</strong></td><td>אין</td><td>משותף, הדוק</td><td>×1</td><td>שיח הדוק, משימה ממוקדת.</td></tr>
+<tr><td><strong>Subagent</strong></td><td>נמוכה–בינונית</td><td>מבודד, מחזיר תקציר</td><td>×4</td><td>עבודה "מלוכלכת" מבודדת, חיפוש, סקירה.</td></tr>
+<tr><td><strong>Agent Team</strong> <span class="badge exp">ניסיוני</span></td><td>בינונית</td><td>עצמאי + תלויות מתואמות</td><td>×15</td><td>עבודה חוצת־שכבות עם בעלות נפרדת.</td></tr>
+<tr><td><strong>Dynamic Workflow</strong> <span class="badge new">2026</span></td><td>גבוהה מאוד (עד 1,000)</td><td>עצמאי לחלוטין + אימות</td><td>×15+</td><td>היקף קודבייס, ציד באגים, ביקורת.</td></tr>
+</tbody></table></div>
+
+<h3>ענה על 3 שאלות וקבל המלצה</h3>
+<div class="picker" id="picker-widget">
+  <div class="pk-bar"><span></span><span></span><span></span></div>
+  <div class="pk-stage" id="pk-stage"></div>
+  <div class="pk-controls">
+    <button class="pk-btn-sec" id="pk-back" type="button">← חזרה</button>
+    <button class="pk-btn-sec" id="pk-restart" type="button" hidden>התחל מחדש ↻</button>
+  </div>
+</div>
+
+<div class="callout tip"><div class="co-head"><span class="ico">💡</span>ברירת המחדל הבריאה</div>
+<p>כשמתלבטים — <strong>רדו במדרג, לא עלו</strong>. רוב המשימות נפתרות מצוין עם סוכן יחיד + Plan Mode, או עם subagent אחד לבידוד. טפסו ל־Teams ו־Workflows רק כשהמקביליות אמיתית והערך מצדיק את העלות הגבוהה פי כמה.</p></div>
+</section>
+
+<!-- ===== 14 HEADLESS / SDK / CI ===== -->
+<section class="doc-section" id="headless" data-num="14" data-title="Headless, SDK, CI ו-Worktrees" data-kicker="אוטומציה ותשתית" data-phase="אוטומציה ומעשה">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">14</span> אוטומציה ותשתית · מעשה</div>
+<h2 class="sec-title">Headless, Agent SDK, CI ו-Worktrees</h2></div>
+
+<p class="lead-p">עד כה עבדנו אינטראקטיבית. אבל אותו מנוע אגנטי רץ גם <strong>ללא ממשק</strong> — בסקריפטים, ב־CI, וכספרייה. כאן גם מסתתרת מלכודת חיוב חשובה שחובה להכיר.</p>
+
+<h3>מצב Headless</h3>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">bash</span><span class="cspace"></span></div>
+<pre><code class="lang-bash"># הרצה לא-אינטראקטיבית עם סט כלים מוגבל
+claude -p "סכם את שינויי ה-PR האחרון" \
+  --allowedTools "Read,Bash(git*)" \
+  --output-format json \
+  --bare
+
+# חידוש סשן קודם לפי מזהה
+claude -p "המשך מאיפה שעצרנו" --resume &lt;session-id&gt;</code></pre></div>
+<p>הדגל <code class="ic">--bare</code> מומלץ לסקריפטים (ויהפוך לברירת המחדל של <code class="ic">-p</code>).</p>
+
+<h3>Claude Agent SDK</h3>
+<p>הספרייה שהֵרֵיצה את Claude Code זמינה לבנייה עצמית — <strong>שונתה השם</strong> מ"Claude Code SDK" ל־<strong>Claude Agent SDK</strong> <span class="badge dep">שם ישן הוסר</span> (<code class="ic">@anthropic-ai/claude-agent-sdk</code>, ל־Python ו־TypeScript):</p>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">javascript · Agent SDK</span><span class="cspace"></span></div>
+<pre><code class="lang-javascript">import { query } from "@anthropic-ai/claude-agent-sdk";
+
+const result = query({
+  prompt: "תקן את אזהרות ה-lint בתיקיית src והרץ את הטסטים",
+  options: {
+    model: "claude-sonnet-5",
+    allowedTools: ["Read", "Edit", "Bash"],
+    permissionMode: "acceptEdits"
+  }
+});
+
+for await (const message of result) {
+  console.log(message);
+}</code></pre></div>
+
+<div class="callout danger"><div class="co-head"><span class="ico">🛑</span>שינוי חיוב קריטי — 15 ביוני 2026</div>
+<p>החל מ־15.6.2026, שימוש ב־<code class="ic">claude -p</code>, ב־Agent SDK וב־GitHub Actions <strong>נמשך ממאגר קרדיטים נפרד</strong> (Agent SDK) — לא ממכסת המנוי האינטראקטיבי. <strong>כוון עבודות headless למפתח API ייעודי</strong> (<code class="ic">ANTHROPIC_API_KEY</code>). הרצת headless מחשבון מנוי <strong>ללא</strong> מפתח API עלולה להוביל לחסימת חשבון לפי תנאי השימוש.</p></div>
+
+<h3>GitHub Actions</h3>
+<p>האקשן הרשמי <code class="ic">anthropics/claude-code-action@v1</code> מריץ את המנוע המלא ב־CI. אזכור <code class="ic">@claude</code> ב־PR/issue (אינטראקטיבי), או פרמטר <code class="ic">prompt</code> (אוטומציה):</p>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">.github/workflows/claude.yml</span><span class="cspace"></span></div>
+<pre><code class="lang-yaml">name: Claude
+on:
+  issue_comment:
+    types: [created]
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}</code></pre></div>
+
+<h3>Git Worktrees — סוכנים מקבילים בלי התנגשויות</h3>
+<p>כדי להריץ כמה סשנים במקביל בלי שידרכו זה על זה, <code class="ic">claude -w &lt;name&gt;</code> <span class="badge ver">v2.1.50+</span> יוצר checkout מבודד עם branch משלו תחת <code class="ic">.claude/worktrees/</code>. subagent יכול לרוץ במבודד עם <code class="ic">isolation: worktree</code>.</p>
+<div class="code-block"><div class="code-head"><div class="cdots"><i></i><i></i><i></i></div><span class="clang">bash</span><span class="cspace"></span></div>
+<pre><code class="lang-bash"># worktree מבודד עם branch משלו
+claude -w feature-auth
+# הסוכן עובד ב- .claude/worktrees/feature-auth/</code></pre></div>
+<div class="flag-line"><span>🆕</span><div><b>ניהול מרכזי:</b> <code class="ic">claude agents</code> פותח מסך אחד עם כל הסשנים וסוכני הרקע — מה רץ, מה מחכה לך ומה הסתיים. סוכן רקע שמסיים עבודת קוד ב־worktree כבר עושה commit, push ופותח draft PR בעצמו.</div></div>
+<div class="callout tip"><div class="co-head"><span class="ico">💡</span>כמה זה מעשי?</div>
+<p>צוות Anthropic מציין 10–15 סשנים מקבילים כטיפ פרודוקטיביות מוביל, אבל באופן מעשי <strong>2–4 הם נקודה מתוקה</strong> — מעבר לזה נשחקים מגבלות הקצב ורוחב הסקירה האנושי. עשה commit או stash לפני שאתה פותח worktree (שינויים לא־שמורים לא עוברים איתך).</p></div>
+</section>
+
+<!-- ===== 15 COST + SUMMARY ===== -->
+<section class="doc-section" id="cost" data-num="15" data-title="עלויות, טעויות וסיכום" data-kicker="עלות, מלכודות וסיכום" data-phase="אוטומציה ומעשה">
+<div class="sec-head"><div class="sec-kicker"><span class="knum">15</span> עלות, מלכודות וסיכום · מעשה</div>
+<h2 class="sec-title">עלויות, טעויות נפוצות וצעדים הבאים</h2></div>
+
+<p class="lead-p">סוכנים אוטונומיים הם עוצמתיים — אבל הם צורכים טוקנים, ולעיתים עושים טעויות. הפרק הזה מקבץ את כל המלכודות שפגשנו, את מציאות העלויות, ומסכם את המדריך.</p>
+
+<h3>מציאות העלויות</h3>
+<div class="callout bench"><div class="co-head"><span class="ico">📊</span>נתונים רשמיים מ-Anthropic (עודכן 15.4.2026)</div>
+<p>עלות ממוצעת <strong>כ־$13 למפתח ליום עבודה פעיל</strong> (עודכן כלפי מעלה מ־$6). בארגונים, <strong>$150–$250 למפתח לחודש</strong>. כ־90% מהמשתמשים מתחת ל־$30 ליום פעיל.</p>
+<p>למשתמש יומי, תוכנית <strong>Max</strong> (כ־$100–200 לחודש) זולה משמעותית מתעריפי API ישירים.</p>
+<p><span class="badge new">🆕</span> <strong>יולי 2026:</strong> Fable 5 מוסיף מדרגה — $10/$50, כפול מ־Opus 4.8 — ובמנויים שורף מכסה בערך פי 2 (דווחו בקהילה מקרים של מיצוי חלון Max בתוך כחצי שעה ברמות effort גבוהות). מנגד, Sonnet 5 בתמחור ההיכרות ($2/$10 עד 31.8) מוזיל עומסים אגנטיים, ומגבלות הקצב ב־Claude Code הועלו עם השקתו.</p></div>
+
+<h3>למה מרובה־סוכנים יקר — ויזואלית</h3>
+<p>זכרו את הנתון מפרק 07: צריכת הטוקנים לבדה מסבירה 80% מהביצועים — אבל גם 80% מהעלות:</p>
+<div class="cost-bars">
+  <div class="cb-row"><span class="cb-lbl">שיחה רגילה</span><div class="cb-track"><div class="cb-fill" style="width:7%"></div></div><span class="cb-val">×1</span></div>
+  <div class="cb-row"><span class="cb-lbl">סוכן יחיד</span><div class="cb-track"><div class="cb-fill" style="width:27%"></div></div><span class="cb-val">×4</span></div>
+  <div class="cb-row"><span class="cb-lbl">מרובה־סוכנים</span><div class="cb-track"><div class="cb-fill hot" style="width:100%"></div></div><span class="cb-val">×15</span></div>
+</div>
+<p>שלושת בזבזני הטוקנים הגדולים: <strong>הקשר מנופח</strong>, <strong>הצפת פלט מ־hooks</strong>, ו<strong>סשנים מרתוניים</strong>. עשה <code class="ic">/compact</code> כל 20–30 דקות.</p>
+
+<h3>מקבץ הטעויות הנפוצות</h3>
+<div class="cards c2">
+<div class="card"><div class="c-ico">🍳</div><h4>סשן מטבח</h4><p>ערבוב משימות לא קשורות. → <code class="ic">/clear</code> בין משימות.</p></div>
+<div class="card"><div class="c-ico">🌀</div><h4>ספירלת תיקונים</h4><p>אחרי 2 כשלונות — <code class="ic">/rewind</code> ונסח מחדש, לא עוד תיקונים.</p></div>
+<div class="card"><div class="c-ico">🏗️</div><h4>הנדסת־יתר</h4><p>אבסטרקציות מיותרות. → "הגישה הפשוטה ביותר" ב־CLAUDE.md.</p></div>
+<div class="card"><div class="c-ico">📜</div><h4>CLAUDE.md מנופח</h4><p>מס טוקנים קבוע. → עובדתי וקצר.</p></div>
+<div class="card"><div class="c-ico">💾</div><h4>קבצים בלתי הפיכים</h4><p>commit/גיבוי <em>לפני</em> שנותנים גישה.</p></div>
+<div class="card"><div class="c-ico">🔍</div><h4>מבקר שמגזים</h4><p>הנחה לדווח רק על בעיות אמיתיות.</p></div>
+</div>
+
+<h3>סולם ההחלטה — לסיכום</h3>
+<p>השאלה המנחה תמיד: <strong>כמה כל עובד צריך לדעת על השאר?</strong></p>
+<ol>
+<li><strong>סוכן יחיד</strong> — שיח הדוק, הקשר משותף.</li>
+<li><strong>Subagent</strong> — עבודה מבודדת שמחזירה תקציר.</li>
+<li><strong>Subagent משורשר/Fork</strong> — רצף שלבים, או צורך בהרבה רקע.</li>
+<li><strong>Agent Team</strong> — עבודה שיתופית עם תלויות והודעות בין עמיתים.</li>
+<li><strong>Dynamic Workflow</strong> — מקביליות מסיבית, עצמאית, עם אימות.</li>
+</ol>
+
+<div class="callout tip"><div class="co-head"><span class="ico">💡</span>שלושת ההרגלים שישנו לך הכי הרבה</div>
+<p><strong>1.</strong> תכנן לפני שתבצע (Plan Mode). <strong>2.</strong> נהל את ההקשר באכזריות (<code class="ic">/clear</code>, כלל ה־40%). <strong>3.</strong> בודד עבודה מלוכלכת ב־subagent — וטפס במדרג רק כשהמקביליות אמיתית.</p></div>
+
+<div class="exercise"><div class="ex-head"><span>🛠️</span>תרגול מסכם</div>
+<ol><li>בחר פיצ'ר אמיתי. עבור עליו מקצה לקצה: <code class="ic">/clear</code> → Plan Mode → ביצוע → <code class="ic">@code-reviewer</code> בהקשר נקי → commit.</li>
+<li>הגדר hook אחד שאוכף משהו שחשוב לך (פורמט, או טסטים לפני סיום).</li>
+<li>צור subagent אחד שתשתמש בו שוב ושוב, ושמור אותו ב־<code class="ic">.claude/agents/</code> כדי לשתף עם הצוות.</li>
+<li>חזור לבורר בפרק 13 והרץ אותו על המשימה הבאה שלך.</li></ol></div>
+
+<div class="callout note"><div class="co-head"><span class="ico">📌</span>סיימת!</div>
+<p>עברת מהיסודות ועד תזמור מאות סוכנים אוטונומיים. העולם הזה זז מהר — שמור על הרגל לאמת מול <code class="ic">code.claude.com/docs</code>, ובעיקר: <strong>תתחיל קטן, תכנן, ותטפס במדרג רק כשצריך.</strong> בהצלחה. 🚀</p></div>
+</section>
+
+<!-- ===================== EXTRA STYLES (keyframes, responsive, widgets) ===================== -->
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes lnIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(163,194,147,.6)}70%{box-shadow:0 0 0 9px rgba(163,194,147,0)}100%{box-shadow:0 0 0 0 rgba(163,194,147,0)}}
+
+/* ---------- july 2026 additions ---------- */
+.badge.mythos{background:color-mix(in srgb,var(--purple) 15%,transparent);color:var(--purple);
+  border:1px solid color-mix(in srgb,var(--purple) 35%,transparent)}
+a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+@media print{
+  header.top,aside.sidebar,#read-progress,.sidebar-overlay,.complete-row,.copy-btn,
+  .bg-grid,.bg-glow,.picker,.pk-controls{display:none!important}
+  .layout,main.content{padding:0!important;display:block}
+  .doc-section{break-inside:avoid-page}
+  .terminal{box-shadow:none}
+}
+
+/* ---------- picker widget ---------- */
+.picker{border:1px solid var(--border);border-radius:var(--radius);
+  background:linear-gradient(165deg,var(--bg-3),var(--bg-2));padding:22px;margin:22px 0}
+.pk-bar{display:flex;gap:7px;margin-bottom:20px}
+.pk-bar span{height:5px;flex:1;border-radius:5px;background:var(--border);transition:.3s}
+.pk-bar span.on{background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.pk-q{font-family:var(--font-display);font-weight:700;font-size:clamp(20px,3vw,26px);
+  margin-bottom:6px;line-height:1.25}
+.pk-sub{color:var(--text-mute);font-size:14px;margin-bottom:18px}
+.pk-opts{display:grid;gap:10px}
+.pk-opt{text-align:right;background:var(--bg);border:1px solid var(--border);border-radius:11px;
+  padding:14px 16px;cursor:pointer;color:var(--text);font-family:var(--font-body);
+  font-size:15.5px;font-weight:600;transition:.16s;display:flex;align-items:center;gap:12px}
+.pk-opt:hover{border-color:var(--accent);background:var(--surface-hover);transform:translateX(-3px)}
+.pk-opt .pk-k{width:28px;height:28px;flex:none;border-radius:8px;background:var(--accent-soft);
+  border:1px solid var(--accent-line);color:var(--accent);display:grid;place-items:center;
+  font-family:var(--font-mono);font-size:13px;font-weight:700}
+.pk-controls{display:flex;gap:10px;margin-top:18px}
+.pk-btn-sec{background:none;border:1px solid var(--border);color:var(--text-soft);border-radius:9px;
+  padding:8px 16px;cursor:pointer;font-family:var(--font-body);font-weight:600;font-size:14px;transition:.16s}
+.pk-btn-sec:hover{border-color:var(--accent-line);color:var(--text)}
+.pk-btn-sec[hidden]{display:none}
+.pk-result{animation:fadeUp .4s both}
+.pk-res-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);
+  font-size:12.5px;font-weight:600;color:var(--accent);background:var(--accent-soft);
+  border:1px solid var(--accent-line);padding:5px 13px;border-radius:30px;margin-bottom:14px}
+.pk-res-title{font-family:var(--font-display);font-weight:800;font-size:clamp(26px,4vw,36px);
+  margin-bottom:12px;color:var(--text);line-height:1.1}
+.pk-res-title .grad{background:linear-gradient(115deg,var(--accent),var(--accent-2));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.pk-res-body{font-size:16px;color:var(--text-soft);margin-bottom:16px;line-height:1.7}
+.pk-res-how{background:var(--bg);border:1px solid var(--border);border-right:3px solid var(--accent);
+  border-radius:10px;padding:13px 16px;font-size:14.5px;color:var(--text-soft);margin-bottom:16px}
+.pk-res-how b{color:var(--text)}
+.pk-res-meter{display:grid;gap:9px}
+.pk-mrow{display:flex;align-items:center;gap:10px;font-size:13px}
+.pk-mrow .pk-mlbl{width:120px;flex:none;color:var(--text-mute)}
+.pk-mrow .pk-mtrack{flex:1;height:8px;background:var(--bg);border:1px solid var(--border);
+  border-radius:6px;overflow:hidden}
+.pk-mrow .pk-mfill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  border-radius:6px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+.pk-mrow.win .pk-mlbl{color:var(--accent);font-weight:700}
+
+/* ---------- cost bars ---------- */
+.cost-bars{display:grid;gap:13px;margin:20px 0;padding:18px;background:var(--bg-2);
+  border:1px solid var(--border);border-radius:12px}
+.cb-row{display:flex;align-items:center;gap:13px}
+.cb-lbl{width:118px;flex:none;font-size:14px;font-weight:600;color:var(--text-soft)}
+.cb-track{flex:1;height:26px;background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;overflow:hidden}
+.cb-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--green));
+  border-radius:6px;min-width:6px}
+.cb-fill.hot{background:linear-gradient(90deg,var(--accent-strong),var(--accent-2))}
+.cb-val{width:40px;flex:none;font-family:var(--font-mono);font-weight:700;font-size:14px;color:var(--text)}
+
+/* ---------- footer ---------- */
+footer.site{border-top:1px solid var(--border-soft);margin-top:60px;padding:34px 0 10px;
+  color:var(--text-mute);font-size:14px}
+footer.site .f-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+footer.site .f-mark{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+  font-family:var(--font-mono);font-weight:700;color:#1a1613;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+footer.site b{color:var(--text-soft)}
+footer.site p{margin-bottom:9px;line-height:1.6}
+footer.site .f-disc{font-size:12.5px;color:var(--text-mute);background:var(--bg-2);
+  border:1px solid var(--border-soft);border-radius:9px;padding:11px 14px;margin-top:6px}
+
+/* ---------- responsive / mobile drawer ---------- */
+.sidebar-overlay{display:none}
+@media (max-width:980px){
+  :root{--maxw:760px}
+  #menu-btn{display:inline-flex}
+  aside.sidebar{position:fixed;top:var(--header-h);right:0;bottom:0;height:auto;
+    width:min(86vw,var(--sb-w));transform:translateX(100%);
+    transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:95;background:var(--bg);
+    border-left:none;border-inline-start:1px solid var(--border);
+    box-shadow:-14px 0 44px rgba(0,0,0,.42)}
+  aside.sidebar.open{transform:translateX(0)}
+  .sidebar-overlay{display:block;position:fixed;inset:0;top:var(--header-h);z-index:90;
+    background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .3s}
+  .sidebar-overlay.show{opacity:1;pointer-events:auto}
+  main.content{padding:0 20px}
+}
+@media (max-width:600px){
+  body{font-size:16px}
+  .cards.c2,.cards.c3{grid-template-columns:1fr}
+  .hstat{min-width:calc(50% - 6px);flex:1}
+  .brand .b-txt span{display:none}
+  .top-btn .kbd{display:none}
+  .complete-row{flex-direction:column;align-items:stretch}
+  .pk-mrow .pk-mlbl{width:96px;font-size:12px}
+  .cb-lbl{width:92px;font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
+</style>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="site">
+  <div class="f-top"><span class="f-mark">CC</span><b>Claude Code · המדריך האגנטי המלא</b></div>
+  <p>מדריך לימודי עצמאי. כל הפקודות, שמות המודלים והגרסאות נכונים ל־2 ביולי 2026 — עולם שזז מהר, אז אמתו מול <b>code.claude.com/docs</b>.</p>
+  <p>הנתונים המסומנים 📊 הם הערכות פנימיות של Anthropic ולא נבדקו בנפרד. פיצ'רים המסומנים "ניסיוני"/"2026" עשויים להשתנות.</p>
+  <div class="f-disc">נבנה כקובץ HTML יחיד עצמאי · ההתקדמות וערכת הנושא נשמרות מקומית בדפדפן שלך (localStorage) ואינן נשלחות לאף שרת.</div>
+</footer>
+
+</div><!-- /.content-inner -->
+</main>
+</div><!-- /.layout -->
+<div class="sidebar-overlay" id="sb-overlay"></div>
+
+<script>
+(function(){
+  "use strict";
+  var doc=document;
+  function $(id){return doc.getElementById(id);}
+
+  /* ---------- SVG snippets ---------- */
+  var CHECK_NAV='<svg class="done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+  var CHECK_BIG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+  var PLUS_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
+  var COPY_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+
+  /* ---------- safe storage ---------- */
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+
+  var sections=Array.prototype.slice.call(doc.querySelectorAll(".doc-section"));
+
+  /* ---------- THEME ---------- */
+  var themeBtn=$("theme-btn"), icSun=$("ic-sun"), icMoon=$("ic-moon");
+  function applyTheme(t){
+    var light=(t==="light");
+    doc.documentElement.setAttribute("data-theme", light?"light":"dark");
+    if(icSun) icSun.style.display=light?"none":"";
+    if(icMoon) icMoon.style.display=light?"":"none";
+  }
+  applyTheme(lsGet("cc_guide_theme")||"dark");
+  if(themeBtn) themeBtn.addEventListener("click",function(){
+    var light=doc.documentElement.getAttribute("data-theme")==="light";
+    var next=light?"dark":"light"; applyTheme(next); lsSet("cc_guide_theme",next);
+  });
+
+  /* ---------- BUILD NAV ---------- */
+  var nav=$("nav"), lastPhase=null;
+  sections.forEach(function(sec){
+    var phase=sec.getAttribute("data-phase");
+    if(phase!==lastPhase){
+      var ph=doc.createElement("div"); ph.className="nav-phase"; ph.textContent=phase;
+      nav.appendChild(ph); lastPhase=phase;
+    }
+    var a=doc.createElement("a");
+    a.className="nav-item"; a.href="#"+sec.id; a.setAttribute("data-target",sec.id);
+    a.innerHTML='<span class="num">'+sec.getAttribute("data-num")+'</span><span class="lbl">'+sec.getAttribute("data-title")+'</span>'+CHECK_NAV;
+    nav.appendChild(a);
+  });
+  var navMap={};
+  doc.querySelectorAll(".nav-item").forEach(function(it){ navMap[it.getAttribute("data-target")]=it; });
+
+  /* ---------- PROGRESS + MARK COMPLETE ---------- */
+  var STORE="cc_guide_progress_v1";
+  var completed=(function(){ try{ var r=lsGet(STORE); return r? new Set(JSON.parse(r)) : new Set(); }catch(e){ return new Set(); } })();
+  function saveSet(){ lsSet(STORE, JSON.stringify(Array.prototype.slice.call(completed))); }
+
+  var RING_C=2*Math.PI*27;
+  var ringFg=$("ring-fg");
+  if(ringFg){ ringFg.style.strokeDasharray=RING_C; ringFg.style.strokeDashoffset=RING_C; }
+  function updateProgress(){
+    var total=sections.length, done=0;
+    sections.forEach(function(s){ if(completed.has(s.id)) done++; });
+    var frac= total? done/total : 0;
+    if(ringFg) ringFg.style.strokeDashoffset=RING_C*(1-frac);
+    var pct=$("ring-pct"); if(pct) pct.textContent=Math.round(frac*100)+"%";
+    var pc=$("prog-count"); if(pc) pc.textContent=done+" מתוך "+total+" פרקים";
+    doc.querySelectorAll(".nav-item").forEach(function(it){
+      it.classList.toggle("completed", completed.has(it.getAttribute("data-target")));
+    });
+  }
+  function setBtn(btn,done){
+    btn.classList.toggle("is-done",done);
+    btn.innerHTML=(done? CHECK_BIG+"<span>הפרק הושלם</span>" : PLUS_SVG+"<span>סמן כהושלם</span>");
+  }
+  sections.forEach(function(sec){
+    var row=doc.createElement("div"); row.className="complete-row";
+    row.innerHTML='<span class="cr-txt">סיימת את הפרק? סמן אותו כדי לעקוב אחר ההתקדמות שלך.</span>';
+    var btn=doc.createElement("button"); btn.className="mark-btn"; btn.type="button";
+    btn.setAttribute("data-mark",sec.id);
+    setBtn(btn, completed.has(sec.id));
+    btn.addEventListener("click",function(){
+      if(completed.has(sec.id)) completed.delete(sec.id); else completed.add(sec.id);
+      saveSet(); setBtn(btn, completed.has(sec.id)); updateProgress();
+    });
+    row.appendChild(btn); sec.appendChild(row);
+  });
+  var resetBtn=$("prog-reset");
+  if(resetBtn) resetBtn.addEventListener("click",function(){
+    completed=new Set(); saveSet();
+    doc.querySelectorAll(".mark-btn").forEach(function(b){ setBtn(b,false); });
+    updateProgress();
+  });
+  updateProgress();
+
+  /* ---------- SEARCH ---------- */
+  var index=sections.map(function(s){
+    return { id:s.id, text:(s.getAttribute("data-title")+" "+s.getAttribute("data-kicker")+" "+s.textContent).toLowerCase() };
+  });
+  var searchInput=$("nav-search"), navEmpty=$("nav-empty");
+  function findRec(id){ for(var i=0;i<index.length;i++){ if(index[i].id===id) return index[i]; } return null; }
+  if(searchInput) searchInput.addEventListener("input",function(){
+    var q=this.value.trim().toLowerCase(), anyVisible=false;
+    doc.querySelectorAll(".nav-item").forEach(function(it){
+      var rec=findRec(it.getAttribute("data-target"));
+      var match=(!q)||(rec&&rec.text.indexOf(q)!==-1);
+      it.style.display=match?"":"none";
+      if(match) anyVisible=true;
+    });
+    doc.querySelectorAll(".nav-phase").forEach(function(ph){
+      var sib=ph.nextElementSibling, vis=false;
+      while(sib&&!sib.classList.contains("nav-phase")){
+        if(sib.classList.contains("nav-item")&&sib.style.display!=="none"){ vis=true; break; }
+        sib=sib.nextElementSibling;
+      }
+      ph.style.display=(q&&!vis)?"none":"";
+    });
+    if(navEmpty) navEmpty.style.display=anyVisible?"none":"block";
+  });
+
+  /* ---------- MOBILE DRAWER ---------- */
+  var sidebar=$("sidebar"), overlay=$("sb-overlay"), menuBtn=$("menu-btn");
+  function openSidebar(){ if(sidebar)sidebar.classList.add("open"); if(overlay)overlay.classList.add("show"); }
+  function closeSidebar(){ if(sidebar)sidebar.classList.remove("open"); if(overlay)overlay.classList.remove("show"); }
+  function isMobile(){ return window.matchMedia("(max-width:980px)").matches; }
+  if(menuBtn) menuBtn.addEventListener("click",function(){ (sidebar&&sidebar.classList.contains("open"))?closeSidebar():openSidebar(); });
+  if(overlay) overlay.addEventListener("click",closeSidebar);
+  if(nav) nav.addEventListener("click",function(e){ if(e.target.closest&&e.target.closest(".nav-item")&&isMobile()) closeSidebar(); });
+
+  var searchTrigger=$("search-trigger");
+  function focusSearch(){ if(isMobile()) openSidebar(); if(searchInput) searchInput.focus(); }
+  if(searchTrigger) searchTrigger.addEventListener("click",focusSearch);
+  doc.addEventListener("keydown",function(e){
+    var tag=(doc.activeElement&&doc.activeElement.tagName)||"";
+    if(e.key==="/"&&tag!=="INPUT"&&tag!=="TEXTAREA"){ e.preventDefault(); focusSearch(); }
+    if(e.key==="Escape") closeSidebar();
+  });
+
+  /* ---------- ACTIVE NAV (IntersectionObserver) ---------- */
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){
+          doc.querySelectorAll(".nav-item.active").forEach(function(a){ a.classList.remove("active"); });
+          var it=navMap[en.target.id]; if(it) it.classList.add("active");
+        }
+      });
+    },{ rootMargin:"-28% 0px -62% 0px", threshold:0 });
+    sections.forEach(function(s){ io.observe(s); });
+  }
+
+  /* ---------- READING PROGRESS BAR ---------- */
+  var rp=$("read-progress");
+  function onScroll(){
+    var h=doc.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    if(rp) rp.style.width=(max>0?(h.scrollTop/max)*100:0)+"%";
+  }
+  window.addEventListener("scroll",onScroll,{passive:true});
+  onScroll();
+  /* ---------- SYNTAX HIGHLIGHTER (vanilla, no deps) ---------- */
+  function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  var GRAMMARS={
+    bash:[
+      ["comment",/#[^\n]*/],
+      ["string",/"(?:\\.|[^"\\])*"/],
+      ["string",/'[^']*'/],
+      ["var",/\$\{[^}]*\}|\$[A-Za-z_]\w*|\$\d/],
+      ["flag",/(?:--|-)[A-Za-z][\w-]*/],
+      ["cmd",/\b(?:claude|npm|npx|brew|curl|irm|iex|git|cd|ls|cat|echo|export|sudo|bash|sh|chmod|mkdir|node|python3?|pip3?|docker|code|winget|tmux|pnpm|yarn)\b/],
+      ["number",/\b\d+(?:\.\d+)?\b/]
+    ],
+    yaml:[
+      ["comment",/#[^\n]*/],
+      ["prop",/[A-Za-z_][\w-]*(?=\s*:)/],
+      ["string",/"(?:\\.|[^"\\])*"/],
+      ["string",/'[^']*'/],
+      ["bool",/\b(?:true|false|null|yes|no)\b/],
+      ["number",/\b\d+(?:\.\d+)?\b/]
+    ],
+    json:[
+      ["prop",/"(?:\\.|[^"\\])*"(?=\s*:)/],
+      ["string",/"(?:\\.|[^"\\])*"/],
+      ["bool",/\b(?:true|false|null)\b/],
+      ["number",/-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b/],
+      ["punc",/[{}\[\],:]/]
+    ],
+    javascript:[
+      ["comment",/\/\*[\s\S]*?\*\//],
+      ["comment",/\/\/[^\n]*/],
+      ["string",/`(?:\\.|[^`\\])*`/],
+      ["string",/"(?:\\.|[^"\\])*"/],
+      ["string",/'(?:\\.|[^'\\])*'/],
+      ["keyword",/\b(?:const|let|var|function|return|if|else|for|await|async|import|from|export|default|new|class|extends|try|catch|of|in|typeof|this|null|undefined|true|false)\b/],
+      ["number",/\b\d+(?:\.\d+)?\b/],
+      ["func",/\b[A-Za-z_$][\w$]*(?=\s*\()/]
+    ],
+    markdown:[
+      ["heading",/^#{1,6}[^\n]*/],
+      ["comment",/^```[^\n]*/],
+      ["link",/\[[^\]]*\]\([^)]*\)/],
+      ["string",/`[^`\n]+`/],
+      ["keyword",/\*\*[^\n]+?\*\*/],
+      ["punc",/^\s*[-*+]\s/]
+    ]
+  };
+  function highlight(code,lang){
+    var rules=GRAMMARS[lang];
+    if(!rules) return esc(code);
+    var combined;
+    try{ combined=new RegExp(rules.map(function(r){return "("+r[1].source+")";}).join("|"),"gm"); }
+    catch(e){ return esc(code); }
+    var out="",last=0,m,guard=0;
+    while((m=combined.exec(code))!==null){
+      if(guard++>200000) break;
+      if(m.index>last) out+=esc(code.slice(last,m.index));
+      var type=null;
+      for(var i=0;i<rules.length;i++){ if(m[i+1]!==undefined){ type=rules[i][0]; break; } }
+      out+='<span class="tok-'+type+'">'+esc(m[0])+'</span>';
+      last=m.index+m[0].length;
+      if(m[0].length===0) combined.lastIndex++;
+    }
+    out+=esc(code.slice(last));
+    return out;
+  }
+  doc.querySelectorAll('pre code[class*="lang-"]').forEach(function(code){
+    var mm=code.className.match(/lang-([a-z]+)/);
+    var lang=mm?mm[1]:"text";
+    try{ code.innerHTML=highlight(code.textContent,lang); }catch(e){}
+  });
+
+  /* ---------- COPY BUTTONS ---------- */
+  function copyText(text,cb){
+    function fallback(){
+      try{
+        var ta=doc.createElement("textarea"); ta.value=text;
+        ta.style.position="fixed"; ta.style.top="-1000px"; ta.style.opacity="0";
+        doc.body.appendChild(ta); ta.focus(); ta.select();
+        var ok=doc.execCommand("copy"); doc.body.removeChild(ta); cb(ok);
+      }catch(e){ cb(false); }
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){cb(true);},function(){fallback();});
+    } else fallback();
+  }
+  doc.querySelectorAll(".code-block").forEach(function(block){
+    var head=block.querySelector(".code-head"), code=block.querySelector("code");
+    if(!head||!code) return;
+    var btn=doc.createElement("button"); btn.className="copy-btn"; btn.type="button";
+    btn.innerHTML=COPY_SVG+"<span>העתק</span>";
+    btn.addEventListener("click",function(){
+      copyText(code.textContent,function(ok){
+        var span=btn.querySelector("span");
+        if(ok){ btn.classList.add("copied"); span.textContent="הועתק!"; }
+        else { span.textContent="שגיאה"; }
+        setTimeout(function(){ btn.classList.remove("copied"); span.textContent="העתק"; },1600);
+      });
+    });
+    head.appendChild(btn);
+  });
+
+  /* ---------- HERO TERMINAL ---------- */
+  var term=$("term");
+  var reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+  if(term){
+    var seq=[
+      {type:"type",cls:"prompt",pre:"$ ",cls2:"user",text:"claude"},
+      {type:"type",cls:"prompt",pre:"> ",cls2:"user",text:"בנה endpoint חדש ל-API עם בדיקות"},
+      {type:"line",cls:"ag",text:"● מתכנן את המשימה (Plan Mode)…"},
+      {type:"line",cls:"muted",text:"● קורא 14 קבצים · מריץ 3 subagents במקביל"},
+      {type:"line",cls:"ok",text:"✓ הושלם — 6 קבצים נערכו · 12 בדיקות עוברות"}
+    ];
+    function addCursor(){ var c=doc.createElement("span"); c.className="cursor"; term.appendChild(c); }
+    if(reduced){
+      seq.forEach(function(s){
+        var d=doc.createElement("span");
+        if(s.type==="type"){ d.className="ln"; d.style.opacity=1; d.innerHTML='<span class="'+s.cls+'">'+s.pre+'</span><span class="'+s.cls2+'">'+s.text+'</span>'; }
+        else { d.className="ln "+s.cls; d.style.opacity=1; d.textContent=s.text; }
+        term.appendChild(d);
+      });
+      addCursor();
+    } else {
+      var i=0;
+      (function nextStep(){
+        if(i>=seq.length){ addCursor(); return; }
+        var s=seq[i++];
+        if(s.type==="type"){
+          var ln=doc.createElement("span"); ln.className="ln"; ln.style.opacity=1;
+          var pre=doc.createElement("span"); pre.className=s.cls; pre.textContent=s.pre; ln.appendChild(pre);
+          var body=doc.createElement("span"); body.className=s.cls2; ln.appendChild(body);
+          term.appendChild(ln);
+          var j=0;
+          (function typeChar(){
+            if(j<=s.text.length){ body.textContent=s.text.slice(0,j); j++; setTimeout(typeChar,40); }
+            else setTimeout(nextStep,360);
+          })();
+        } else {
+          var d=doc.createElement("span"); d.className="ln "+s.cls+" reveal-ln"; d.textContent=s.text;
+          term.appendChild(d); setTimeout(nextStep,640);
+        }
+      })();
+    }
+  }
+
+  /* ---------- AGENT STRATEGY PICKER ---------- */
+  var PK_Q=[
+    { q:'מה היקף המשימה?', sub:'גודל ומבנה העבודה שלפניך.', opts:[
+      {t:'משימה ממוקדת אחת', w:{single:3,sub:1,team:0,flow:0}},
+      {t:'כמה צעדים — אבל קשורים זה לזה', w:{single:2,sub:2,team:0,flow:0}},
+      {t:'כמה זרמי עבודה מקבילים שצריך לתאם', w:{single:0,sub:1,team:3,flow:1}},
+      {t:'עשרות/מאות פריטים עצמאיים (כל ה-repo)', w:{single:0,sub:1,team:1,flow:3}}
+    ]},
+    { q:'כמה כל "עובד" צריך לדעת על השאר?', sub:'זהו גבול ההקשר — הגורם המכריע.', opts:[
+      {t:'הכול הקשר אחד, משותף והדוק', w:{single:3,sub:0,team:0,flow:0}},
+      {t:'ברובו עצמאי — מספיק שיחזיר תקציר', w:{single:0,sub:3,team:1,flow:1}},
+      {t:'עצמאי, אך עם תלויות שצריך לתאם', w:{single:0,sub:1,team:3,flow:1}},
+      {t:'עצמאי לחלוטין, אפשר לאמת כל אחד בנפרד', w:{single:0,sub:1,team:1,flow:3}}
+    ]},
+    { q:'מה חשוב לך יותר כרגע?', sub:'איזון בין פשטות/עלות לתפוקה.', opts:[
+      {t:'פשטות, שליטה ועלות נמוכה', w:{single:2,sub:2,team:0,flow:0}},
+      {t:'בידוד עבודה "מלוכלכת" מההקשר הראשי', w:{single:0,sub:3,team:1,flow:1}},
+      {t:'תפוקה מקסימלית — העלות משנית', w:{single:0,sub:0,team:2,flow:3}}
+    ]}
+  ];
+  var PK_RES={
+    single:{name:"סוכן יחיד",badge:"ללא תזמור",body:"המשימה מתאימה לשיח הדוק עם הקשר משותף. אין צורך בתזמור — סוכן אחד עם Plan Mode ייתן את התוצאה המהירה והזולה ביותר.",how:'<b>איך להתחיל:</b> <code class="ic">/clear</code> ‹ Plan Mode ‹ אישור תוכנית ‹ ביצוע. ראה פרק 06.'},
+    sub:{name:"Subagent",badge:"רמה 1 · בידוד הקשר",body:"יש עבודה שכדאי לבודד — חיפוש נרחב, סקירה, או משימה שמחזירה תקציר. subagent ישמור על ההקשר הראשי שלך נקי וחד.",how:'<b>איך להתחיל:</b> <code class="ic">/agents</code> ליצירת סוכן ממוקד עם כלים מוגבלים, או <code class="ic">@name</code> להפעלה. ראה פרק 07.'},
+    team:{name:"Agent Team",badge:"רמה 2 · ניסיוני",body:"יש כמה זרמי עבודה מקבילים עם תלויות שצריך לתאם (למשל frontend/backend/טסטים). צוות עם ראש, רשימת משימות משותפת ותיבת דואר מתאים כאן.",how:'<b>איך להתחיל:</b> הפעל <code class="ic">CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code> (Opus 4.6+). שים לב לעלות (~×5 לחבר). ראה פרק 11.'},
+    flow:{name:"Dynamic Workflow",badge:"רמה 3 · 2026",body:"מקביליות מסיבית של פריטים עצמאיים שאפשר לאמת בנפרד — מיגרציה, ציד באגים או ביקורת על פני כל הקודבייס.",how:'<b>איך להתחיל:</b> כלול "workflow" בפרומפט או הרץ <code class="ic">/deep-research</code>. דרג עובדים ל-Haiku, הגבל maxTokens, ולמתזמר שקול Opus 4.8 או Fable 5. ראה פרק 12.'}
+  };
+  var pkStage=$("pk-stage");
+  if(pkStage){
+    var pkBar=doc.querySelectorAll("#picker-widget .pk-bar span");
+    var pkBack=$("pk-back"), pkRestart=$("pk-restart"), pkAnswers=[];
+    function pkRender(){
+      var step=pkAnswers.length;
+      pkBar.forEach(function(b,idx){ b.classList.toggle("on", idx<Math.max(step,(step>=PK_Q.length?PK_Q.length:step))); });
+      pkBar.forEach(function(b,idx){ b.classList.toggle("on", idx<step || step>=PK_Q.length); });
+      pkBack.hidden=(step===0);
+      pkRestart.hidden=(step<PK_Q.length);
+      if(step<PK_Q.length){
+        var Q=PK_Q[step];
+        var html='<div class="pk-q">'+Q.q+'</div><div class="pk-sub">'+Q.sub+'</div><div class="pk-opts">';
+        Q.opts.forEach(function(o,idx){ html+='<button class="pk-opt" type="button" data-i="'+idx+'"><span class="pk-k">'+(idx+1)+'</span>'+o.t+'</button>'; });
+        html+='</div>';
+        pkStage.innerHTML=html;
+        pkStage.querySelectorAll(".pk-opt").forEach(function(btn){
+          btn.addEventListener("click",function(){ pkAnswers.push(parseInt(this.getAttribute("data-i"),10)); pkRender(); });
+        });
+      } else {
+        var score={single:0,sub:0,team:0,flow:0};
+        pkAnswers.forEach(function(ans,qi){ var w=PK_Q[qi].opts[ans].w; for(var k in w){ score[k]+=w[k]; } });
+        var order=["single","sub","team","flow"], best="single";
+        order.forEach(function(k){ if(score[k]>score[best]) best=k; });
+        var R=PK_RES[best];
+        var max=Math.max(score.single,score.sub,score.team,score.flow,1);
+        var rows=order.map(function(k){
+          var pct=Math.round(score[k]/max*100);
+          return '<div class="pk-mrow'+(k===best?" win":"")+'"><span class="pk-mlbl">'+PK_RES[k].name+'</span><span class="pk-mtrack"><span class="pk-mfill" data-w="'+pct+'"></span></span></div>';
+        }).join("");
+        pkStage.innerHTML='<div class="pk-result"><span class="pk-res-badge">★ ההמלצה · '+R.badge+'</span><div class="pk-res-title">מומלץ: <span class="grad">'+R.name+'</span></div><div class="pk-res-body">'+R.body+'</div><div class="pk-res-how">'+R.how+'</div><div class="pk-res-meter">'+rows+'</div></div>';
+        setTimeout(function(){ pkStage.querySelectorAll(".pk-mfill").forEach(function(f){ f.style.width=f.getAttribute("data-w")+"%"; }); },80);
+      }
+    }
+    pkBack.addEventListener("click",function(){ if(pkAnswers.length>0){ pkAnswers.pop(); pkRender(); } });
+    pkRestart.addEventListener("click",function(){ pkAnswers=[]; pkRender(); });
+    pkRender();
+  }
+
+})();
+</script>
+</body>
+</html>
