@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>צי, לא צוות · מאסטרי ב-Subagents — מדריך ההמשך 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Suez+One&family=Assistant:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#0a101e; --bg1:#0e1628; --panel:#131e34; --panel2:#17233c; --line:#22304e; --line2:#2c3d61;
+  --ink:#e8eef9; --mut:#93a3c0; --dim:#5f7196;
+  --acc:#3fd2e8; --acc2:#8ce6f4; --acc-dim:#1a3d4d;
+  --amber:#f2b544; --coral:#ff7a70; --mint:#45de9e; --violet:#b6a7f7; --blue:#6aa5ff;
+  --shadow:0 12px 40px rgba(3,8,20,.5);
+  --r:14px; --rs:9px;
+  --sans:'Assistant',-apple-system,'Segoe UI',sans-serif;
+  --disp:'Suez One',serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+[data-theme="light"]{
+  --bg0:#eef2f9; --bg1:#f5f8fd; --panel:#ffffff; --panel2:#f2f6fc; --line:#d8e1f0; --line2:#c2cfe6;
+  --ink:#101d36; --mut:#4b5d7e; --dim:#7c8cab;
+  --acc:#0d94ad; --acc2:#0a7a90; --acc-dim:#d4eef4;
+  --amber:#a86e08; --coral:#c8443a; --mint:#0b8f5c; --violet:#6d5bd0; --blue:#2563eb;
+  --shadow:0 10px 30px rgba(30,50,90,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+body{
+  font-family:var(--sans); background:var(--bg0); color:var(--ink);
+  font-size:16.5px; line-height:1.75; -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(900px 420px at 18% -60px, rgba(63,210,232,.10), transparent 60%),
+    radial-gradient(rgba(140,170,220,.075) 1px, transparent 1.4px);
+  background-size:auto, 26px 26px;
+}
+[data-theme="light"] body::before{background:radial-gradient(900px 420px at 18% -60px, rgba(13,148,173,.09), transparent 60%),radial-gradient(rgba(60,90,150,.09) 1px, transparent 1.4px);background-size:auto,26px 26px}
+::selection{background:var(--acc); color:#04121a}
+
+/* ===== layout ===== */
+.sidebar{
+  position:fixed; top:0; bottom:0; inset-inline-start:0; width:302px; z-index:40;
+  background:var(--bg1); border-inline-end:1px solid var(--line);
+  display:flex; flex-direction:column; overflow-y:auto; padding:20px 18px 28px;
+  scrollbar-width:thin; scrollbar-color:var(--line2) transparent;
+}
+.main{margin-inline-start:302px; position:relative; z-index:1}
+.wrap{max-width:860px; margin:0 auto; padding:0 40px 90px}
+@media(max-width:1060px){
+  .sidebar{transform:translateX(100%); transition:transform .25s ease; box-shadow:var(--shadow)}
+  [dir="rtl"] .sidebar{transform:translateX(100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-inline-start:0}
+  .wrap{padding:0 20px 70px}
+  .topbar{display:flex!important}
+}
+.topbar{
+  display:none; position:sticky; top:0; z-index:30; align-items:center; gap:12px;
+  background:color-mix(in srgb, var(--bg0) 88%, transparent); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line); padding:10px 16px;
+}
+.topbar .tb-title{font-family:var(--disp); font-size:17px}
+.burger{margin-inline-start:auto; background:var(--panel); border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:6px 12px; cursor:pointer; font-family:var(--sans); font-size:14px}
+.scrim{position:fixed; inset:0; background:rgba(4,8,18,.55); z-index:35; opacity:0; pointer-events:none; transition:opacity .2s}
+.scrim.show{opacity:1; pointer-events:auto}
+
+/* ===== sidebar pieces ===== */
+.logo-row{display:flex; align-items:center; gap:11px; margin-bottom:16px}
+.mark{width:40px; height:40px; border-radius:11px; background:var(--panel); border:1px solid var(--line2); display:grid; grid-template-columns:repeat(3,1fr); gap:3.5px; padding:8px; flex:none}
+.mark i{border-radius:50%; background:var(--dim); display:block}
+.mark i.lead{background:var(--acc); box-shadow:0 0 9px rgba(63,210,232,.8)}
+.logo-txt b{font-family:var(--disp); font-weight:400; font-size:18px; display:block; line-height:1.15}
+.logo-txt span{font-size:11.5px; color:var(--mut); letter-spacing:.3px}
+.searchbox{position:relative; margin-bottom:14px}
+.searchbox input{
+  width:100%; background:var(--panel); border:1px solid var(--line); color:var(--ink);
+  border-radius:9px; padding:8px 12px 8px 34px; font-family:var(--sans); font-size:13.5px; outline:none;
+}
+.searchbox input:focus{border-color:var(--acc)}
+.searchbox kbd{position:absolute; inset-inline-end:auto; left:9px; top:7px; font-family:var(--mono); font-size:10.5px; color:var(--dim); border:1px solid var(--line); border-radius:5px; padding:1px 6px}
+.noRes{display:none; font-size:12.5px; color:var(--dim); padding:4px 2px 8px}
+.prog-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:13px 14px; display:flex; align-items:center; gap:13px; margin-bottom:14px}
+.ring{width:56px; height:56px; flex:none}
+.ring svg{width:100%; height:100%; transform:rotate(-90deg)}
+.ring .bgc{stroke:var(--line2); fill:none; stroke-width:5}
+.ring .fgc{stroke:var(--acc); fill:none; stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset .5s ease}
+.ring text{transform:rotate(90deg); transform-origin:center; fill:var(--ink); font-size:15px; font-weight:700; font-family:var(--sans)}
+.prog-meta b{font-size:13.5px; display:block}
+.prog-meta span{font-size:12px; color:var(--mut); display:block}
+.reset{background:none; border:none; color:var(--dim); font-size:11.5px; cursor:pointer; padding:0; margin-top:3px; font-family:var(--sans); text-decoration:underline dotted}
+.reset:hover{color:var(--coral)}
+
+.fleet-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:12px 13px 13px; margin-bottom:16px}
+.fleet-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:9px}
+.fleet-head b{font-size:12.5px; letter-spacing:.4px; color:var(--acc2)}
+.fleet-head span{font-family:var(--mono); font-size:11.5px; color:var(--mut)}
+.fleet{display:grid; grid-template-columns:1fr 1fr; gap:6px}
+.chip{display:flex; align-items:center; gap:7px; border:1.5px dashed var(--line2); border-radius:8px; padding:5px 8px; font-size:11.8px; color:var(--dim); background:transparent; transition:all .3s}
+.chip i{width:7px; height:7px; border-radius:50%; background:var(--dim); flex:none; transition:all .3s}
+.chip.on{border-style:solid; color:var(--ink); background:color-mix(in srgb, var(--chipc) 10%, transparent); border-color:color-mix(in srgb, var(--chipc) 55%, transparent)}
+.chip.on i{background:var(--chipc); box-shadow:0 0 8px var(--chipc)}
+.chip.pop{animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(.9)}55%{transform:scale(1.06)}100%{transform:scale(1)}}
+
+.nav-phase{font-size:11px; font-weight:700; letter-spacing:.9px; color:var(--dim); margin:15px 4px 7px}
+.nav a{
+  display:flex; gap:9px; align-items:baseline; padding:6.5px 9px; border-radius:8px;
+  color:var(--mut); text-decoration:none; font-size:13.8px; line-height:1.4; border:1px solid transparent;
+}
+.nav a .n{font-family:var(--mono); font-size:11px; color:var(--dim); flex:none; width:19px}
+.nav a:hover{background:var(--panel); color:var(--ink)}
+.nav a.act{background:var(--panel2); color:var(--ink); border-color:var(--line)}
+.nav a.act .n{color:var(--acc)}
+.nav a.done .n::after{content:" ✓"; color:var(--mint)}
+.nav a.hide{display:none}
+.theme-row{margin-top:auto; padding-top:18px; display:flex; align-items:center; justify-content:space-between}
+.theme-btn{background:var(--panel); border:1px solid var(--line); color:var(--mut); border-radius:8px; padding:5px 11px; cursor:pointer; font-family:var(--sans); font-size:12.5px}
+.theme-btn:hover{color:var(--ink); border-color:var(--line2)}
+.ver-note{font-size:10.5px; color:var(--dim)}
+
+/* ===== hero ===== */
+.hero{padding:76px 0 30px; position:relative}
+.hero-kick{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px; color:var(--acc2); border:1px solid var(--acc-dim); background:color-mix(in srgb, var(--acc) 7%, transparent); border-radius:99px; padding:4px 13px; margin-bottom:22px}
+.hero h1{font-family:var(--disp); font-weight:400; font-size:clamp(42px,6vw,66px); line-height:1.12; letter-spacing:-.5px}
+.hero h1 .a{color:var(--acc)}
+.hero .sub{font-family:var(--disp); font-weight:400; color:var(--mut); font-size:clamp(17px,2.2vw,22px); margin-top:8px}
+.hero .lead-p{margin-top:22px; max-width:64ch}
+.hstats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:30px 0 26px}
+@media(max-width:720px){.hstats{grid-template-columns:1fr 1fr}}
+.hstat{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:13px 15px}
+.hstat b{font-family:var(--disp); font-weight:400; font-size:26px; color:var(--acc); display:block; line-height:1.2}
+.hstat span{font-size:12.3px; color:var(--mut)}
+.reveal{opacity:0; transform:translateY(14px); animation:rise .7s ease forwards}
+@keyframes rise{to{opacity:1; transform:none}}
+
+/* terminal */
+.term{background:#070d1a; border:1px solid var(--line); border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow); direction:ltr; text-align:left}
+[data-theme="light"] .term{background:#0d1626}
+.term-bar{display:flex; align-items:center; gap:8px; padding:9px 13px; border-bottom:1px solid #1c2740; background:#0b1322}
+.term-bar .dots{display:flex; gap:6px}
+.term-bar .dots i{width:10px; height:10px; border-radius:50%; background:#26334f}
+.term-bar .dots i:first-child{background:#ff6b63}.term-bar .dots i:nth-child(2){background:#f2b544}.term-bar .dots i:nth-child(3){background:#45de9e}
+.term-bar span{font-family:var(--mono); font-size:11px; color:#5f7196; margin-left:auto}
+.term-body{padding:15px 17px 18px; font-family:var(--mono); font-size:13px; line-height:1.9; min-height:158px; color:#c6d4ec}
+.term-body .tl{display:block; white-space:pre-wrap}
+.term-body .p{color:#45de9e}.term-body .u{color:#8ce6f4}.term-body .d{color:#5f7196}.term-body .ok{color:#45de9e}.term-body .run{color:#f2b544}
+.cursor{display:inline-block; width:8px; height:15px; background:var(--acc); vertical-align:-2px; animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ===== sections ===== */
+.doc-section{padding:64px 0 20px; border-top:1px solid var(--line); margin-top:34px}
+.doc-section:first-of-type{border-top:none; margin-top:0}
+.kick{display:flex; align-items:center; gap:11px; font-family:var(--mono); font-size:12px; color:var(--acc2); margin-bottom:11px}
+.kick .knum{background:var(--panel); border:1px solid var(--line2); color:var(--acc); border-radius:7px; padding:2px 9px; font-weight:600}
+.sec-title{font-family:var(--disp); font-weight:400; font-size:clamp(27px,3.4vw,36px); line-height:1.25; margin-bottom:18px}
+h3{font-size:19.5px; font-weight:700; margin:34px 0 11px}
+h4{font-size:16px; font-weight:700; margin:22px 0 8px}
+p{margin:0 0 14px}
+.lead-p{font-size:18px; color:color-mix(in srgb, var(--ink) 88%, var(--mut)); margin-bottom:18px}
+strong{font-weight:700}
+ul,ol{margin:0 0 15px; padding-inline-start:24px}
+li{margin-bottom:7px}
+a{color:var(--acc); text-decoration:underline dotted; text-underline-offset:3px}
+code.ic{font-family:var(--mono); font-size:.86em; background:var(--panel2); border:1px solid var(--line); border-radius:6px; padding:1.5px 6px; direction:ltr; unicode-bidi:isolate; white-space:nowrap}
+kbd{font-family:var(--mono); font-size:.82em; background:var(--panel2); border:1px solid var(--line2); border-bottom-width:2.5px; border-radius:6px; padding:1.5px 7px}
+
+/* code blocks */
+.code{background:#0a1120; border:1px solid var(--line); border-radius:var(--rs); margin:16px 0 20px; overflow:hidden; direction:ltr; text-align:left; position:relative}
+[data-theme="light"] .code{background:#0e1729}
+.code-h{display:flex; align-items:center; gap:8px; padding:7.5px 12px; border-bottom:1px solid #1a2540; background:#0d1526}
+.code-h .cdots{display:flex; gap:5px}
+.code-h .cdots i{width:8.5px; height:8.5px; border-radius:50%; background:#243250}
+.code-h .lang{font-family:var(--mono); font-size:11px; color:#6d80a5}
+.copy{margin-left:auto; background:transparent; border:1px solid #26334f; color:#8296bb; font-family:var(--sans); font-size:11.5px; border-radius:6px; padding:3px 10px; cursor:pointer}
+.copy:hover{color:#dfe9fb; border-color:#3b4c72}
+.code pre{padding:14px 17px; overflow-x:auto; font-family:var(--mono); font-size:12.9px; line-height:1.72; color:#cdd9ef; scrollbar-width:thin}
+.code .c{color:#5f7196}.code .k{color:#8ce6f4}.code .s{color:#a7e8b8}.code .y{color:#f2b544}.code .fn{color:#b6a7f7}
+
+/* callouts */
+.co{border:1px solid var(--line); border-inline-start:3px solid var(--cocol,var(--acc)); background:color-mix(in srgb, var(--cocol,var(--acc)) 5%, var(--panel)); border-radius:var(--rs); padding:14px 17px 11px; margin:18px 0 20px}
+.co .co-h{display:flex; align-items:center; gap:8px; font-weight:700; font-size:14.5px; margin-bottom:7px; color:color-mix(in srgb, var(--cocol,var(--acc)) 78%, var(--ink))}
+.co p{font-size:14.8px; margin-bottom:8px}
+.co p:last-child{margin-bottom:3px}
+.co ul,.co ol{font-size:14.8px}
+.co.note{--cocol:var(--acc)} .co.tip{--cocol:var(--mint)} .co.warn{--cocol:var(--amber)} .co.danger{--cocol:var(--coral)} .co.research{--cocol:var(--violet)} .co.new{--cocol:var(--blue)}
+
+/* badges */
+.b{display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.3px; border-radius:99px; padding:2px 9px; vertical-align:2px; margin-inline-start:5px; border:1px solid}
+.b-new{color:var(--blue); border-color:color-mix(in srgb,var(--blue) 45%,transparent); background:color-mix(in srgb,var(--blue) 9%,transparent)}
+.b-exp{color:var(--amber); border-color:color-mix(in srgb,var(--amber) 45%,transparent); background:color-mix(in srgb,var(--amber) 9%,transparent)}
+.b-ver{color:var(--mut); border-color:var(--line2); background:var(--panel2); font-family:var(--mono); font-weight:500}
+.b-dep{color:var(--coral); border-color:color-mix(in srgb,var(--coral) 45%,transparent); background:color-mix(in srgb,var(--coral) 9%,transparent)}
+
+/* tables */
+.tblwrap{overflow-x:auto; margin:16px 0 20px; border:1px solid var(--line); border-radius:var(--rs)}
+table{width:100%; border-collapse:collapse; font-size:14.3px}
+th{background:var(--panel2); text-align:start; padding:9px 13px; font-size:12.8px; letter-spacing:.3px; color:var(--mut); border-bottom:1px solid var(--line)}
+td{padding:9.5px 13px; border-bottom:1px solid var(--line); vertical-align:top}
+tr:last-child td{border-bottom:none}
+td:first-child{font-weight:600}
+
+/* cards grid */
+.cards{display:grid; gap:11px; margin:16px 0 20px}
+.c3{grid-template-columns:repeat(3,1fr)} .c2{grid-template-columns:1fr 1fr}
+@media(max-width:760px){.c3,.c2{grid-template-columns:1fr}}
+.card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:15px 16px 11px}
+.card .ci{font-size:19px; margin-bottom:6px}
+.card h4{margin:0 0 5px; font-size:15px}
+.card p{font-size:13.8px; color:var(--mut); margin-bottom:4px}
+
+/* exercise + done */
+.ex{border:1px dashed var(--line2); background:color-mix(in srgb, var(--acc) 3%, transparent); border-radius:var(--r); padding:16px 19px 10px; margin:26px 0 8px}
+.ex .ex-h{display:flex; gap:8px; font-weight:800; font-size:15px; margin-bottom:9px; color:var(--acc2)}
+.ex ol{font-size:14.8px}
+.done-row{display:flex; align-items:center; gap:13px; margin-top:26px; padding-top:16px; border-top:1px dashed var(--line)}
+.done-row span{font-size:13px; color:var(--dim)}
+.markbtn{background:var(--panel); border:1px solid var(--line2); color:var(--ink); border-radius:9px; padding:7px 16px; font-family:var(--sans); font-size:13.5px; font-weight:600; cursor:pointer}
+.markbtn:hover{border-color:var(--acc)}
+.markbtn.on{background:color-mix(in srgb, var(--mint) 13%, transparent); border-color:color-mix(in srgb, var(--mint) 55%, transparent); color:var(--mint)}
+
+/* agent file card */
+.afile{border:1px solid var(--line2); border-radius:var(--r); overflow:hidden; margin:16px 0 20px; box-shadow:var(--shadow)}
+.afile-h{display:flex; align-items:center; gap:9px; background:var(--panel2); padding:9px 14px; border-bottom:1px solid var(--line)}
+.afile-h .adot{width:9px; height:9px; border-radius:50%; background:var(--adc,var(--acc)); box-shadow:0 0 7px var(--adc,var(--acc))}
+.afile-h b{font-family:var(--mono); font-size:12.5px; direction:ltr; unicode-bidi:isolate}
+.afile-h span{font-size:12px; color:var(--mut); margin-inline-start:auto}
+.afile .code{margin:0; border:none; border-radius:0}
+
+/* estimator */
+.est{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:18px 20px; margin:18px 0 22px}
+.est h4{margin-top:0}
+.est-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:12px 0 14px}
+@media(max-width:680px){.est-grid{grid-template-columns:1fr}}
+.est label{display:block; font-size:12.5px; color:var(--mut); margin-bottom:5px}
+.est select{width:100%; background:var(--panel2); color:var(--ink); border:1px solid var(--line2); border-radius:8px; padding:7px 10px; font-family:var(--sans); font-size:14px}
+.est-out{display:flex; gap:22px; flex-wrap:wrap; border-top:1px dashed var(--line); padding-top:13px}
+.est-out div b{font-family:var(--disp); font-weight:400; font-size:23px; color:var(--acc); display:block}
+.est-out div span{font-size:12px; color:var(--mut)}
+.est .fine{font-size:11.8px; color:var(--dim); margin:10px 0 0}
+
+details.appx{border:1px solid var(--line); border-radius:var(--rs); margin:0 0 11px; background:var(--panel)}
+details.appx summary{cursor:pointer; padding:11px 15px; font-family:var(--mono); font-size:13px; direction:ltr; text-align:left; color:var(--acc2)}
+details.appx[open] summary{border-bottom:1px solid var(--line)}
+details.appx .code{margin:0; border:none; border-radius:0}
+
+footer.site{border-top:1px solid var(--line); margin-top:60px; padding:30px 0 10px; color:var(--dim); font-size:13px}
+footer.site b{color:var(--mut)}
+.mini-toc{font-size:13.5px; color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tb-title">צי, לא צוות</div>
+  <button class="burger" id="burger">☰ פרקים</button>
+</div>
+<div class="scrim" id="scrim"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="logo-row">
+    <div class="mark" aria-hidden="true"><i class="lead"></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="logo-txt"><b>צי, לא צוות</b><span>מאסטרי ב-Subagents · 2026</span></div>
+  </div>
+  <div class="searchbox">
+    <input type="search" id="q" placeholder="חיפוש בפרקים…" aria-label="חיפוש">
+    <kbd>/</kbd>
+  </div>
+  <div class="noRes" id="noRes">לא נמצאו פרקים תואמים.</div>
+  <div class="prog-card">
+    <div class="ring">
+      <svg viewBox="0 0 60 60"><circle class="bgc" cx="30" cy="30" r="25"></circle><circle class="fgc" id="ringFg" cx="30" cy="30" r="25" stroke-dasharray="157" stroke-dashoffset="157"></circle><text x="30" y="35" text-anchor="middle" id="ringPct">0%</text></svg>
+    </div>
+    <div class="prog-meta">
+      <b>ההתקדמות שלך</b>
+      <span id="progTxt">0 מתוך 12 פרקים</span>
+      <button class="reset" id="resetBtn">איפוס התקדמות</button>
+    </div>
+  </div>
+  <div class="fleet-card">
+    <div class="fleet-head"><b>מצבת הצי</b><span id="fleetCount">0/8</span></div>
+    <div class="fleet" id="fleet"></div>
+  </div>
+  <nav class="nav" id="nav" aria-label="פרקי המדריך"></nav>
+  <div class="theme-row">
+    <button class="theme-btn" id="themeBtn">☾ מצב כהה</button>
+    <span class="ver-note">עודכן 6.7.2026</span>
+  </div>
+</aside>
+
+<div class="main">
+<div class="wrap">
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="top">
+  <div class="hero-kick reveal" style="animation-delay:.05s">מדריך המשך · אחרי "המדריך האגנטי המלא"</div>
+  <h1><span class="reveal" style="display:block;animation-delay:.15s"><span class="a">צי,</span> לא צוות.</span></h1>
+  <div class="sub reveal" style="animation-delay:.3s">מאסטרי ב-Subagents — מהסוכן הראשון ועד ערכה שלמה שעובדת</div>
+  <p class="lead-p reveal" style="animation-delay:.45s">המדריך הראשון נתן לך את המפה של עולם הסוכנים. הפעם לא לומדים על — <strong>בונים</strong>. פרק אחר פרק תקים צי של סוכני־משנה מקצועיים: סייר, מריץ בדיקות, פאנל מבקרים, מוח מתזמר ושער איכות. התזה: את רוב הערך של מרובה־סוכנים אפשר לסחוט מ<strong>רמה 1 של המדרג בלבד</strong> — שרשור, מקביליות, fork וזיכרון — במחיר של פי 4, לא פי 15, ובלי אף פיצ'ר ניסיוני. בסוף מחכה לך מוצר: <strong>ערכת צי</strong> שמעתיקים לכל ריפו ומשתפים עם הצוות.</p>
+  <div class="hstats">
+    <div class="hstat reveal" style="animation-delay:.55s"><b>12</b><span>פרקים, כל אחד מסתיים במשהו שרץ</span></div>
+    <div class="hstat reveal" style="animation-delay:.63s"><b>6+2</b><span>סוכנים + כישורים בערכה הסופית</span></div>
+    <div class="hstat reveal" style="animation-delay:.71s"><b>×4</b><span>עלות טוקנים — במקום ×15 של Teams</span></div>
+    <div class="hstat reveal" style="animation-delay:.79s"><b>0</b><span>מפתחות API — הכול רץ על המנוי</span></div>
+  </div>
+  <div class="term reveal" style="animation-delay:.9s">
+    <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div><span>claude — zsh — 96×24</span></div>
+    <div class="term-body" id="term"></div>
+  </div>
+</header>
+
+<!-- ================= 01 ================= -->
+<section class="doc-section" id="setup" data-num="01" data-title="הסביבה, הדמו וקו הבסיס" data-phase="שלב א — יסודות הסוכן הבודד">
+<div class="kick"><span class="knum">01</span> שלב א · יסודות הסוכן הבודד</div>
+<h2 class="sec-title">נקודת פתיחה: הסביבה, פרויקט הדמו וקו הבסיס</h2>
+
+<p class="lead-p">לפני שמגייסים את הסוכן הראשון, צריך שלושה דברים: סביבה תקינה, מגרש אימונים אמיתי, ו<strong>קו בסיס למדידה</strong>. את השלישי רוב האנשים מדלגים עליו — וזו טעות: בלי מדידת "לפני", לא תוכל להוכיח לעצמך בפרק 11 שהצי באמת משתלם.</p>
+
+<h3>מה בונים במדריך הזה — הערכה הסופית</h3>
+<p>זה המוצר שיהיה לך ביד בסוף פרק 12. כל יחידה נבנית בפרק משלה, ובסרגל הצד תוכל לראות את "מצבת הצי" מתמלאת ככל שתתקדם:</p>
+<div class="cards c2">
+  <div class="card"><div class="ci">🔭</div><h4>repo-scout <span class="b b-ver">פרקים 02–03</span></h4><p>סייר קריאה־בלבד על Haiku. ממפה קוד ומחזיר דו"ח של 30 שורות — בלי לזהם את ההקשר הראשי.</p></div>
+  <div class="card"><div class="ci">🧪</div><h4>test-runner <span class="b b-ver">פרק 04</span></h4><p>מריץ בדיקות בלבד, מחזיר רק כשלים בפורמט קבוע. Haiku, כלים נעולים, תקציב סבבים.</p></div>
+  <div class="card"><div class="ci">👁</div><h4>code-reviewer <span class="b b-ver">פרקים 05, 08</span></h4><p>מבקר בהקשר נקי שלא ממציא בעיות — ובהמשך גם לומד את הפרויקט עם זיכרון משלו.</p></div>
+  <div class="card"><div class="ci">🛡</div><h4>פאנל מבקרים ×3 <span class="b b-ver">פרק 07</span></h4><p>אבטחה, ביצועים ומוסכמות — שלושה מומחים צרים שרצים במקביל על אותו diff.</p></div>
+  <div class="card"><div class="ci">🧠</div><h4>dispatch — מוח מתזמר <span class="b b-ver">פרק 09</span></h4><p>skill שמקודד את כללי הפיזור של Anthropic: כמה סוכנים, מתי במקביל, ומתי בכלל לא.</p></div>
+  <div class="card"><div class="ci">🚧</div><h4>שער איכות אוטומטי <span class="b b-ver">פרק 10</span></h4><p>hooks שמפעילים את הצי בלי שתבקש: פורמט אחרי כל עריכה, בדיקות לפני כל סיום.</p></div>
+</div>
+
+<div class="co note"><div class="co-h"><span>📌</span>מה המדריך מניח שאתה כבר יודע</div>
+<p>המדריך הזה הוא המשך ישיר ל"מדריך האגנטי המלא". הוא מניח שאתה שולט בלולאה האגנטית ובמצבי ההרשאה (פרק 04 שם), בהנדסת הקשר וכלל ה־40% (פרק 05), ושקראת את פרק ה־Subagents (07) לפחות פעם אחת. נדרשים: Claude Code <code class="ic">v2.1.197+</code> (ברירת המחדל Sonnet 5), תוכנית Pro / Max / Team — <strong>ובכוונה: אפס מפתחות API</strong>. כל מה שנעשה כאן רץ אינטראקטיבית על המנוי, בהתאם להחלטה שקיבלנו: רמה 1 של המדרג בלבד.</p></div>
+
+<h3>צעד 1 · בדיקת סביבה (2 דקות)</h3>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">bash</span><button class="copy">העתק</button></div>
+<pre><span class="c"># ודא גרסה עדכנית ואבחן בעיות</span>
+claude --version        <span class="c"># צפוי: 2.1.197 ומעלה</span>
+claude doctor
+
+<span class="c"># ודא שברירת המחדל היא Sonnet 5 (מהיר וזול — מושלם למדריך)</span>
+claude
+&gt; /model                <span class="c"># אמור להציג claude-sonnet-5</span></pre></div>
+
+<h3>צעד 2 · מקימים את מגרש האימונים: orders-api</h3>
+<p>נעבוד על אותו פרויקט שהופיע ב־CLAUDE.md לדוגמה במדריך הראשון: <strong>API קטן לניהול הזמנות</strong> ב־TypeScript. למה דמו ולא הריפו האמיתי שלך? כדי שכל פקודה במדריך תהיה ניתנת לשחזור אחד־לאחד, וכדי שתוכל לשבור דברים בכיף. בכל פרק תמצא הערת <em>"וביישום אמיתי…"</em> שמתרגמת את הצעד לריפו שלך.</p>
+<p>וכמובן — את הדמו לא בונים ידנית. נותנים ל־Claude Code לבנות אותו, ב־Plan Mode:</p>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">bash</span><button class="copy">העתק</button></div>
+<pre>mkdir orders-api &amp;&amp; cd orders-api
+git init
+claude
+<span class="c"># בתוך הסשן: Shift+Tab כדי להיכנס ל-Plan Mode, ואז:</span></pre></div>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">prompt · להדביק ב-Plan Mode</span><button class="copy">העתק</button></div>
+<pre>הקם פרויקט TypeScript בשם orders-api:
+- pnpm, TypeScript strict (בלי any), Vitest, ESLint + Prettier
+- מבנה: src/routes (הגדרות endpoint), src/services (לוגיקה עסקית),
+  src/db (שכבת נתונים in-memory לצורך הדמו)
+- ישויות: Order { id, customer, items[], status, total }
+- endpoints: POST /orders, GET /orders, GET /orders/:id
+- ולידציה בסיסית ב-service, לא ב-route
+- 8-10 בדיקות Vitest ליד הקבצים שהן בודקות
+- סקריפטים: pnpm test, pnpm lint, pnpm dev
+אל תוסיף תלויות מעבר לנדרש ואל תוסיף אבסטרקציות מיותרות.</pre></div>
+<p>קרא את התוכנית שמוצגת, ערוך אם צריך, אשר — ותן לו לעבוד. בסיום, ודא: <code class="ic">pnpm test</code> ירוק, <code class="ic">pnpm lint</code> נקי.</p>
+
+<h3>צעד 3 · CLAUDE.md — הזיכרון המשותף של הצי</h3>
+<p>הרץ <code class="ic">/init</code> וכוונן את התוצאה. הקובץ הזה חשוב כאן שבעתיים: <strong>הוא ההקשר היחיד שכל סוכני הצי יחלקו</strong> (נרחיב בפרק 02). גרסה טובה לדמו:</p>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">markdown · CLAUDE.md</span><button class="copy">העתק</button></div>
+<pre><span class="k"># הפרויקט: orders-api — API לניהול הזמנות</span>
+
+<span class="k">## פקודות</span>
+- בדיקות: `pnpm test` (חובה לפני סיום כל משימה)
+- לינט: `pnpm lint --fix`
+
+<span class="k">## מוסכמות</span>
+- TypeScript strict בלבד. אין `any`.
+- לוגיקה עסקית ב-src/services, לא ב-src/routes.
+- בדיקות Vitest ליד הקובץ שהן בודקות. שמות קבצים ב-kebab-case.
+
+<span class="k">## אל תעשה</span>
+- אל תוסיף תלויות בלי לשאול.
+- השתמש בגישה הפשוטה ביותר; בלי אבסטרקציות לא מבוקשות.</pre></div>
+
+<h3>צעד 4 · קו הבסיס: משימת T0 ומחברת מדידות</h3>
+<p>עכשיו החלק שמפריד בין "שיחקתי עם סוכנים" ל"אני יודע מה הם שווים". נריץ משימה מוגדרת <strong>בלי שום סוכן־משנה</strong>, ונרשום את המספרים. פתח סשן נקי (<code class="ic">/clear</code>) ותן:</p>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">prompt · משימת T0</span><button class="copy">העתק</button></div>
+<pre>הוסף endpoint חדש: GET /orders/:id/summary שמחזיר
+{ id, customer, itemCount, total, status }.
+הלוגיקה ב-service, כולל טיפול ב-404. כתוב בדיקות והרץ אותן.</pre></div>
+<p>בסיום, הרץ <code class="ic">/usage</code> ו־<code class="ic">/context</code>, וצור קובץ <code class="ic">measurements.md</code> עם שלוש שורות: כמה טוקנים נצרכו, כמה אחוז מההקשר הראשי תפוס בסוף, וכמה סבבי תיקון נדרשו. אל תתקמצן בדקה הזו — נחזור לקובץ בפרק 11 ונשווה מולו את הצי המלא.</p>
+<p>סיים ב־<code class="ic">git add -A &amp;&amp; git commit</code> — הרגל הבטיחות מהמדריך הראשון תקף כאן לכל אורך הדרך.</p>
+
+<div class="co tip"><div class="co-h"><span>💡</span>וביישום אמיתי…</div>
+<p>על ריפו קיים, דלג על צעד 2, ודא ש־CLAUDE.md שלך עומד בסטנדרט של צעד 3 (עובדתי, קצר, עם פקודות בדיקה אמיתיות), ובחר משימת T0 אופיינית לפרויקט — תיקון באג בינוני או endpoint חדש — כקו בסיס.</p></div>
+
+<div class="ex"><div class="ex-h"><span>🛠️</span>תרגול הפרק</div>
+<ol>
+<li>הקם את orders-api, ודא ש־<code class="ic">pnpm test</code> ו־<code class="ic">pnpm lint</code> ירוקים, ועשה commit.</li>
+<li>הרץ את T0 בסשן נקי ומלא את <code class="ic">measurements.md</code> — טוקנים, % הקשר, סבבי תיקון.</li>
+<li>שאלת הכנה לפרק הבא: במהלך T0, כמה מהטוקנים נשרפו על <em>קריאת קבצים לצורך התמצאות</em>? הרץ <code class="ic">/context</code> והסתכל. את החלק הזה בדיוק נלמד לבודד.</li>
+</ol></div>
+<div class="done-row"><button class="markbtn" data-done="setup">סמן כהושלם</button><span>סיימת את הפרק? סמן אותו כדי לעקוב אחר ההתקדמות.</span></div>
+</section>
+
+<!-- ================= 02 ================= -->
+<section class="doc-section" id="anatomy" data-num="02" data-title="אנטומיה: הסוכן הראשון" data-phase="שלב א — יסודות הסוכן הבודד">
+<div class="kick"><span class="knum">02</span> שלב א · יסודות הסוכן הבודד</div>
+<h2 class="sec-title">אנטומיה של Subagent: מגייסים את repo-scout</h2>
+
+<p class="lead-p">סוכן־משנה הוא בסך הכול <strong>קובץ Markdown עם כותרת YAML</strong> — אבל כל שדה בכותרת הזו הוא החלטת עיצוב. בפרק הזה נבנה את הסוכן הראשון בצי, סייר הקודבייס, ותוך כדי נעבור על כל שדה ושדה: לא רק "מה הוא עושה" אלא <em>למה הוא קיים</em>.</p>
+
+<h3>למה סייר הוא הסוכן הראשון</h3>
+<p>זכור מה מדד לך <code class="ic">/context</code> בסוף פרק 01: חלק ניכר מהטוקנים של T0 נשרף על התמצאות — קריאת קבצים, grep, ניסיון להבין את המבנה. זו בדיוק העבודה ה"מלוכלכת" שהמדריך הראשון דיבר עליה: הכרחית, אבל אין שום סיבה שתשב בהקשר הראשי שלך. סייר עם חלון הקשר משלו קורא 15 קבצים — ומחזיר 25 שורות.</p>
+
+<h3>הקובץ</h3>
+<p>צור את <code class="ic">.claude/agents/repo-scout.md</code> (התיקייה ברמת הפרויקט — כך הסוכן ייכנס ל־git וישותף עם הצוות):</p>
+<div class="afile" style="--adc:var(--acc)">
+<div class="afile-h"><span class="adot"></span><b>.claude/agents/repo-scout.md</b><span>גרסה 1 — נשדרג בפרק 03</span></div>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">markdown + yaml</span><button class="copy">העתק</button></div>
+<pre><span class="y">---
+name: repo-scout
+description: סייר קודבייס לקריאה בלבד. השתמש בו לפני משימות שדורשות
+  היכרות עם חלקים לא מוכרים בקוד — למיפוי קבצים רלוונטיים, זרימת מידע
+  ונקודות כניסה. use proactively.
+tools: Read, Grep, Glob
+model: haiku
+maxTurns: 12
+color: cyan
+---</span>
+אתה סייר קודבייס. תפקידך לחקור ולהחזיר דו"ח קצר — לא לשנות דבר.
+
+כשאתה מקבל שאלה:
+1. אתר קבצים רלוונטיים עם Glob/Grep לפני שאתה צולל לקריאה.
+2. קרא רק את מה שנחוץ לשאלה — לא קבצים שלמים כשמספיק קטע.
+3. החזר תשובה תמציתית וממוקדת בשאלה שנשאלת.</pre></div></div>
+
+<h3>הכותרת, שדה־שדה</h3>
+<p>הטבלה הבאה היא מפת ההתמצאות של כל המדריך — כל שדה, ה"למה" שלו, והפרק שבו נשתמש בו לעומק:</p>
+<div class="tblwrap"><table>
+<tr><th>שדה</th><th>מה הוא קובע</th><th>ה"למה"</th><th>פרק</th></tr>
+<tr><td><code class="ic">name</code></td><td>מזהה ייחודי, גם ל־<code class="ic">@אזכור</code>.</td><td>שם = ממשק. קצר, פעולה־ברורה, kebab-case.</td><td>02</td></tr>
+<tr><td><code class="ic">description</code></td><td>מתי Claude יפעיל את הסוכן אוטומטית.</td><td><strong>השדה החשוב ביותר.</strong> זה לא תיעוד — זה הטריגר.</td><td>02, 10</td></tr>
+<tr><td><code class="ic">tools</code> / <code class="ic">disallowedTools</code></td><td>רשימה לבנה / שחורה של כלים.</td><td>הרשאה מינימלית = בטיחות + מיקוד.</td><td>04</td></tr>
+<tr><td><code class="ic">model</code></td><td>sonnet / opus / haiku / fable / inherit.</td><td>עבודה מכנית ל־Haiku, שיפוט ל־inherit. זה מנוף העלות הגדול.</td><td>04</td></tr>
+<tr><td><code class="ic">permissionMode</code></td><td>מצב הרשאות משלו (למשל plan).</td><td>סוכן קריאה־בלבד לא צריך לשאול אותך כלום.</td><td>04</td></tr>
+<tr><td><code class="ic">maxTurns</code></td><td>תקרת סבבים.</td><td>בלם עלות: סוכן תקוע לא שורף בלי סוף.</td><td>04</td></tr>
+<tr><td><code class="ic">effort</code></td><td>רמת מאמץ לסוכן זה.</td><td>סייר לא צריך xhigh; מבקר לפעמים כן.</td><td>04</td></tr>
+<tr><td><code class="ic">memory</code></td><td>זיכרון נפרד (user/project/local).</td><td>מבקר שזוכר תיקונים משתפר עם הזמן.</td><td>08</td></tr>
+<tr><td><code class="ic">skills</code></td><td>טעינה מראש של תוכן skills מלא.</td><td>ידע מובטח, בלי לסמוך על גילוי אוטומטי.</td><td>08</td></tr>
+<tr><td><code class="ic">mcpServers</code></td><td>שרתי MCP לסוכן זה בלבד.</td><td>כלים כבדים לסוכן אחד — הקשר ראשי נשאר רזה.</td><td>08</td></tr>
+<tr><td><code class="ic">background</code></td><td>הרצה ברקע כברירת מחדל.</td><td>עבודה ארוכה שלא חוסמת אותך.</td><td>07</td></tr>
+<tr><td><code class="ic">isolation: worktree</code></td><td>הרצה ב־git worktree מבודד.</td><td>סוכן כותב שלא דורך על העץ שלך.</td><td>09</td></tr>
+<tr><td><code class="ic">color</code></td><td>צבע בממשק.</td><td>כשרצים 4 סוכנים במקביל, צבע = התמצאות.</td><td>07</td></tr>
+</table></div>
+
+<div class="co note"><div class="co-h"><span>📌</span>ה-description הוא API, לא הערה</div>
+<p>Claude קורא את כל ה־descriptions בתחילת סשן ומחליט לבד מתי להפעיל כל סוכן. תיאור פסיבי ("סוכן שיודע לחפש בקוד") כמעט לא יופעל. תיאור טוב עונה על שלוש שאלות: <strong>מה</strong> הסוכן עושה, <strong>מתי</strong> להשתמש בו (מילות טריגר!), ו<strong>דחיפה</strong> — הצירוף <code class="ic">use proactively</code> שמעודד הפעלה יזומה. במדריך הראשון ראינו ש־Claude נוטה להפעיל <em>פחות מדי</em>; התיאור הוא המקום לתקן את זה.</p></div>
+
+<h3>שתי דרכים ליצור — ואיפה הקבצים גוברים</h3>
+<p>אפשר לכתוב את הקובץ ידנית (כמו שעשינו — הכי שקוף ללמידה), ואפשר להריץ <code class="ic">/agents</code> ולבחור <em>Generate with Claude</em>: מתארים את הסוכן בשפה חופשית ומקבלים טיוטה לעריכה. הדרך המומלצת בעבודה שוטפת: לייצר טיוטה בוויזארד, לכוונן ידנית, <strong>ולשמור ב־git כמו כל קוד</strong>. וזכור את סדר הקדימות מהמדריך הראשון — אם יש התנגשות שמות, מנצח לפי הסדר: הגדרות מנוהלות ← דגל <code class="ic">--agents</code> ← <code class="ic">.claude/agents/</code> (פרויקט) ← <code class="ic">~/.claude/agents/</code> (משתמש) ← פלאגינים. סוכן פרויקט מסתיר סוכן משתמש באותו שם — מקור קלאסי לבלבול, נחזור אליו בפרק 11.</p>
+
+<div class="co new"><div class="co-h"><span>🆕</span>ומה עם Explore המובנה?</div>
+<p>ל־Claude Code יש סייר מובנה — Explore — ומאז יוני 2026 הוא יורש את מודל הסשן (כלומר: על Opus הוא רץ יקר). ה־repo-scout שלנו הוא ההשלמה: מוצמד ל־Haiku לסריקות זולות, כפוף לחוזה פלט שנגדיר בפרק 03, וטוען את CLAUDE.md של הפרויקט — בעוד ש־Explore מדלג עליו בכוונה כדי להישאר זריז. שניהם לגיטימיים; לסייר <em>שלך</em> יש כללים <em>שלך</em>.</p></div>
+
+<h3>נסיעת מבחן</h3>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">prompt</span><button class="copy">העתק</button></div>
+<pre>@repo-scout מפה לי איפה מטופלת ולידציה של הזמנות:
+אילו קבצים מעורבים, ומה קורה כשהקלט לא תקין?</pre></div>
+<p>שים לב לשני דברים בזמן הריצה: בממשק מופיע שהסוכן רץ (בצבע cyan שהגדרנו), וההקשר הראשי שלך <strong>לא זז</strong> — הרץ <code class="ic">/context</code> לפני ואחרי כדי לראות זאת במו עיניך. זו כל התורה על רגל אחת.</p>
+
+<div class="co tip"><div class="co-h"><span>💡</span>וביישום אמיתי…</div>
+<p>הסייר הראשון בריפו אמיתי שווה זהב במיוחד בקוד ירושה: "מפה לי איך עובד תהליך ההתחברות" על קודבייס בן חמש שנים היא בדיוק המשימה שהורגת הקשר ראשי — ובדיוק המשימה של repo-scout.</p></div>
+
+<div class="ex"><div class="ex-h"><span>🛠️</span>תרגול הפרק</div>
+<ol>
+<li>צור את <code class="ic">repo-scout.md</code> כפי שמוצג, והרץ עליו את נסיעת המבחן. מדוד <code class="ic">/context</code> לפני ואחרי.</li>
+<li>שבור את ה־description בכוונה: החלף אותו ב"סוכן חיפוש" בלבד, פתח סשן חדש, ובקש "תבין איך עובדות ההזמנות" <em>בלי</em> @אזכור. האם הסוכן הופעל מעצמו? החזר את התיאור המלא ונסה שוב.</li>
+<li>הרץ <code class="ic">/agents</code> וצור דרך הוויזארד טיוטת סוכן כלשהו — רק כדי להכיר את הכלי. מחק אותו בסוף.</li>
+</ol></div>
+<div class="done-row"><button class="markbtn" data-done="anatomy">סמן כהושלם</button><span>הסייר גויס — היחידה הראשונה במצבה נדלקת.</span></div>
+</section>
+
+<!-- ================= 03 ================= -->
+<section class="doc-section" id="contract" data-num="03" data-title="חוזה הקלט/פלט" data-phase="שלב א — יסודות הסוכן הבודד">
+<div class="kick"><span class="knum">03</span> שלב א · יסודות הסוכן הבודד</div>
+<h2 class="sec-title">חוזה הקלט/פלט: הצינור הצר שהכול עובר דרכו</h2>
+
+<p class="lead-p">זה הפרק שהופך סוכנים מ"נחמד" ל"אמין". המדריך הראשון קבע את העיקרון: סוכן־משנה מתחיל בהקשר נקי, וערוץ הקלט <em>היחיד</em> שלו הוא מחרוזת הפרומפט שנשלחת אליו. המסקנה המעשית: בין ההקשר הראשי לסוכן יש <strong>צינור צר בשני הכיוונים</strong> — ומי שלא מעצב את שני הקצוות, מקבל זבל בשניהם.</p>
+
+<h3>קצה א' · פרומפט השיגור (Dispatch Prompt)</h3>
+<p>הסוכן לא רואה את השיחה שלך. הוא לא יודע איזה באג תיקנת הרגע, מה שם הקובץ ש"דיברנו עליו", או מה "הבעיה מקודם". פרומפט שיגור טוב מכיל חמישה רכיבים:</p>
+<div class="cards c2">
+  <div class="card"><div class="ci">🎯</div><h4>מטרה</h4><p>מה בדיוק צריך לחזור. שאלה אחת ממוקדת, לא "תבין את הקוד".</p></div>
+  <div class="card"><div class="ci">📁</div><h4>עוגנים</h4><p>נתיבי קבצים, הודעות שגיאה מלאות, שמות פונקציות — כל מה שהיית "זוכר" בשבילו.</p></div>
+  <div class="card"><div class="ci">⛔</div><h4>אילוצים</h4><p>מה לא לעשות: "אל תקרא את node_modules", "התמקד רק ב-src/services".</p></div>
+  <div class="card"><div class="ci">📋</div><h4>פורמט פלט</h4><p>איך התשובה צריכה להיראות — או הפניה לחוזה הקבוע של הסוכן.</p></div>
+</div>
+<p>והחמישי, שנשכח הכי הרבה: <strong>קריטריון סיום</strong> — מתי הסוכן יודע שסיים ("כשמצאת את כל נקודות הקריאה ל־X, עצור והחזר דו"ח").</p>
+
+<div class="cards c2">
+<div class="card" style="border-color:color-mix(in srgb,var(--coral) 40%,var(--line))"><div class="ci">✗</div><h4>שיגור חלש</h4><p>"@repo-scout תבדוק את עניין הסטטוסים"</p></div>
+<div class="card" style="border-color:color-mix(in srgb,var(--mint) 40%,var(--line))"><div class="ci">✓</div><h4>שיגור חזק</h4><p>"@repo-scout מפה את כל המקומות שקוראים או משנים את Order.status. התמקד ב-src/services וב-src/routes. אני מתכנן להוסיף סטטוס 'cancelled' — ציין איפה יידרש שינוי."</p></div>
+</div>
+
+<h3>קצה ב' · חוזה הפלט (Output Contract)</h3>
+<p>הכיוון השני חשוב לא פחות: סוכן שמחזיר 200 שורות של ציטוטי קוד <strong>מזהם את ההקשר הראשי</strong> — בדיוק הדבר שגייסנו אותו למנוע. הפתרון: מקבעים בפרומפט המערכת של הסוכן פורמט תשובה קבוע עם תקרת אורך. כך גם הסוכן ממוקד, וגם ההקשר הראשי מקבל תמיד מבנה צפוי שקל להמשיך איתו.</p>
+
+<h3>ומה כשהדו"ח באמת גדול? מערכת הקבצים כזיכרון משותף</h3>
+<div class="co note"><div class="co-h"><span>📌</span>הדפוס החשוב ביותר בפרק</div>
+<p>לסוכנים אין ערוץ תקשורת ביניהם — אבל <strong>יש להם מערכת קבצים משותפת</strong>. כשתוצר גדול מדי לצינור, הסוכן כותב אותו לקובץ ומחזיר רק את הנתיב + תקציר של 5 שורות. ההקשר הראשי נשאר נקי, המידע המלא לא הולך לאיבוד, וסוכן אחר (או אתה) יכול לקרוא את הקובץ בהמשך. ניצור לכך תיקיית <code class="ic">reports/</code> — היא תהפוך ל"תיבת הדואר" של הצי בפרקים 06–07, וזה גם התחליף שלנו ל־mailbox האמיתי של Agent Teams — בחינם.</p></div>
+
+<h3>repo-scout, גרסה 2 — עם חוזה</h3>
+<div class="afile" style="--adc:var(--acc)">
+<div class="afile-h"><span class="adot"></span><b>.claude/agents/repo-scout.md</b><span>גרסה סופית</span></div>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">markdown + yaml</span><button class="copy">העתק</button></div>
+<pre><span class="y">---
+name: repo-scout
+description: סייר קודבייס לקריאה בלבד. השתמש בו לפני משימות שדורשות
+  היכרות עם חלקים לא מוכרים בקוד — למיפוי קבצים רלוונטיים, זרימת מידע
+  ונקודות כניסה. use proactively.
+tools: Read, Grep, Glob, Write
+model: haiku
+maxTurns: 12
+color: cyan
+---</span>
+אתה סייר קודבייס. תפקידך לחקור ולהחזיר דו"ח קצר — לא לשנות קוד.
+
+שיטת עבודה:
+1. אתר קבצים עם Glob/Grep לפני קריאה לעומק. קרא רק את הנחוץ.
+2. ענה אך ורק על השאלה שנשאלה.
+
+## פורמט "דו"ח סיור" (חובה, עד 30 שורות)
+**שאלה:** חזרה על השאלה במשפט.
+**קבצים רלוונטיים:** נתיב · תפקיד · שורות מפתח (טבלה קצרה).
+**זרימה:** 3–5 משפטים על איך המידע עובר.
+**סיכונים / הפתעות:** עד 3 נקודות.
+**מה לא בדקתי:** משפט אחד, בכנות.
+
+אם הממצאים ארוכים מ-30 שורות: כתוב דו"ח מלא אל
+reports/scout-&lt;נושא&gt;-&lt;תאריך&gt;.md (הכלי Write מותר לך רק לשם כך),
+והחזר לצ'אט את הנתיב + 5 שורות תקציר בלבד.</pre></div></div>
+<p>שים לב לפשרה המודעת: הוספנו לסייר את הכלי <code class="ic">Write</code> — סטייה מ"קריאה בלבד" — אבל תחמנו אותה בפרומפט לתיקיית reports בלבד. בפרק 04 נלמד לאכוף גבולות כאלה גם ברמת הכלים עצמם, לא רק בבקשה יפה.</p>
+
+<div class="co warn"><div class="co-h"><span>⚠️</span>הטעות הנפוצה: שיגור "מטבח" </div>
+<p>המקבילה של "סשן מטבח" מהמדריך הראשון: לדחוף לסוכן אחד שלוש שאלות לא קשורות ("תמפה את הוולידציה וגם תבדוק למה הבדיקה נופלת וגם תציע שיפורי ביצועים"). התוצאה: דו"ח ארוך, שטחי, שחורג מהחוזה. שאלה אחת — שיגור אחד. שלוש שאלות? בפרק 07 נריץ שלושה סוכנים במקביל.</p></div>
+
+<div class="ex"><div class="ex-h"><span>🛠️</span>תרגול הפרק</div>
+<ol>
+<li>עדכן את repo-scout לגרסה 2 ושגר אליו את "השיגור החזק" מהדוגמה. ודא שחזר דו"ח בפורמט, עד 30 שורות.</li>
+<li>נסה לשבור את החוזה: בקש ממנו "תעתיק לי לכאן את כל הקוד הרלוונטי". סוכן ממושמע יכתוב ל־reports/ ויחזיר נתיב. אם הוא הציף — חזק את ניסוח החוזה ("חובה", "לעולם אל").</li>
+<li>השווה: אותה שאלה בשיגור חלש מול חזק. ספור כמה סבבים (turns) לקח לכל אחד — <code class="ic">maxTurns</code> פתאום יקבל משמעות.</li>
+</ol></div>
+<div class="done-row"><button class="markbtn" data-done="contract">סמן כהושלם</button><span>מעכשיו כל סוכן שנבנה יקבל חוזה מהיום הראשון.</span></div>
+</section>
+
+<!-- ================= 04 ================= -->
+<section class="doc-section" id="limits" data-num="04" data-title="גבולות: כלים, הרשאות ותקציב" data-phase="שלב א — יסודות הסוכן הבודד">
+<div class="kick"><span class="knum">04</span> שלב א · יסודות הסוכן הבודד</div>
+<h2 class="sec-title">גבולות: כלים, הרשאות, מודל ותקציב — בונים test-runner</h2>
+
+<p class="lead-p">בפרק הקודם ביקשנו יפה מהסייר לא לכתוב מחוץ ל־reports. בקשות יפות זה נחמד; <strong>גבולות נאכפים זה מקצועי</strong>. בפרק הזה נכיר את ארבעת מנגנוני התיחום של סוכן — כלים, הרשאות, סבבים ומודל — ונשתמש בכולם כדי לבנות את היחידה השנייה בצי: מריץ הבדיקות.</p>
+
+<h3>עקרון ההרשאה המינימלית</h3>
+<p>סוכן צריך לקבל <em>בדיוק</em> את הכלים שהמשימה שלו דורשת — לא כלי אחד יותר. זה קודם כול עניין של בטיחות (סוכן בלי <code class="ic">Edit</code> פיזית לא יכול לשבור קוד; סוכן בלי <code class="ic">Bash</code> לא ימחק כלום), אבל לא פחות מזה עניין של <strong>מיקוד</strong>: סוכן עם ארגז כלים צר פשוט טועה פחות, כי אין לו לאן לברוח מהמשימה.</p>
+<div class="tblwrap"><table>
+<tr><th>כלי</th><th>מה הוא מתיר</th><th>למי בצי שלנו</th></tr>
+<tr><td><code class="ic">Read, Grep, Glob</code></td><td>קריאה וחיפוש בקבצים.</td><td>כולם. זו רצפת הבסיס.</td></tr>
+<tr><td><code class="ic">Edit, Write</code></td><td>שינוי ויצירת קבצים.</td><td>כמעט אף אחד — הכתיבה נשארת בהקשר הראשי (או ב־Write תחום, כמו בסייר).</td></tr>
+<tr><td><code class="ic">Bash</code></td><td>כל פקודת מעטפת. מסוכן כשהוא פתוח.</td><td>אף פעם לא פתוח. תמיד עם תבנית — ראה בהמשך.</td></tr>
+<tr><td><code class="ic">WebSearch, WebFetch</code></td><td>גישה לרשת.</td><td>לא בצי הבסיסי. סוכן מחקר ייעודי — אולי.</td></tr>
+<tr><td><code class="ic">Agent</code></td><td>הפעלת סוכני־משנה.</td><td>לא רלוונטי — סוכן לא יולד סוכן (פרק 06).</td></tr>
+</table></div>
+
+<h3>Bash עם תבנית: הכלי החזק בפרק</h3>
+<p>במקום להעניק <code class="ic">Bash</code> מלא, מגבילים אותו לתבניות פקודה — אותו תחביר שראינו במדריך הראשון ב־headless (<code class="ic">--allowedTools "Read,Bash(git*)"</code>) עובד גם בשדה <code class="ic">tools</code> של סוכן:</p>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">yaml · דוגמאות תיחום</span><button class="copy">העתק</button></div>
+<pre><span class="k">tools:</span> Bash(pnpm test*), Bash(pnpm lint*), Read   <span class="c"># מריץ בדיקות — ותו לא</span>
+<span class="k">tools:</span> Read, Grep, Glob, Bash(git diff*)           <span class="c"># מבקר: קריאה + diff בלבד</span>
+<span class="k">disallowedTools:</span> Edit, Write, WebFetch             <span class="c"># רשימה שחורה, כשקל יותר להגדיר מה אסור</span></pre></div>
+
+<h3>שלושת המחוונים הנותרים</h3>
+<ul>
+<li><strong><code class="ic">maxTurns</code> — בלם העלות.</strong> סוכן שנתקע בלולאת "אנסה שוב" שורף טוקנים בשקט. תקרת סבבים הופכת תקיעה לכישלון מהיר וזול, שחוזר אליך עם דיווח. כלל אצבע: פי 1.5–2 ממספר הסבבים שלוקח לריצה מוצלחת טיפוסית.</li>
+<li><strong><code class="ic">model</code> — מנוף העלות הגדול.</strong> ההחלטה מהמדריך הראשון (Fable מתזמר, עובדים זולים) חיה כאן: עבודה מכנית ודיווחית — <code class="ic">haiku</code>. שיפוט והבנת קוד עמוקה — <code class="ic">inherit</code> (יורש את מודל הסשן). אפשר גם לקבע גלובלית עם משתנה הסביבה <code class="ic">CLAUDE_CODE_SUBAGENT_MODEL</code>, אבל קיבוע פר־סוכן ב־frontmatter מנצח בקריאוּת.</li>
+<li><strong><code class="ic">effort</code> ו־<code class="ic">permissionMode</code>.</strong> סוכן קריאה־בלבד יכול לקבל <code class="ic">permissionMode: plan</code> — והוא לעולם לא יעצור אותך עם בקשות אישור. סוכן שיפוט קשה יכול לקבל <code class="ic">effort: high</code> נקודתית, בלי להעלות את הסשן כולו.</li>
+</ul>
+
+<h3>מגייסים: test-runner</h3>
+<div class="afile" style="--adc:var(--mint)">
+<div class="afile-h"><span class="adot"></span><b>.claude/agents/test-runner.md</b><span>יחידה 2 בצי</span></div>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">markdown + yaml</span><button class="copy">העתק</button></div>
+<pre><span class="y">---
+name: test-runner
+description: מריץ את חבילת הבדיקות ומחזיר רק כשלים, בפורמט קבוע.
+  use proactively אחרי כל שינוי קוד ולפני סיום כל משימה.
+tools: Bash(pnpm test*), Bash(pnpm lint*), Read
+model: haiku
+maxTurns: 8
+color: green
+---</span>
+אתה מריץ בדיקות. אתה לא מתקן קוד, לא כותב קוד ולא מציע רפקטורים.
+
+1. הרץ `pnpm test`.
+2. הכול עבר? החזר שורה אחת בדיוק: "✓ N בדיקות עברו".
+3. יש כשלים? לכל כשל (עד 5):
+   - שם הבדיקה + קובץ:שורה
+   - שורת השגיאה המרכזית — אחת, בלי stack מלא
+   - השערה לגורם, במשפט אחד
+   מעל 5 כשלים: דווח על 5 וציין את המספר הכולל.
+
+מותר לך Read רק כדי לדייק שורת כשל. אל תריץ דבר מלבד
+pnpm test / pnpm lint.</pre></div></div>
+
+<div class="co research"><div class="co-h"><span>📊</span>חשבון קטן, עיקרון גדול</div>
+<p>ריצת בדיקות טיפוסית כאן צורכת בערך 25K קלט / 1.5K פלט. על Haiku ($1/$5 למיליון): כ־3 סנט. על Sonnet 5 (במחיר ההיכרות $2/$10): כ־6.5 סנט. ההבדל פר־ריצה מצחיק — אבל הצי ירוץ עשרות פעמים ביום, וב־Haiku הוא גם <em>מהיר</em> יותר. העיקרון שנקבע כאן ("מכני = Haiku") הוא שיחזיק את יחס ה־×4 בפרק 11.</p></div>
+
+<div class="co danger"><div class="co-h"><span>🛑</span>גם עם גבולות — הכלל הישן תקף</div>
+<p>שום תיחום לא מחליף גיבוי. לפני שנותנים לסוכן כלשהו לגעת בעץ העבודה — commit. המקרה המתועד מהמדריך הראשון (סוכן שמחק קבצים ייחודיים) קרה למישהו שהיה בטוח שזה לא יקרה לו.</p></div>
+
+<div class="ex"><div class="ex-h"><span>🛠️</span>תרגול הפרק</div>
+<ol>
+<li>גייס את test-runner. שבור בדיקה בכוונה (שנה assertion), שגר אותו, וודא שהדיווח חוזר בפורמט המדויק.</li>
+<li>נסה לפרוץ את הגבול: בקש ממנו במפורש "תתקן את הבדיקה שנופלת". הוא אמור להיעצר — אין לו Edit. שים לב איך מרגיש כשגבול עובד.</li>
+<li>הורד את <code class="ic">maxTurns</code> ל־2 ושגר שוב. צפה בכישלון־מהיר מבוקר. החזר ל־8.</li>
+</ol></div>
+<div class="done-row"><button class="markbtn" data-done="limits">סמן כהושלם</button><span>יחידה שנייה במצבה — והצי כבר יודע לבדוק את עצמו.</span></div>
+</section>
+
+<!-- ================= 05 ================= -->
+<section class="doc-section" id="reviewer" data-num="05" data-title="המבקר האובייקטיבי" data-phase="שלב ב — בניית הצי">
+<div class="kick"><span class="knum">05</span> שלב ב · בניית הצי</div>
+<h2 class="sec-title">המבקר האובייקטיבי: code-reviewer שלא ממציא בעיות</h2>
+
+<p class="lead-p">המדריך הראשון קבע את העיקרון: הקשר שכתב קוד הוא הקשר <em>מוטה</em> — הוא "מאוהב" בפתרון של עצמו. מבקר שמתחיל נקי, רואה רק את ה־diff, ולא יודע כמה התאמצת — הוא הדבר הכי קרוב לסוקר אנושי אובייקטיבי. אבל למבקרים יש מחלה מקצועית משלהם, והפרק הזה מוקדש לריפוי שלה.</p>
+
+<h3>המחלה: מבקר שמונחה למצוא — ימצא</h3>
+<p>סוכן שהפרומפט שלו אומר "מצא בעיות" יחזיר בעיות. תמיד. גם כשאין. הוא ימציא הערות סגנון, יציע רפקטורים מיותרים, ויסמן קוד תקין כ"מסוכן" — כי זו המשימה שקיבל. התרופה בנויה משלושה חלקים בפרומפט: <strong>היתר לשתוק</strong> ("אין ממצאים? אמור זאת ועצור"), <strong>חובת אימות</strong> (לפתוח את הקובץ לפני דיווח — לא לשפוט מה־diff בלבד), ו<strong>הגדרת חומרה</strong> שמכריחה כל ממצא להצדיק את עצמו.</p>
+
+<div class="afile" style="--adc:var(--blue)">
+<div class="afile-h"><span class="adot"></span><b>.claude/agents/code-reviewer.md</b><span>גרסה 1 — זיכרון יתווסף בפרק 08</span></div>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">markdown + yaml</span><button class="copy">העתק</button></div>
+<pre><span class="y">---
+name: code-reviewer
+description: מבקר קוד בכיר בהקשר נקי. השתמש מיד אחרי כתיבה או שינוי
+  של קוד, ולפני כל commit. use proactively.
+tools: Read, Grep, Glob, Bash(git diff*), Bash(git log*)
+model: inherit
+maxTurns: 15
+color: blue
+---</span>
+אתה מבקר/ת קוד בכיר/ה בפרויקט הזה.
+
+תהליך:
+1. הרץ `git diff` (או את הטווח שנמסר לך) כדי לזהות מה השתנה.
+2. התמקד אך ורק בקבצים ששונו.
+3. לפני שאתה מדווח על בעיה — פתח את הקובץ וקרא את ההקשר
+   המלא. אסור לדווח על סמך ה-diff בלבד.
+
+## פורמט ממצאים (חובה)
+כל ממצא בשורה: 🔴/🟡/🔵 · קובץ:שורה · הבעיה במשפט · תיקון מוצע.
+🔴 קריטי — באג, אבטחה, אובדן נתונים.
+🟡 אזהרה — יישבר בתנאים סבירים, או הפרת CLAUDE.md.
+🔵 הצעה — שיפור ממשי בלבד. לא טעם אישי.
+
+כללים:
+- דווח רק על בעיות נכונוּת, אבטחה, או הפרת מוסכמות הפרויקט.
+- אל תמציא הערות סגנון שוליות.
+- אין ממצאים? כתוב "לא נמצאו בעיות" — ועצור. זו תשובה מצוינת.
+- עד 10 ממצאים; מעבר לכך, ציין כמות בלבד.</pre></div></div>
+<p>שים לב לבחירות: <code class="ic">model: inherit</code> — ביקורת היא עבודת שיפוט, לא ניקיון; הכלים כוללים <code class="ic">Bash(git diff*)</code> בלבד מתוך משפחת Bash; ואין לו שום יכולת כתיבה — מבקר שמתקן בעצמו חוטא לתפקידו (ולפעמים גם דורס אותך).</p>
+
+<h3>כיול דו־צדדי: כך בודקים מבקר</h3>
+<p>מבקר, כמו גלאי עשן, נבחן בשני מצבים — ורוב האנשים בודקים רק אחד:</p>
+<div class="cards c2">
+<div class="card"><div class="ci">🐛</div><h4>מבחן הרגישות</h4><p>שתול באג אמיתי (מחק את בדיקת ה־404 מה־summary, או החלף <code class="ic">&gt;=</code> ב־<code class="ic">&gt;</code>), אל תעשה commit, ושגר את המבקר על ה־diff. הוא חייב לתפוס — ברמת 🔴.</p></div>
+<div class="card"><div class="ci">🤫</div><h4>מבחן השקט</h4><p>קח diff תקין לחלוטין (שינוי שם משתנה, הוספת בדיקה) ושגר שוב. התשובה הנכונה: "לא נמצאו בעיות". אם צצו 4 "הצעות" — הפרומפט עוד לא בריא.</p></div>
+</div>
+<p>נכשל במבחן השקט? חזק את סעיף הכללים ("זו תשובה מצוינת" שם בכוונה — היא נותנת למודל רשות פסיכולוגית לשתוק). נכשל ברגישות? בדוק שהוא באמת מריץ diff ולא מנחש, והעלה effort נקודתית.</p>
+
+<div class="co tip"><div class="co-h"><span>💡</span>וביישום אמיתי…</div>
+<p>הוסף לסעיף הכללים שורה אחת פר־פרויקט עם הרגישות המקומית: "שים לב במיוחד ל־X" (טיפול בכסף, תאריכים, הרשאות). נקודה אחת ממוקדת שווה יותר מעשרה כללים גנריים — ובפרק 08 ניתן למבקר לצבור נקודות כאלה בעצמו, עם זיכרון.</p></div>
+
+<div class="ex"><div class="ex-h"><span>🛠️</span>תרגול הפרק</div>
+<ol>
+<li>גייס את code-reviewer והרץ עליו את שני צדי הכיול — באג שתול ו־diff נקי. תעד ב־measurements.md מה קרה.</li>
+<li>שגר אותו על ה־diff של T0 מפרק 01 (<code class="ic">git diff HEAD~1</code>). מצא משהו אמיתי? זה כבר החזר על ההשקעה.</li>
+<li>נסח "שורת רגישות" אחת שמתאימה לפרויקט האמיתי שלך, ושמור אותה בצד לפרק 08.</li>
+</ol></div>
+<div class="done-row"><button class="markbtn" data-done="reviewer">סמן כהושלם</button><span>שלוש יחידות במצבה. עכשיו נלמד לחבר אותן לשרשרת.</span></div>
+</section>
+
+<!-- ================= 06 ================= -->
+<section class="doc-section" id="chain" data-num="06" data-title="שרשור: המנצח על התזמורת" data-phase="שלב ב — בניית הצי">
+<div class="kick"><span class="knum">06</span> שלב ב · בניית הצי</div>
+<h2 class="sec-title">שרשור: ההקשר הראשי כמנצח על התזמורת</h2>
+
+<p class="lead-p">שלוש יחידות בצי — הגיע הזמן שיעבדו יחד. אבל רגע: סוכן־משנה <strong>לא יכול להפעיל סוכן־משנה</strong> (המגבלה מפרק 07 במדריך הראשון). אז מי מתאם? התשובה מגדירה את כל הפרק: <em>ההקשר הראשי שלך הוא המנצח</em>. הסוכנים הם הנגנים; אתה — והסשן הראשי — קובעים מי מנגן, מתי, ומה עובר הלאה.</p>
+
+<h3>השרשרת הקנונית</h3>
+<p>לפיצ'ר בינוני ומעלה, זו השרשרת שנחזור אליה שוב ושוב במדריך — כל חוליה בהקשר משלה, והמידע עובר בצינורות הצרים שעיצבנו בפרק 03:</p>
+<div class="cards c3">
+  <div class="card"><div class="ci">🔭</div><h4>1 · repo-scout</h4><p>ממפה את השטח, מחזיר דו"ח סיור.</p></div>
+  <div class="card"><div class="ci">📐</div><h4>2 · Plan Mode</h4><p>ההקשר הראשי מתכנן — מוזן מהדו"ח, לא מקריאת 20 קבצים.</p></div>
+  <div class="card"><div class="ci">⌨</div><h4>3 · מימוש</h4><p>בהקשר הראשי. הכתיבה נשארת אצל המנצח.</p></div>
+  <div class="card"><div class="ci">🧪</div><h4>4 · test-runner</h4><p>מאמת. מחזיר רק כשלים.</p></div>
+  <div class="card"><div class="ci">👁</div><h4>5 · code-reviewer</h4><p>מבקר בהקשר נקי.</p></div>
+  <div class="card"><div class="ci">🔁</div><h4>6 · לולאת תיקון</h4><p>המנצח מתקן לפי הממצאים → חזרה ל־4. עד ירוק.</p></div>
+</div>
+
+<h3>איך מעבירים מידע בין חוליות</h3>
+<p>שתי דרכים, ולכל אחת מקום:</p>
+<ul>
+<li><strong>מסירה בצ'אט</strong> — התקציר שהסוכן החזיר יושב ממילא בהקשר הראשי, ו־Claude מעביר את הרלוונטי לחוליה הבאה בפרומפט השיגור. מתאים לתקצירים קצרים (וזו הסיבה שנלחמנו על תקרת 30 השורות).</li>
+<li><strong>מסירה בקובץ</strong> — לתוצרים גדולים: הסייר כתב ל־<code class="ic">reports/scout-discounts.md</code>? פרומפט השיגור לחוליה הבאה פשוט אומר "קרא את reports/scout-discounts.md ופעל לפיו". ההקשר הראשי מחזיק רק את הנתיב. זה, בקטן ובחינם, ה־mailbox של Agent Teams.</li>
+</ul>
+
+<h3>דוגמה עובדת מקצה לקצה: קודי הנחה</h3>
+<p>נריץ את השרשרת על פיצ'ר אמיתי. היופי: לא צריך לנצח ידנית על כל חוליה — אפשר לתת ל־Claude את פרטיטורת השרשרת <strong>בפרומפט אחד</strong>, והוא ינהל את המעברים:</p>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">prompt · פרומפט מנצח — להדביק בסשן נקי</span><button class="copy">העתק</button></div>
+<pre>נבנה תמיכה בקודי הנחה להזמנות. עבוד בשלבים, ועצור לאישורי:
+
+1. שגר את @repo-scout: "מפה את יצירת ההזמנה וחישוב ה-total —
+   קבצים, זרימה, ואיפה נכון לשלב לוגיקת הנחה."
+2. על סמך הדו"ח, הצג לי תוכנית (Plan Mode) ל:
+   POST /orders עם שדה discountCode אופציונלי,
+   ולידציה ב-service, קודים לדוגמה ב-src/db.
+3. אחרי אישורי — ממש, כולל בדיקות לקוד תקין/פג/לא קיים.
+4. שגר את @test-runner. יש כשלים? תקן וחזור על שלב 4.
+5. כשהכול ירוק — שגר את @code-reviewer על git diff,
+   טפל בממצאי 🔴 ו-🟡, והצג לי סיכום קצר.</pre></div>
+<p>שים לב מה קיבלנו: הסיור, הבדיקות והביקורת רצו <strong>מחוץ להקשר הראשי</strong>. הרץ <code class="ic">/context</code> בסוף — תגלה שבנית פיצ'ר שלם ואתה עדיין רחוק מכלל ה־40%. זה בדיוק "מרחיקים את העבודה המלוכלכת" מהמדריך הראשון, הפעם כשיטה ולא כטריק.</p>
+
+<div class="co warn"><div class="co-h"><span>⚠️</span>אל תשרשר משימת שורה אחת</div>
+<p>"רדו במדרג, לא עלו" חל גם <em>בתוך</em> רמה 1. תיקון typo לא צריך סיור, ושינוי בקובץ יחיד שאתה מכיר לא צריך שרשרת של חמש חוליות — העלות (טוקנים, זמן, נקודות אובדן מידע) פשוט לא מוצדקת. השרשרת המלאה שמורה למשימות שנוגעות בכמה קבצים או בשטח לא מוכר. בפרק 09 נקודד את שיקול הדעת הזה לתוך skill.</p></div>
+
+<div class="co note"><div class="co-h"><span>📌</span>ורצף קבוע? יש גם דרך שלישית</div>
+<p>כשאותו רצף חוזר על עצמו שוב ושוב, אפשר לארוז אותו כ־skill (פרק 08 במדריך הראשון) — ו־skill יכול אפילו לרוץ בעצמו בתוך סוכן עם <code class="ic">context: fork</code>. את פרומפט המנצח שלמעלה נהפוך בדיוק לכזה בפרק 09.</p></div>
+
+<div class="ex"><div class="ex-h"><span>🛠️</span>תרגול הפרק</div>
+<ol>
+<li>הרץ את שרשרת קודי ההנחה מקצה לקצה עם פרומפט המנצח. תעד ב־measurements.md: סך טוקנים, ו־% ההקשר הראשי בסוף.</li>
+<li>תרגל מסירה בקובץ: בקש מהסייר דו"ח מפורט במיוחד (הוא יכתוב ל־reports/), ואז פתח <code class="ic">/clear</code> והתחל משימה חדשה שכל ההקשר שלה הוא "קרא את הדו"ח ב־reports/... ופעל".</li>
+<li>זהה בעבודה שלך משימה אחת מהשבוע האחרון שהשרשרת היתה הורגת — ואחת שהיא היתה overkill עבורה. היכולת להבדיל היא הנכס.</li>
+</ol></div>
+<div class="done-row"><button class="markbtn" data-done="chain">סמן כהושלם</button><span>יש לך שרשרת עבודה. עכשיו נלמד להריץ חוליות במקביל.</span></div>
+</section>
+
+<!-- ================= 07 ================= -->
+<section class="doc-section" id="parallel" data-num="07" data-title="מקביליות: פאנל המבקרים" data-phase="שלב ב — בניית הצי">
+<div class="kick"><span class="knum">07</span> שלב ב · בניית הצי</div>
+<h2 class="sec-title">מקביליות: מפרקים את המבקר לפאנל של שלושה</h2>
+
+<p class="lead-p">עד עכשיו הצי עבד בטור. אבל היתרון האמיתי של הקשרים מבודדים מתגלה כשמריצים אותם <strong>בו־זמנית</strong> — והמקום הטבעי להתחיל בו הוא הביקורת: במקום מבקר־על אחד שמנסה לחשוב על הכול, שלושה מומחים צרים שכל אחד רואה את ה־diff מזווית אחת.</p>
+
+<h3>למה מומחים צרים מנצחים גנרליסט</h3>
+<p>זה עקרון ההתמחות מהמדריך הראשון בפעולה: פרומפט מערכת ממוקד ("אתה מבקר אבטחה") מתפקד טוב יותר מפרומפט כללי, כי כל ההקשר של הסוכן משרת שאלה אחת. מבקר אבטחה לא מתפזר על ביצועים; מבקר ביצועים לא מעיר על שמות משתנים. והבונוס: שלושתם רצים <em>במקביל</em> — זמן ההמתנה של הפאנל כולו הוא כזמן המבקר האיטי ביותר, לא סכומם.</p>
+
+<h3>מגייסים את הפאנל</h3>
+<div class="afile" style="--adc:var(--coral)">
+<div class="afile-h"><span class="adot"></span><b>.claude/agents/security-reviewer.md</b><span>יחידה 4</span></div>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">markdown + yaml</span><button class="copy">העתק</button></div>
+<pre><span class="y">---
+name: security-reviewer
+description: מבקר אבטחה ממוקד ל-diff הנוכחי. use proactively לפני
+  merge של קוד שנוגע בקלט משתמש, הרשאות, או נתונים רגישים.
+tools: Read, Grep, Glob, Bash(git diff*)
+model: inherit
+maxTurns: 12
+color: red
+---</span>
+אתה מבקר אבטחה. אתה בודק אך ורק היבטי אבטחה — לא סגנון,
+לא ביצועים, לא ארכיטקטורה.
+
+סרוק את ה-diff מול הרשימה: ולידציית קלט חסרה · הזרקות
+(SQL/פקודות/נתיבים) · סודות בקוד · הרשאות וגישה · חשיפת
+מידע בשגיאות · תלויות חדשות.
+
+פורמט: כמו code-reviewer — 🔴/🟡/🔵 · קובץ:שורה · בעיה · תיקון.
+אמת כל ממצא בקריאת הקובץ המלא לפני דיווח. אין ממצאים?
+"לא נמצאו בעיות אבטחה" — ועצור.</pre></div></div>
+
+<p>שני האחרים באותה תבנית בדיוק — משנים רק את המוקד ואת המודל:</p>
+<div class="tblwrap"><table>
+<tr><th>קובץ</th><th>מוקד הבדיקה</th><th>model</th><th>הערה</th></tr>
+<tr><td><code class="ic">perf-reviewer.md</code></td><td>N+1, לולאות מיותרות על מבני נתונים, I/O סינכרוני, הקצאות בלולאה חמה.</td><td><code class="ic">inherit</code></td><td>שיפוט ביצועים דורש הבנת הקשר — לא חוסכים כאן.</td></tr>
+<tr><td><code class="ic">conventions-reviewer.md</code></td><td>עמידה במוסכמות CLAUDE.md: מבנה תיקיות, שמות, מיקום בדיקות, אין any.</td><td><code class="ic">haiku</code></td><td>בדיקה מכנית מול רשימה — מושלם ל־Haiku. בפרק 08 נצייד אותו ברשימה רשמית.</td></tr>
+</table></div>
+
+<h3>שיגור מקבילי — ואיסוף מסודר</h3>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">prompt · פאנל במקביל</span><button class="copy">העתק</button></div>
+<pre>הרץ במקביל את @security-reviewer, @perf-reviewer
+ו-@conventions-reviewer על git diff main.
+כשכולם סיימו: מזג לטבלת ממצאים אחת ממוינת לפי חומרה,
+אחד את כפילויות, וסמן ממצאים שסותרים זה את זה.</pre></div>
+<p>שורת המיזוג בסוף היא לא קישוט — היא <strong>תפקיד המנצח</strong>: שלושה דוחות של עד 10 ממצאים כל אחד זה עדיין עד 30 שורות שנוחתות בהקשר הראשי. המיזוג מרסן את זה, וחשיפת סתירות בין מבקרים היא גרסת־הכיס של "אימות אדוורסרי" מפרק ה־Dynamic Workflows — אותו רעיון, מדרגה 1.</p>
+
+<div class="co research"><div class="co-h"><span>📊</span>כמה במקביל? המספרים מהמחקר</div>
+<p>מכללי התזמור של Anthropic שראינו במדריך הראשון: המתזמר מפעיל <strong>3–5 סוכנים במקביל</strong> (לא בטור) — זו הנקודה המתוקה. השוואה ישירה: 2–4 סוכנים. ומעל זה התיאום מתחיל לאכול את הרווח. הפאנל שלנו, בכוונה, הוא שלישייה.</p></div>
+
+<h3>ולרוחב: סוכני רקע</h3>
+<p>מקביליות יש גם ביחס <em>אליך</em>: סוכן עם <code class="ic">background: true</code> (או בקשה מפורשת "ברקע") לא חוסם את הסשן — אתה ממשיך לעבוד והוא מדווח כשסיים. שני עדכוני יוני מהמדריך הראשון הופכים את זה לשמיש באמת: בקשות הרשאה של סוכני רקע <strong>מוצפות אל הסשן הראשי</strong> (במקום להידחות בשקט), והמסך של <code class="ic">claude agents</code> מרכז את כל מה שרץ, מחכה או הסתיים. חיבור התראות על <code class="ic">agent_completed</code> — בפרק 10.</p>
+
+<div class="co warn"><div class="co-h"><span>⚠️</span>המלכודת: הצפה מקבילית</div>
+<p>שלושה סוכנים ממושמעים שמחזירים 30 שורות = 90 שורות. חמישה סוכנים <em>בלי חוזה</em> שמחזירים 200 = פיצוץ הקשר במכה אחת. המשוואה פשוטה: מקביליות × חוזי פלט רופפים = ריקבון הקשר מהיר. לכן החוזים מפרק 03 אינם אופציה — הם תנאי הכניסה למקביליות. ולכתיבה במקביל יש בעיה נוספת לגמרי (התנגשויות) — בפרק 09.</p></div>
+
+<div class="ex"><div class="ex-h"><span>🛠️</span>תרגול הפרק</div>
+<ol>
+<li>גייס את שלושת חברי הפאנל (העתק את התבנית, שנה מוקד ומודל) והרץ אותם במקביל על diff קודי ההנחה מפרק 06.</li>
+<li>מדוד: כמה זמן לקח לפאנל במקביל מול הרצה בטור של אותם שלושה? רשום ב־measurements.md.</li>
+<li>שגר את repo-scout <em>ברקע</em> על שאלה גדולה ("מפה את כל שכבת ה־db"), המשך לעבוד על משהו אחר, וצפה בדיווח כשיגיע. פתח <code class="ic">claude agents</code> בטרמינל שני תוך כדי.</li>
+</ol></div>
+<div class="done-row"><button class="markbtn" data-done="parallel">סמן כהושלם</button><span>שש יחידות במצבה — הצי בהרכב מלא. עכשיו משדרגים אותו.</span></div>
+</section>
+
+<!-- ================= 08 ================= -->
+<section class="doc-section" id="forkmem" data-num="08" data-title="Fork, זיכרון וציוד מתקדם" data-phase="שלב ב — בניית הצי">
+<div class="kick"><span class="knum">08</span> שלב ב · בניית הצי</div>
+<h2 class="sec-title">ציוד מתקדם: Fork, זיכרון, Skills ו-MCP פר־סוכן</h2>
+
+<p class="lead-p">הצי בהרכב מלא — הפרק הזה מצייד אותו. ארבע יכולות שכל אחת פותרת חולשה אחרת של סוכן־משנה רגיל: fork פותר את "ההקשר הנקי מדי", זיכרון פותר את "כל ריצה מתחילה מאפס", skills פותרים את "הידע לא מובטח", ו־mcpServers פותר את "הכלים הכבדים מעמיסים על כולם".</p>
+
+<h3>1 · Fork — כשהקשר נקי הוא דווקא החיסרון <span class="b b-ver">v2.1.161+</span></h3>
+<p>כל הפרקים עד כה חגגו את ההקשר הנקי. אבל יש רגעים הפוכים: דיבגת שעה, ההקשר מלא ברמזים, ואתה רוצה "עוד זוג עיניים <em>שראה הכול</em>". סוכן טרי יאלץ אותך לתמצת שעה לפרומפט. <code class="ic">/fork</code> עושה את ההפך — משכפל סוכן שיורש את <strong>השיחה המלאה</strong>, ובזכות שימוש חוזר ב־prompt cache של ההורה, זול משנדמה.</p>
+<div class="tblwrap"><table>
+<tr><th></th><th>Subagent טרי</th><th>Fork</th></tr>
+<tr><td>הקשר פתיחה</td><td>נקי — רק פרומפט השיגור.</td><td>השיחה המלאה עד רגע הפיצול.</td></tr>
+<tr><td>מצטיין ב…</td><td>אובייקטיביות, מיקוד, עבודה מכנית.</td><td>המשכיות: דיבוג עמוק, "נסה כיוון חלופי מאותה נקודה".</td></tr>
+<tr><td>עלות</td><td>קטנה וקבועה.</td><td>קריאת cache זולה — אבל יורש גם את הזיהום. אל תעשה fork לסשן מטבח.</td></tr>
+</table></div>
+<p>כלל כיס: <strong>אובייקטיביות → טרי. המשכיות → fork.</strong> מבקר לעולם לא יהיה fork — כל הפואנטה שלו היא שלא ראה כלום.</p>
+
+<h3>2 · זיכרון — המבקר שלומד את הפרויקט</h3>
+<p>שדה <code class="ic">memory</code> נותן לסוכן פנקס משלו ששורד בין סשנים: <code class="ic">project</code> (משותף לפרויקט, ההגיוני לצי), <code class="ic">user</code> (חוצה פרויקטים), <code class="ic">local</code> (רק המכונה שלך). נשדרג את code-reviewer:</p>
+<div class="afile" style="--adc:var(--blue)">
+<div class="afile-h"><span class="adot"></span><b>.claude/agents/code-reviewer.md</b><span>גרסה 2 — התוספות מסומנות</span></div>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">diff · לתוך הקובץ מפרק 05</span><button class="copy">העתק</button></div>
+<pre><span class="y">---
+name: code-reviewer
+…
+maxTurns: 15
+<span class="s">memory: project</span>
+color: blue
+---</span>
+…(הפרומפט מפרק 05)…
+
+<span class="s">## זיכרון
+בסוף כל ביקורת, אם למדת משהו שישפר ביקורות עתידיות —
+רגישות של הפרויקט, תיקון שקיבלת מהמשתמש, דפוס באג שחוזר —
+רשום אותו לזיכרון בשורה אחת. אל תרשום ממצאים חד-פעמיים.</span></pre></div></div>
+<p>עכשיו סגור מעגל: כשהמבקר טועה, <strong>תקן אותו במקום</strong> ("הערת ה־🟡 על X שגויה — אצלנו זה מכוון, כי Y"). ההערה תישמר, והביקורת הבאה כבר לא תחזור עליה. זו "שורת הרגישות" מפרק 05 — רק שהיא נכתבת מעצמה. את הפנקס מבקרים ומנקים עם <code class="ic">/memory</code>.</p>
+<div class="co warn"><div class="co-h"><span>⚠️</span>זיכרון הוא מס הקשר</div>
+<p>כמו CLAUDE.md, הזיכרון נטען בכל ריצה של הסוכן. פנקס של 200 שורות אנקדוטות = סוכן איטי ויקר יותר, לתמיד. קצץ אחת לשבועיים: השאר רק שורות שמשנות החלטה עתידית.</p></div>
+
+<h3>3 · Skills מוטענים מראש — ידע מובטח</h3>
+<p>גילוי הדרגתי (המדריך הראשון, פרק 08) הוא נהדר להקשר הראשי — אבל לסוכן ממוקד לפעמים רוצים <strong>ודאות</strong>, לא גילוי. שדה <code class="ic">skills</code> טוען את תוכן ה־skill המלא לתוך הסוכן מראש. ניצור את רשימת המוסכמות הרשמית של הפרויקט, ונצמיד אותה למבקר המוסכמות:</p>
+<div class="afile" style="--adc:var(--violet)">
+<div class="afile-h"><span class="adot"></span><b>.claude/skills/review-checklist/SKILL.md</b><span>ידע צוותי, בגרסה אחת</span></div>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">markdown + yaml</span><button class="copy">העתק</button></div>
+<pre><span class="y">---
+name: review-checklist
+description: רשימת המוסכמות המחייבת של orders-api לביקורת קוד.
+---</span>
+# רשימת ביקורת מוסכמות — orders-api
+
+1. TypeScript strict. אין `any`, אין `as unknown as`.
+2. לוגיקה עסקית ב-src/services בלבד. route שמכיל if עסקי = ממצא.
+3. בדיקות Vitest ליד הקובץ הנבדק. פיצ'ר בלי בדיקה = 🟡.
+4. שמות קבצים kebab-case; פונקציות camelCase.
+5. שגיאות דרך המנגנון הקיים ב-services/errors — לא throw גולמי.
+
+## Gotchas
+- אל תסמן קבצי בדיקה על שימוש ב-any בתוך mocks — מותר שם.
+- schema של Order משתנה רק בליווי migration note ב-README.</pre></div></div>
+<p>ובתוך <code class="ic">conventions-reviewer.md</code> מוסיפים שורה אחת ל־frontmatter: <code class="ic">skills: review-checklist</code>. מעכשיו יש לצוות <strong>מקור אמת אחד</strong> למוסכמות: מעדכנים את ה־skill — כל הביקורות מתעדכנות. שים לב לסעיף ה־Gotchas: כמו שלמדנו, זה החלק היקר ביותר בכל skill.</p>
+
+<h3>4 · MCP פר־סוכן — הכלים הכבדים בחדר אחד</h3>
+<p>שדה <code class="ic">mcpServers</code> מחבר שרת MCP <strong>לסוכן אחד בלבד</strong> — הדפוס מ"זווית אגנטית" של המדריך הראשון, כמדיניות קבע: ההקשר הראשי לא סוחב את הגדרות הכלים, והסוכן היחיד שצריך אותן מחזיק אותן. בצי הבסיסי שלנו אין צורך ב־MCP (וזה יתרון — הערכה עובדת בכל מקום), אבל התבנית מוכנה למי שרוצה:</p>
+<div class="co note"><div class="co-h"><span>📌</span>הרחבה אופציונלית: pr-scribe</div>
+<p>סוכן שמחזיק לבדו את שרת ה־GitHub MCP (<code class="ic">mcpServers: github</code>), עם משימה אחת: לקבל סיכום שינויים ולפתוח PR/issue מנוסח היטב. כלי ה־GitHub לא מעמיסים על אף הקשר אחר, וכל ה־push החוצה עובר דרך צוואר בקבוק אחד שקל לבקר. דורש <code class="ic">claude mcp add</code> מהמדריך הראשון — לא חלק מהמסלול כאן.</p></div>
+
+<div class="ex"><div class="ex-h"><span>🛠️</span>תרגול הפרק</div>
+<ol>
+<li>שדרג את code-reviewer עם זיכרון, הרץ ביקורת, תקן אותו על ממצא אחד — ופתח סשן חדש כדי לוודא שהלקח נשמר (<code class="ic">/memory</code> להצצה).</li>
+<li>צור את review-checklist, חבר ל־conventions-reviewer, והפר בכוונה מוסכמה מס' 2 (if עסקי ב-route). ודא שהוא תופס — ומצטט את הסעיף.</li>
+<li>תרגיל fork: באמצע חקירת באג, הרץ <code class="ic">/fork</code> ובקש מהעותק לרדוף השערה חלופית. השווה לתחושת סוכן טרי.</li>
+</ol></div>
+<div class="done-row"><button class="markbtn" data-done="forkmem">סמן כהושלם</button><span>הצי מצויד. נשאר לתת לו מוח.</span></div>
+</section>
+
+<!-- ================= 09 ================= -->
+<section class="doc-section" id="orchestrate" data-num="09" data-title="מוח מתזמר בסשן אחד" data-phase="שלב ג — תזמור, מדידה ואריזה">
+<div class="kick"><span class="knum">09</span> שלב ג · תזמור, מדידה ואריזה</div>
+<h2 class="sec-title">Orchestrator-Worker בסשן אחד: כללי הפיזור הופכים ל-Skill</h2>
+
+<p class="lead-p">כל מה שלמדנו עד כה דורש ממך שיקול דעת: מתי לשרשר, כמה במקביל, איזה חוזה. שיקול דעת הוא נהדר — אבל הוא לא מתועד, לא משותף, ונשחק בסוף יום ארוך. בפרק הזה נעשה לו מה ש־Claude Code עושה לכל דבר טוב: <strong>נקודד אותו</strong>. התוצאה היא היחידה השביעית בערכה — skill בשם dispatch, המוח המתזמר של הצי.</p>
+
+<h3>הרעיון: המחקר של Anthropic כהוראות הפעלה</h3>
+<p>במדריך הראשון ראינו את כללי התזמור ממחקר מערכת המחקר של Anthropic — כמה סוכנים לפי גודל משימה, מקביל ולא טורי — עם ההמלצה "שווה לשבץ בפרומפט של מתזמר". זה בדיוק מה שנעשה, בתוספת הכללים שלנו מהפרקים הקודמים:</p>
+
+<div class="afile" style="--adc:var(--acc)">
+<div class="afile-h"><span class="adot"></span><b>.claude/skills/dispatch/SKILL.md</b><span>יחידה 7 — המוח המתזמר</span></div>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">markdown + yaml</span><button class="copy">העתק</button></div>
+<pre><span class="y">---
+name: dispatch
+description: מתכנן הפעלת צי סוכנים למשימה. השתמש כשמשימה נוגעת
+  בכמה קבצים, בשטח לא מוכר, או כשהמשתמש מבקש /dispatch.
+---</span>
+# תכנון פיזור צי — למשימה: $ARGUMENTS
+
+לפני ביצוע, הצג תוכנית פיזור קצרה לפי הכללים:
+
+## מדרג (רדו, לא עלו)
+- נגיעה בקובץ מוכר אחד → בלי סוכנים. עבוד ישירות.
+- שטח לא מוכר → @repo-scout קודם. שאלה אחת לשיגור.
+- איסוף עובדה פשוט → סוכן אחד, 3–10 קריאות כלים.
+- השוואה/כמה זוויות → 2–4 סוכנים במקביל.
+- לעולם לא יותר מ-5 במקביל.
+
+## כללי ברזל
+- כל שיגור: מטרה + עוגנים + אילוצים + פורמט + קריטריון סיום.
+- קוראים במקביל בחופשיות; כותבים במקביל — רק על קבוצות
+  קבצים זרות. יש חפיפה? כתיבה בטור, או isolation: worktree.
+- אחרי כל שינוי קוד: @test-runner. לפני commit: פאנל ביקורת.
+- לולאת שיפור (מבקר → תיקון) — עד 2 סבבים. עדיין 🔴? עצור
+  ושאל את המשתמש.
+- כל דו"ח מעל 30 שורות → reports/ + תקציר.
+
+הצג: אילו סוכנים, באיזה סדר, מה במקביל, ומה תקציב
+הסבבים — ואז המתן לאישור.</pre></div></div>
+
+<p>שימוש: <code class="ic">/dispatch "העבר את הוולידציה מהראוטים לשכבת השירות"</code> — הביטוי אחרי הפקודה נכנס ל־<code class="ic">$ARGUMENTS</code>, ו־Claude מציג תוכנית פיזור לפני שנוגע בכלום. קיבלת Plan Mode, אבל למבנה הצי.</p>
+
+<h3>שני דפוסים שה-skill מפעיל — והפינה החדה של שניהם</h3>
+<p>מתוך חמשת דפוסי היסוד של "Building Effective Agents", המוח שלנו מיישם בעיקר שניים ברמה 1:</p>
+<ul>
+<li><strong>Evaluator-Optimizer:</strong> ההקשר הראשי מייצר, מבקר בהקשר נקי מפריך, וחוזר חלילה. הפינה החדה: בלי תנאי עצירה זו לולאה אינסופית של ליטושים — לכן "עד 2 סבבים ואז אדם". (זו גם הסיבה שבפרק 10 נגן על ה־Stop hook באותה צורה.)</li>
+<li><strong>Parallelization בכתיבה:</strong> קריאה מקבילית בטוחה תמיד; כתיבה מקבילית על אותם קבצים = דריסה הדדית. הכלל: מפצלים לקבוצות קבצים <em>זרות</em>, וכשאי אפשר — <code class="ic">isolation: worktree</code> מהמדריך הראשון נותן לכל סוכן כותב עותק מבודד של הריפו, ומיזוג מסודר אחריו.</li>
+</ul>
+
+<div class="co note"><div class="co-h"><span>📌</span>רגע, זה לא Dynamic Workflow בקטן?</div>
+<p>בדיוק. ההבדל: שם Claude כותב <em>קוד</em> תזמור שרץ לבד על מאות סוכנים ותוצאות הביניים חיות מחוץ להקשר; כאן התזמור הוא <em>שיחה</em> — שקוף, ניתן לעצירה, ובעלות רמה 1. כשתפגוש משימה שהתוכנית שלה אומרת "צריך 40 עובדים" — זה הרגע האמיתי לטפס במדרג, ותדע לזהות אותו כי ניסית קודם את הגרסה הזולה.</p></div>
+
+<div class="ex"><div class="ex-h"><span>🛠️</span>תרגול הפרק</div>
+<ol>
+<li>צור את dispatch והרץ <code class="ic">/dispatch</code> על משימת הוולידציה שלמעלה. קרא בעיון את תוכנית הפיזור — האם היא מכבדת את "רדו במדרג"?</li>
+<li>נסה אותו גם על משימת טריוויה ("תקן typo ב-README") — תוכנית טובה תגיד "בלי סוכנים". אם לא, חדד את סעיף המדרג.</li>
+<li>תרגיל הכתיבה המקבילית: בקש תוכנית ל"הוסף לוגים לכל ה-services" וּודא שהיא מחלקת קבצים לקבוצות זרות או מציעה worktree.</li>
+</ol></div>
+<div class="done-row"><button class="markbtn" data-done="orchestrate">סמן כהושלם</button><span>לצי יש מוח. עכשיו נלמד אותו להפעיל את עצמו.</span></div>
+</section>
+
+<!-- ================= 10 ================= -->
+<section class="doc-section" id="automate" data-num="10" data-title="אוטומציה: הצי מפעיל את עצמו" data-phase="שלב ג — תזמור, מדידה ואריזה">
+<div class="kick"><span class="knum">10</span> שלב ג · תזמור, מדידה ואריזה</div>
+<h2 class="sec-title">אוטומציה: שער האיכות — הצי שמפעיל את עצמו</h2>
+
+<p class="lead-p">צי שצריך לזכור להפעיל הוא צי שישכחו להפעיל. בפרק הזה נסגור את הפער עם <strong>סולם אכיפה בן שלוש דרגות</strong> — מהעדין (תיאור שמזמין הפעלה) דרך המבוקש (CLAUDE.md) ועד הנאכף (hooks). בסופו, הבדיקות והביקורת פשוט יקרו, בין אם ביקשת ובין אם לא.</p>
+
+<h3>דרגה 1 · תיאור פרואקטיבי — ההפעלה מלמטה</h3>
+<p>כבר עשינו את זה בלי לקרוא לזה בשם: <code class="ic">use proactively</code> + מילות טריגר בכל description. עכשיו, כשהצי שלם, שווה סיבוב כוונון: פתח סשן, בצע שינוי קוד קטן, ואל תזכיר סוכנים. אם test-runner ו־code-reviewer לא קפצו מעצמם — התיאורים שלהם עדיין פסיביים מדי. נסח אותם כתנאי ("אחרי כל שינוי קוד", "לפני כל commit") ולא כיכולת ("יודע להריץ בדיקות").</p>
+
+<h3>דרגה 2 · CLAUDE.md — נוהל העבודה המבוקש</h3>
+<p>מוסיפים ל־CLAUDE.md סעיף קצר שהופך את השרשרת מפרק 06 לנוהל הבית:</p>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">markdown · תוספת ל-CLAUDE.md</span><button class="copy">העתק</button></div>
+<pre><span class="k">## זרימת עבודה עם הצי</span>
+- שטח לא מוכר? הפעל @repo-scout לפני שאתה קורא קבצים בעצמך.
+- אחרי כל שינוי קוד: @test-runner. לפני commit: @code-reviewer.
+- משימה רב-קבצית: פתח בתוכנית פיזור לפי ה-skill dispatch.
+- אסור לסיים משימה כשיש בדיקות נכשלות.</pre></div>
+<p>וכאן חוזר הנתון המצנן מהמדריך הראשון: הוראות ב־CLAUDE.md נאכפות בכ־<strong>70%</strong> מהמקרים בלבד. זה מצוין בתור הכוונה — וזה לא מספיק בתור שער. לשער יש דרגה שלישית.</p>
+
+<h3>דרגה 3 · Hooks — האכיפה שאי אפשר לשכוח</h3>
+<p>שני hooks עושים את כל העבודה. הראשון שקט לגמרי, השני הוא הלב של שער האיכות:</p>
+<div class="afile" style="--adc:var(--mint)">
+<div class="afile-h"><span class="adot"></span><b>.claude/settings.json</b><span>יחידה 8 — שער האיכות</span></div>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">json</span><button class="copy">העתק</button></div>
+<pre>{
+  <span class="k">"hooks"</span>: {
+    <span class="k">"PostToolUse"</span>: [{
+      <span class="k">"matcher"</span>: <span class="s">"Write|Edit"</span>,
+      <span class="k">"hooks"</span>: [{ <span class="k">"type"</span>: <span class="s">"command"</span>,
+        <span class="k">"command"</span>: <span class="s">"npx prettier --write \"$CLAUDE_TOOL_INPUT_FILE_PATH\" --log-level silent"</span> }]
+    }],
+    <span class="k">"Stop"</span>: [{
+      <span class="k">"hooks"</span>: [{ <span class="k">"type"</span>: <span class="s">"command"</span>,
+        <span class="k">"command"</span>: <span class="s">"bash .claude/hooks/quality-gate.sh"</span> }]
+    }],
+    <span class="k">"SubagentStop"</span>: [{
+      <span class="k">"hooks"</span>: [{ <span class="k">"type"</span>: <span class="s">"command"</span>,
+        <span class="k">"command"</span>: <span class="s">"bash .claude/hooks/fleet-log.sh"</span> }]
+    }]
+  }
+}</pre></div></div>
+
+<div class="afile" style="--adc:var(--amber)">
+<div class="afile-h"><span class="adot"></span><b>.claude/hooks/quality-gate.sh</b><span>עצירה? רק כשהכול ירוק</span></div>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">bash</span><button class="copy">העתק</button></div>
+<pre>#!/usr/bin/env bash
+input=$(cat)   <span class="c"># ה-payload של האירוע מגיע ב-stdin כ-JSON</span>
+
+<span class="c"># מגן הלולאה מהמדריך הראשון: אם השער כבר הפעיל אותנו — לא שוב</span>
+echo "$input" | grep -q '"stop_hook_active":true' &amp;&amp; exit 0
+
+if ! pnpm test --silent &gt; /tmp/quality-gate.log 2&gt;&amp;1; then
+  echo "שער האיכות: יש בדיקות נכשלות — הפעל את @test-runner ותקן לפני סיום." &gt;&amp;2
+  exit 2   <span class="c"># קוד 2 באירוע Stop = המשך לעבוד</span>
+fi
+exit 0</pre></div></div>
+<p>מה קורה בפועל: הסוכן מסיים משימה ומנסה לעצור ← השער מריץ את הבדיקות בשקט ← אם משהו אדום, קוד היציאה 2 מחזיר אותו לעבודה עם הודעה שמכוונת אותו אל test-runner. הצי סוגר על עצמו את הלולאה — <em>בלי שנגעת</em>. ה־<code class="ic">fleet-log.sh</code> השלישי הוא שורת echo אחת שמוסיפה ל־<code class="ic">reports/fleet-log.md</code> רישום "מי רץ מתי" — יומן הפעילות של הצי, שימושי להפתיע בפרק 11.</p>
+
+<div class="co warn"><div class="co-h"><span>⚠️</span>שני כללי בטיחות ל-hooks של הצי</div>
+<p><strong>שקט הוא ברירת המחדל.</strong> hook פטפטן הוא אחד משלושת בזבזני הטוקנים הגדולים — לכן ה־prettier רץ ב־silent וה־gate מדבר רק בכישלון. <strong>ותמיד מגן לולאה.</strong> Stop hook שמחזיר "המשך" בלי לבדוק את <code class="ic">stop_hook_active</code> = סוכן שרץ עד שתחסום לו את הכרטיס.</p></div>
+
+<div class="co note"><div class="co-h"><span>📌</span>ומה עם CI? — מחוץ לתחום, בכוונה</div>
+<p>את אותו שער אפשר להריץ גם על כל PR עם GitHub Actions — אבל זכור את מלכודת ה־15 ביוני מהמדריך הראשון: הרצה לא־אינטראקטיבית נמשכת ממאגר קרדיטים נפרד ודורשת מפתח API ייעודי. זה מנוגד להחלטת היסוד של המדריך הזה (הכול על המנוי), אז נשאיר את זה כדלת מסומנת: פרק 14 של המדריך הראשון מחכה לך כשתרצה לפתוח אותה.</p></div>
+
+<div class="ex"><div class="ex-h"><span>🛠️</span>תרגול הפרק</div>
+<ol>
+<li>התקן את שלושת ה־hooks. שבור בדיקה, בקש מ־Claude משימה קטנה אחרת, וצפה בשער תופס אותו בניסיון לסיים — ומחזיר אותו לתקן.</li>
+<li>בדוק את מגן הלולאה: ודא שאחרי סבב תיקון אחד מוצלח הסוכן משתחרר, ולא נתקע בלולאת בדיקות.</li>
+<li>הצץ ב־<code class="ic">reports/fleet-log.md</code> אחרי יום עבודה — מי היחידה הכי עסוקה בצי שלך?</li>
+</ol></div>
+<div class="done-row"><button class="markbtn" data-done="automate">סמן כהושלם</button><span>המצבה מלאה: 8/8. נשאר להוכיח שזה משתלם — ולארוז.</span></div>
+</section>
+
+<!-- ================= 11 ================= -->
+<section class="doc-section" id="measure" data-num="11" data-title="מדידה, דיבוג ועלות" data-phase="שלב ג — תזמור, מדידה ואריזה">
+<div class="kick"><span class="knum">11</span> שלב ג · תזמור, מדידה ואריזה</div>
+<h2 class="sec-title">מדידה, דיבוג ועלות: מוכיחים את התזה</h2>
+
+<p class="lead-p">פתחנו את המדריך בהבטחה — "רוב הערך של מרובה־סוכנים, בפי 4 ולא פי 15" — ובמחברת מדידות. הגיע יום התשלום: מריצים משימת ביקורת מול קו הבסיס, לומדים לקרוא את המספרים בעיניים פקוחות, ואוספים את ארגז כלי הדיבוג לצי שמתנהג מוזר.</p>
+
+<h3>הניסוי: T1 מול T0</h3>
+<p>בחר משימה שקולה ל־T0 מפרק 01 (למשל: <code class="ic">GET /orders/:id/history</code> עם אותם דרישות), והרץ אותה הפעם דרך הצי המלא — <code class="ic">/dispatch</code>, שרשרת, פאנל, שער. רשום את אותם שלושה מספרים. כך נראתה המדידה שלנו על הדמו — <strong>להמחשה בלבד, המספרים שלך יהיו אחרים</strong>:</p>
+<div class="tblwrap"><table>
+<tr><th></th><th>T0 · סוכן יחיד</th><th>T1 · הצי המלא</th></tr>
+<tr><td>סך טוקנים</td><td>~52K</td><td>~171K (×3.3)</td></tr>
+<tr><td>הקשר ראשי בסיום</td><td>61% 🔴</td><td>23% 🟢</td></tr>
+<tr><td>סבבי תיקון ידניים</td><td>3</td><td>1 (השער סגר את השאר)</td></tr>
+<tr><td>באגים שנתפסו לפני commit</td><td>0</td><td>2 (אחד 🔴 של המבקר)</td></tr>
+</table></div>
+<p>וזו הקריאה הישרה של הטבלה: הצי <strong>יקר יותר בטוקנים</strong> — בערך פי 3–4, בדיוק כפי שהמחקר ניבא — אבל הוא מחזיר את ההפרש בשלושה מטבעות אחרים: הקשר ראשי שנשאר מתחת לכלל ה־40% (כלומר סשן שנשאר חד לאורך שעות), לולאת תיקון שנסגרת לבד, ובאגים שנעצרו לפני שהגיעו אליך. על משימת שורה אחת? הצי הוא בזבוז, נקודה. הערך מתחיל במשימות בינוניות — וגדל איתן.</p>
+
+<h3>מחשבון כיס: כמה יעלה לי פיזור?</h3>
+<div class="est" id="estimator">
+<h4>🧮 אומדן גס לפיזור צי</h4>
+<div class="est-grid">
+  <div><label>גודל המשימה</label><select id="estSize"><option value="s">קטנה — קובץ מוכר אחד</option><option value="m" selected>בינונית — פיצ'ר רב-קבצי</option><option value="l">גדולה — חוצת-שכבות</option></select></div>
+  <div><label>הרכב ההפעלה</label><select id="estComp"><option value="solo">סוכן יחיד (קו בסיס)</option><option value="chain" selected>שרשרת מלאה</option><option value="panel">שרשרת + פאנל מקבילי</option></select></div>
+  <div><label>מודל העובדים</label><select id="estModel"><option value="mix" selected>מעורב — המלצת המדריך</option><option value="haiku">הכול Haiku</option><option value="sonnet">הכול Sonnet 5</option></select></div>
+</div>
+<div class="est-out">
+  <div><b id="estTok">—</b><span>טוקנים משוערים</span></div>
+  <div><b id="estCost">—</b><span>שווי API משוער (על מנוי: מכסה)</span></div>
+  <div><b id="estRatio">—</b><span>יחס מול סוכן יחיד</span></div>
+</div>
+<p class="fine">אומדן להמחשת סדרי גודל בלבד, לפי תמחור יולי 2026 (Haiku $1/$5 · Sonnet 5 $2/$10 עד 31.8) ותמהיל קלט/פלט טיפוסי. המציאות שלך תזוז — בשביל זה יש /usage.</p>
+</div>
+
+<h3>ארגז הדיבוג: הצי מתנהג מוזר</h3>
+<div class="tblwrap"><table>
+<tr><th>סימפטום</th><th>הגורם הנפוץ</th><th>התיקון</th></tr>
+<tr><td>הסוכן לא מופעל מעצמו</td><td>description פסיבי, בלי מילות טריגר.</td><td>נסח כתנאי + <code class="ic">use proactively</code>; בדוק ב־/agents שהוא בכלל נטען.</td></tr>
+<tr><td>מופעל הסוכן הלא נכון</td><td>שני סוכנים בשמות/תיאורים חופפים — או סוכן פרויקט שמאפיל על סוכן משתמש.</td><td>זכור את סדר הקדימות מפרק 02; בדל תיאורים, מחק כפילויות.</td></tr>
+<tr><td>מציף את ההקשר הראשי</td><td>אין חוזה פלט, או שהחוזה "מנומס" מדי.</td><td>תקרת שורות מפורשת + ניתוב ל־reports/ (פרק 03).</td></tr>
+<tr><td>מחזיר דו"ח יפה ושגוי</td><td>שיגור בלי עוגנים — הסוכן ניחש.</td><td>נתיבים והודעות שגיאה מלאות בשיגור; דרוש "מה לא בדקתי".</td></tr>
+<tr><td>רץ ורץ ולא חוזר</td><td>אין קריטריון סיום, אין maxTurns.</td><td>שניהם. תמיד.</td></tr>
+<tr><td>הביקורת רועשת/ריקה לסירוגין</td><td>המבקר לא עבר כיול דו־צדדי.</td><td>שני המבחנים מפרק 05, אחרי כל שינוי פרומפט.</td></tr>
+<tr><td>הכול איטי משהיה</td><td>זיכרון תפוח, CLAUDE.md מנופח, hooks פטפטנים.</td><td><code class="ic">/context</code> לאבחון, ואז דיאטה: <code class="ic">/memory</code>, קיצוץ, השתקה.</td></tr>
+</table></div>
+
+<div class="co research"><div class="co-h"><span>📊</span>ולסגירת התזה — הטבלה המלאה</div>
+<p>סוכן יחיד ×1 · <strong>הצי שלנו ×3–4</strong> · Agent Teams ×15 (ניסיוני, Opus ומעלה) · Dynamic Workflows ×15+ ועד $30–60 לסבב מתזמר. הצי נותן בידוד הקשר, התמחות, מקביליות, ביקורת עצמית וזיכרון — חמש מתוך שש היכולות שבגללן מטפסים במדרג. היחידה שנשארה למעלה: מקביליות מסיבית באמת. כשתצטרך אותה — תדע.</p></div>
+
+<div class="ex"><div class="ex-h"><span>🛠️</span>תרגול הפרק</div>
+<ol>
+<li>הרץ את ניסוי T1 ומלא את הטבלה שלך ב־measurements.md. חשב את היחס האישי שלך.</li>
+<li>קח את הסימפטום שהציק לך הכי הרבה עד כה, אתר אותו בטבלת הדיבוג, ותקן לפי המרשם.</li>
+<li>שחק במחשבון: מצא את נקודת האיזון שבה "שרשרת מלאה" מתחילה להצדיק את עצמה מול סוכן יחיד — ואמת מול תחושת הבטן שלך.</li>
+</ol></div>
+<div class="done-row"><button class="markbtn" data-done="measure">סמן כהושלם</button><span>התזה הוכחה במספרים שלך. נשאר לארוז ולשלוח.</span></div>
+</section>
+
+<!-- ================= 12 ================= -->
+<section class="doc-section" id="ship" data-num="12" data-title="אריזה: הצי כמוצר" data-phase="שלב ג — תזמור, מדידה ואריזה">
+<div class="kick"><span class="knum">12</span> שלב ג · תזמור, מדידה ואריזה</div>
+<h2 class="sec-title">אריזה: ערכת הצי — מהפרויקט שלך לכל ריפו</h2>
+
+<p class="lead-p">הבטחנו מוצר — הנה הוא. בפרק האחרון הופכים את מה שבנית מ"קבצים בפרויקט הדמו" ל<strong>ערכה נניידת</strong>: עוברים בדיקת קבלה, מפרידים את הגנרי מהספציפי, וקובעים כללי תחזוקה כדי שהצי ישרוד גם צוות וגם זמן.</p>
+
+<h3>תכולת הקופסה</h3>
+<div class="code"><div class="code-h"><div class="cdots"><i></i><i></i><i></i></div><span class="lang">tree · מה נכנס ל-git</span><button class="copy">העתק</button></div>
+<pre>.claude/
+├── agents/
+│   ├── repo-scout.md            <span class="c"># פרקים 02–03 · סיור וחוזה</span>
+│   ├── test-runner.md           <span class="c"># פרק 04 · גבולות ותקציב</span>
+│   ├── code-reviewer.md         <span class="c"># פרקים 05+08 · כיול וזיכרון</span>
+│   ├── security-reviewer.md     <span class="c"># פרק 07 · הפאנל</span>
+│   ├── perf-reviewer.md
+│   └── conventions-reviewer.md  <span class="c"># + skills: review-checklist</span>
+├── skills/
+│   ├── review-checklist/SKILL.md  <span class="c"># פרק 08 · מקור אמת למוסכמות</span>
+│   └── dispatch/SKILL.md          <span class="c"># פרק 09 · המוח המתזמר</span>
+├── hooks/
+│   ├── quality-gate.sh          <span class="c"># פרק 10 · השער</span>
+│   └── fleet-log.sh
+└── settings.json                <span class="c"># חיווט ה-hooks</span>
+CLAUDE.md                        <span class="c"># כולל סעיף "זרימת עבודה עם הצי"</span>
+FLEET.md                         <span class="c"># ה-README של הערכה — בנספח</span>
+reports/                         <span class="c"># ריק + .gitkeep; תיבת הדואר של הצי</span></pre></div>
+
+<h3>בדיקת קבלה — 8 סימונים לפני שמכריזים "מוצר"</h3>
+<p>כמו כל מוצר, גם לצי מגיעות בדיקות קבלה. עבור על הרשימה על הדמו; כל סימון מגובה בפרק שבו נבנה:</p>
+<ol>
+<li><strong>הסייר ממושמע:</strong> שאלה גדולה מחזירה ≤30 שורות או נתיב ב־reports/ (פרק 03).</li>
+<li><strong>הגבולות מוחזקים:</strong> בקשת "תקן" מ־test-runner נעצרת בהיעדר Edit (פרק 04).</li>
+<li><strong>המבקר עובר כיול דו־צדדי:</strong> תופס באג שתול, שותק על diff נקי (פרק 05).</li>
+<li><strong>השרשרת רצה מפרומפט מנצח אחד</strong>, וההקשר הראשי נשאר מתחת ל־40% (פרק 06).</li>
+<li><strong>הפאנל רץ במקביל</strong> וחוזר כטבלה ממוזגת אחת (פרק 07).</li>
+<li><strong>הזיכרון שורד סשן:</strong> תיקון למבקר מופיע בביקורת הבאה (פרק 08).</li>
+<li><strong>‎/dispatch יודע לסרב:</strong> על משימת טריוויה הוא ממליץ "בלי סוכנים" (פרק 09).</li>
+<li><strong>השער סוגר לולאה:</strong> בדיקה שבורה מחזירה את הסוכן לעבודה — פעם אחת, לא לנצח (פרק 10).</li>
+</ol>
+
+<h3>ניוד לריפו אמיתי: מה גנרי ומה מקומי</h3>
+<p>היופי בערכה: כמעט הכול גנרי. ההעברה לריפו חדש היא <code class="ic">cp -r .claude/</code> ואז התאמה של שלושה דברים בלבד — <strong>פקודות</strong> (pnpm test ← מה שרץ אצלך, גם ב־test-runner וגם ב־quality-gate.sh), <strong>מוסכמות</strong> (review-checklist/SKILL.md נכתב מחדש פר־פרויקט — הוא <em>אמור</em> להיות מקומי), ו<strong>שורת רגישות</strong> אחת למבקר. עשר דקות, צי חדש.</p>
+
+<div class="co note"><div class="co-h"><span>📌</span>כלל הצוות: סוכנים הם קוד</div>
+<p>ברגע ש־<code class="ic">.claude/</code> ב־git, כל שינוי בפרומפט של סוכן משנה התנהגות אצל <em>כל</em> חברי הצוות — בדיוק כמו שינוי בקוד. לכן: שינויי סוכנים עוברים ב־PR, מבקר עובר כיול דו־צדדי מחדש אחרי כל עריכה, ול־FLEET.md מוסיפים שורת changelog. ומי שרוצה צעד הלאה — אורזים את הערכה כפלאגין ומפיצים בין ריפואים; זה כבר מעבר להיקף שלנו.</p></div>
+
+<h3>נספח: הקבצים שלא הוצגו במלואם</h3>
+<p>רוב קבצי הערכה מופיעים בפרקים שלהם. הנה ארבעת המשלימים — פתח, העתק, סגור:</p>
+
+<details class="appx"><summary>.claude/agents/perf-reviewer.md</summary>
+<div class="code"><div class="code-h"><span class="lang">markdown + yaml</span><button class="copy">העתק</button></div>
+<pre><span class="y">---
+name: perf-reviewer
+description: מבקר ביצועים ממוקד ל-diff הנוכחי. use proactively לפני
+  merge של קוד שנוגע בלולאות, גישות נתונים או נתיבים חמים.
+tools: Read, Grep, Glob, Bash(git diff*)
+model: inherit
+maxTurns: 12
+color: yellow
+---</span>
+אתה מבקר ביצועים. אך ורק ביצועים — לא סגנון, לא אבטחה.
+
+סרוק את ה-diff מול: שאילתות/קריאות בתוך לולאה (N+1) ·
+מעברים מיותרים על אוספים · I/O סינכרוני בנתיב חם ·
+הקצאות חוזרות בלולאה · מבנה נתונים לא מתאים לגישה.
+
+דווח רק על מה שמשפיע בפועל בעומסים סבירים — לא מיקרו-
+אופטימיזציות. פורמט 🔴/🟡/🔵 · קובץ:שורה · בעיה · תיקון.
+אמת בקריאת הקובץ לפני דיווח. אין ממצאים? אמור ועצור.</pre></div></details>
+
+<details class="appx"><summary>.claude/agents/conventions-reviewer.md</summary>
+<div class="code"><div class="code-h"><span class="lang">markdown + yaml</span><button class="copy">העתק</button></div>
+<pre><span class="y">---
+name: conventions-reviewer
+description: בודק עמידה במוסכמות הפרויקט לפי review-checklist.
+  use proactively לפני כל commit.
+tools: Read, Grep, Glob, Bash(git diff*)
+model: haiku
+maxTurns: 10
+skills: review-checklist
+color: purple
+---</span>
+אתה בודק מוסכמות. הרשימה היחידה שמחייבת אותך היא ה-skill
+review-checklist שנטען אליך — אל תמציא כללים מעבר לה.
+
+עבור על ה-diff סעיף-סעיף מול הרשימה. לכל הפרה: מספר
+הסעיף · קובץ:שורה · תיקון. שים לב לסעיף ה-Gotchas —
+הוא גובר. אין הפרות? "עומד במוסכמות" — ועצור.</pre></div></details>
+
+<details class="appx"><summary>.claude/hooks/fleet-log.sh</summary>
+<div class="code"><div class="code-h"><span class="lang">bash</span><button class="copy">העתק</button></div>
+<pre>#!/usr/bin/env bash
+<span class="c"># יומן הצי: רישום שקט של כל ריצת subagent. payload ב-stdin.</span>
+input=$(cat)
+name=$(echo "$input" | sed -n 's/.*"agent_name":"\([^"]*\)".*/\1/p')
+mkdir -p reports
+echo "- $(date '+%Y-%m-%d %H:%M') · ${name:-unknown}" &gt;&gt; reports/fleet-log.md
+exit 0</pre></div></details>
+
+<details class="appx"><summary>FLEET.md — ה-README של הערכה</summary>
+<div class="code"><div class="code-h"><span class="lang">markdown</span><button class="copy">העתק</button></div>
+<pre><span class="k"># ערכת הצי — subagents לפרויקט הזה</span>
+
+6 סוכנים, 2 כישורים ושער איכות. נבנתה לפי "צי, לא צוות" (2026).
+
+<span class="k">## שימוש יומיומי</span>
+- מיפוי: `@repo-scout &lt;שאלה ממוקדת&gt;`
+- משימה רב-קבצית: `/dispatch "&lt;המשימה&gt;"` ואשר את תוכנית הפיזור
+- לפני commit: הפאנל רץ אוטומטית; אל תעקוף את שער האיכות
+
+<span class="k">## התאמה לריפו חדש (10 דק')</span>
+1. עדכן פקודות בדיקה: test-runner.md + hooks/quality-gate.sh
+2. כתוב מחדש: skills/review-checklist/SKILL.md
+3. שורת רגישות למבקר ב-code-reviewer.md
+
+<span class="k">## תחזוקה</span>
+- שינוי סוכן = PR + כיול דו-צדדי מחדש + שורה ב-changelog
+- אחת לשבועיים: /memory — דיאטה לזיכרון המבקר
+
+<span class="k">## Changelog</span>
+- 2026-07-06 · v1.0 · הרכבה ראשונה</pre></div></details>
+
+<h3>ולסיום — לאן ממשיכים</h3>
+<p>עברת מ"קובץ Markdown עם YAML" לצי שלם: חוזים, גבולות, שרשור, פאנל מקבילי, זיכרון, מוח מתזמר ושער שנסגר לבד. ובעיקר — יש לך עכשיו <strong>אינסטינקט מדרג</strong>: אתה יודע להריח מתי משימה שווה סוכן, מתי שרשרת, ומתי כלום. שלוש דלתות מסומנות נשארו פתוחות כשתהיה מוכן: CI ו־headless (המדריך הראשון, פרק 14), Agent Teams כשבאמת יש בעלויות נפרדות (פרק 11 שם), ו־Dynamic Workflows כשהתוכנית של /dispatch אומרת "צריך 40 עובדים" (פרק 12 שם). עד אז — הצי שלך מכסה את 90% הנותרים. הפלג בשלום. ⚓</p>
+
+<div class="ex"><div class="ex-h"><span>🛠️</span>תרגול מסכם</div>
+<ol>
+<li>עבור על שמונה בדיקות הקבלה על הדמו. כל סימון אדום — חזרה לפרק המתאים.</li>
+<li>העתק את הערכה לריפו אמיתי שלך, בצע את התאמת 10 הדקות, והרץ עליו את השרשרת הקנונית על משימה אמיתית אחת.</li>
+<li>שתף: פתח PR של תיקיית <code class="ic">.claude/</code> לריפו צוותי, עם FLEET.md כהסבר. הביקורת הראשונה של עמית על פרומפט סוכן שלך שווה יותר מכל פרק במדריך הזה.</li>
+</ol></div>
+<div class="done-row"><button class="markbtn" data-done="ship">סמן כהושלם</button><span>12/12 — הערכה בידיים שלך. ⚓</span></div>
+</section>
+
+<footer class="site">
+<p><b>צי, לא צוות · מאסטרי ב-Subagents</b> — מדריך המשך ל"מדריך האגנטי המלא". כל הפקודות, השדות ושמות המודלים נכונים ל-6 ביולי 2026; העולם הזה זז מהר — אמתו מול code.claude.com/docs. נתוני 📊 הם הערכות פנימיות של Anthropic או מדידות הדגמה, ולא נבדקו בנפרד.</p>
+<p>נבנה כקובץ HTML יחיד ועצמאי · ההתקדמות, מצבת הצי וערכת הנושא נשמרות מקומית בדפדפן (localStorage) ואינן נשלחות לשום שרת.</p>
+</footer>
+
+</div><!-- /wrap -->
+</div><!-- /main -->
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const KEY='fleet.progress.v1', TKEY='fleet.theme.v1';
+const sections=$$('.doc-section');
+const TOTAL=sections.length;
+let done=new Set();
+try{done=new Set(JSON.parse(localStorage.getItem(KEY)||'[]'))}catch(e){}
+
+/* ---------- fleet roster ---------- */
+const FLEET=[
+ {n:'repo-scout',ch:'anatomy',c:'var(--acc)'},
+ {n:'test-runner',ch:'limits',c:'var(--mint)'},
+ {n:'code-reviewer',ch:'reviewer',c:'var(--blue)'},
+ {n:'security-reviewer',ch:'parallel',c:'var(--coral)'},
+ {n:'perf-reviewer',ch:'parallel',c:'var(--amber)'},
+ {n:'conventions-reviewer',ch:'parallel',c:'var(--violet)'},
+ {n:'dispatch · skill',ch:'orchestrate',c:'var(--acc2)'},
+ {n:'שער איכות · hooks',ch:'automate',c:'var(--mint)'}
+];
+const fleetEl=$('#fleet');
+FLEET.forEach(u=>{
+  const d=document.createElement('div');
+  d.className='chip'; d.dataset.ch=u.ch; d.style.setProperty('--chipc',u.c);
+  d.innerHTML='<i></i><span>'+u.n+'</span>';
+  fleetEl.appendChild(d);
+});
+
+/* ---------- nav ---------- */
+const nav=$('#nav');
+let curPhase='';
+sections.forEach(sec=>{
+  const ph=sec.dataset.phase;
+  if(ph!==curPhase){curPhase=ph;
+    const h=document.createElement('div'); h.className='nav-phase'; h.textContent=ph; nav.appendChild(h);}
+  const a=document.createElement('a');
+  a.href='#'+sec.id; a.dataset.sec=sec.id;
+  a.innerHTML='<span class="n">'+sec.dataset.num+'</span><span>'+sec.dataset.title+'</span>';
+  a.addEventListener('click',()=>{closeSide();});
+  nav.appendChild(a);
+});
+const navLinks=$$('#nav a');
+const secText={}; sections.forEach(s=>{secText[s.id]=(s.dataset.num+' '+s.dataset.title+' '+s.textContent).toLowerCase()});
+
+/* ---------- progress ---------- */
+const CIRC=157;
+function render(changed){
+  const n=done.size, p=n/TOTAL;
+  $('#ringFg').style.strokeDashoffset=String(CIRC*(1-p));
+  $('#ringPct').textContent=Math.round(p*100)+'%';
+  $('#progTxt').textContent=n+' מתוך '+TOTAL+' פרקים';
+  navLinks.forEach(a=>a.classList.toggle('done',done.has(a.dataset.sec)));
+  $$('.markbtn').forEach(b=>{
+    const on=done.has(b.dataset.done);
+    b.classList.toggle('on',on);
+    b.textContent=on?'✓ הפרק הושלם':'סמן כהושלם';
+  });
+  let lit=0;
+  $$('#fleet .chip').forEach(ch=>{
+    const on=done.has(ch.dataset.ch);
+    if(on&&!ch.classList.contains('on')&&changed===ch.dataset.ch){ch.classList.add('pop');setTimeout(()=>ch.classList.remove('pop'),600)}
+    ch.classList.toggle('on',on); if(on)lit++;
+  });
+  $('#fleetCount').textContent=lit+'/'+FLEET.length;
+}
+function save(){localStorage.setItem(KEY,JSON.stringify([...done]))}
+$$('.markbtn').forEach(b=>b.addEventListener('click',()=>{
+  const id=b.dataset.done;
+  done.has(id)?done.delete(id):done.add(id);
+  save(); render(id);
+}));
+$('#resetBtn').addEventListener('click',()=>{
+  if(confirm('לאפס את כל ההתקדמות ומצבת הצי?')){done.clear();save();render();}
+});
+
+/* ---------- search ---------- */
+const q=$('#q');
+function doSearch(){
+  const v=q.value.trim().toLowerCase();
+  let any=false;
+  navLinks.forEach(a=>{
+    const hit=!v||secText[a.dataset.sec].includes(v);
+    a.classList.toggle('hide',!hit); if(hit)any=true;
+  });
+  $$('.nav-phase').forEach(h=>{
+    let el=h.nextElementSibling, vis=false;
+    while(el&&!el.classList.contains('nav-phase')){if(el.tagName==='A'&&!el.classList.contains('hide'))vis=true;el=el.nextElementSibling}
+    h.style.display=vis?'':'none';
+  });
+  $('#noRes').style.display=any?'none':'block';
+}
+q.addEventListener('input',doSearch);
+document.addEventListener('keydown',e=>{
+  if(e.key==='/'&&document.activeElement!==q&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();openSide();q.focus()}
+  if(e.key==='Escape'&&document.activeElement===q){q.value='';doSearch();q.blur()}
+});
+
+/* ---------- scrollspy ---------- */
+const spy=new IntersectionObserver(es=>{
+  es.forEach(en=>{ if(en.isIntersecting){
+    navLinks.forEach(a=>a.classList.toggle('act',a.dataset.sec===en.target.id));
+  }});
+},{rootMargin:'-15% 0px -75% 0px'});
+sections.forEach(s=>spy.observe(s));
+
+/* ---------- theme ---------- */
+const root=document.documentElement, tb=$('#themeBtn');
+function setTheme(t){root.dataset.theme=t;localStorage.setItem(TKEY,t);
+  tb.textContent=t==='dark'?'☀ מצב בהיר':'☾ מצב כהה';}
+setTheme(localStorage.getItem(TKEY)||'dark');
+tb.addEventListener('click',()=>setTheme(root.dataset.theme==='dark'?'light':'dark'));
+
+/* ---------- copy ---------- */
+$$('.copy').forEach(btn=>btn.addEventListener('click',()=>{
+  const pre=btn.closest('.code').querySelector('pre');
+  const txt=pre.textContent;
+  const ok=()=>{const o=btn.textContent;btn.textContent='הועתק ✓';setTimeout(()=>btn.textContent=o,1400)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok).catch(()=>{fallback()});}
+  else fallback();
+  function fallback(){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(e){}ta.remove();}
+}));
+
+/* ---------- terminal ---------- */
+const term=$('#term');
+const LINES=[
+ {h:'<span class="p">$</span> claude',t:60},
+ {h:'<span class="u">&gt;</span> בנה תמיכה בקודי הנחה, עם בדיקות',t:26},
+ {h:'<span class="run">●</span> @repo-scout ממפה את שכבת ההזמנות… <span class="d">haiku · הקשר מבודד</span>',t:0},
+ {h:'<span class="run">●</span> תוכנית אושרה · מימוש ב-3 קבצים',t:0},
+ {h:'<span class="ok">✓</span> @test-runner: 18 בדיקות · @code-reviewer: ללא ממצאים',t:0},
+ {h:'<span class="ok">✓</span> ההקשר הראשי בסיום: <span class="ok">23%</span> בלבד',t:0}
+];
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function playTerm(){
+  term.innerHTML='';
+  if(reduced){LINES.forEach(l=>{const d=document.createElement('span');d.className='tl';d.innerHTML=l.h;term.appendChild(d)});return}
+  let i=0;
+  function nextLine(){
+    if(i>=LINES.length){setTimeout(playTerm,6500);return}
+    const l=LINES[i++]; const row=document.createElement('span'); row.className='tl'; term.appendChild(row);
+    if(l.t>0){ /* typewriter for prompt lines */
+      const tmp=document.createElement('div'); tmp.innerHTML=l.h;
+      const plain=tmp.textContent; let k=0;
+      const txt=document.createElement('span'); const cur=document.createElement('span');
+      cur.className='cursor'; row.appendChild(txt); row.appendChild(cur);
+      const iv=setInterval(()=>{
+        k++; txt.textContent=plain.slice(0,k);
+        if(k>=plain.length){clearInterval(iv);row.innerHTML=l.h;setTimeout(nextLine,320)}
+      },l.t);
+    }else{
+      row.style.opacity='0'; row.innerHTML=l.h;
+      requestAnimationFrame(()=>{row.style.transition='opacity .45s';row.style.opacity='1'});
+      setTimeout(nextLine,520);
+    }
+  }
+  nextLine();
+}
+playTerm();
+
+/* ---------- estimator ---------- */
+const BASE={s:22,m:60,l:140};            /* K tokens, single agent */
+const MULT={solo:1,chain:3.1,panel:3.8};
+function estimate(){
+  const size=$('#estSize').value, comp=$('#estComp').value, model=$('#estModel').value;
+  const tokK=Math.round(BASE[size]*MULT[comp]);
+  const rate=comp==='solo'?4.0:({haiku:2.9,mix:3.2,sonnet:4.0})[model]; /* $ למיליון, משוקלל קלט/פלט */
+  const cost=tokK/1000*rate;
+  $('#estTok').textContent='~'+tokK+'K';
+  $('#estCost').textContent='$'+(cost<1?cost.toFixed(2):cost.toFixed(1));
+  $('#estRatio').textContent='×'+MULT[comp].toFixed(1).replace('.0','');
+}
+['estSize','estComp','estModel'].forEach(id=>{const el=$('#'+id); if(el)el.addEventListener('change',estimate)});
+if($('#estimator'))estimate();
+
+/* ---------- mobile sidebar ---------- */
+const sb=$('#sidebar'), scrim=$('#scrim');
+function openSide(){sb.classList.add('open');scrim.classList.add('show')}
+function closeSide(){sb.classList.remove('open');scrim.classList.remove('show')}
+$('#burger').addEventListener('click',()=>sb.classList.contains('open')?closeSide():openSide());
+scrim.addEventListener('click',closeSide);
+
+render();
+})();
+</script>
+</body>
+</html>
